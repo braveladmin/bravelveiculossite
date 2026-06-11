@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carregando... | Bravel Veículos</title>
+  <meta name="description" id="metaDesc" content="Detalhes do veículo — Bravel Veículos">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="veiculo.css?v=2">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="vp-header">
+    <div class="vp-header-inner">
+      <a href="index.html#estoque" class="vp-back">
+        <i class="fa-solid fa-chevron-left"></i>
+        <span>Voltar ao estoque</span>
+      </a>
+      <a href="index.html" class="vp-logo">
+        <img src="site/bravel-logo.png" alt="Bravel Veículos" class="vp-logo-img">
+      </a>
+      <a href="#" class="vp-wpp-btn" id="vpWppHeader">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span>WhatsApp</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="vp-main">
+    <div class="vp-container">
+
+      <!-- TOP BLOCK -->
+      <div class="vp-top-block">
+
+        <!-- Gallery -->
+        <div class="vp-gallery" style="animation:fadeIn 0.55s ease 0.1s both">
+          <div class="vp-gallery-main" id="vpGalleryMain">
+            <div class="vp-main-fallback" id="vpFallback">
+              <span id="vpEmoji"></span>
+            </div>
+            <button class="vp-gal-nav vp-gal-prev" id="vpGalPrev" aria-label="Anterior">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="vp-gal-nav vp-gal-next" id="vpGalNext" aria-label="Próxima">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <div class="vp-gal-counter" id="vpGalCounter"></div>
+            <button class="vp-gal-ampliar" id="vpGalAmpliar">
+              <i class="fa-solid fa-expand"></i> AMPLIAR
+            </button>
+          </div>
+          <div class="vp-thumbs" id="vpThumbs"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="vp-info" style="animation:slideRight 0.6s ease 0.2s both">
+          <div style="animation:fadeUp 0.5s ease 0.3s both">
+            <span class="vp-type-label" id="vpTypeLabel"></span>
+            <h1 class="vp-title" id="vpTitle"></h1>
+            <p class="vp-version" id="vpVersion"></p>
+          </div>
+
+          <div class="vp-price-block" style="animation:fadeUp 0.5s ease 0.42s both">
+            <div class="vp-price" id="vpPrice"></div>
+            <div class="vp-price-note">à vista ou financiado</div>
+          </div>
+
+          <div class="vp-quick-specs" id="vpQuickSpecs" style="animation:fadeUp 0.5s ease 0.52s both"></div>
+
+          <a href="#" class="vp-cta-wpp" id="vpCta1" style="animation:fadeUp 0.5s ease 0.62s both">
+            <i class="fa-brands fa-whatsapp"></i>
+            Tenho interesse nesse veículo
+          </a>
+
+          <div class="vp-trust-mini" style="animation:fadeUp 0.5s ease 0.72s both">
+            <span><i class="fa-solid fa-shield-halved"></i> Revisado</span>
+            <span><i class="fa-solid fa-file-lines"></i> Histórico aberto</span>
+            <span><i class="fa-solid fa-right-left"></i> Aceita troca</span>
+            <span><i class="fa-regular fa-clock"></i> Proposta na hora</span>
+          </div>
+        </div>
+
+      </div><!-- /vp-top-block -->
+
+      <!-- CARACTERÍSTICAS -->
+      <section class="vp-section anim-up">
+        <h2 class="vp-section-title">Características</h2>
+        <div class="vp-chars-grid" id="vpCharsGrid"></div>
+      </section>
+
+      <!-- OPCIONAIS -->
+      <section class="vp-section anim-up hidden" id="vpOptionalsSection">
+        <div class="vp-optionals-header">
+          <span class="section-label">EQUIPAMENTOS</span>
+          <span class="vp-optionals-count" id="vpOptionalsCount"></span>
+        </div>
+        <h2 class="vp-section-title">Opcionais e itens de série</h2>
+        <div class="vp-optionals-box">
+          <div class="vp-optionals-grid" id="vpOptionalsGrid"></div>
+        </div>
+      </section>
+
+      <!-- DESCRIÇÃO -->
+      <section class="vp-section anim-up">
+        <h2 class="vp-section-title">Sobre este veículo</h2>
+        <p class="vp-desc-text" id="vpDesc"></p>
+        <a href="#" class="vp-cta-wpp vp-cta-wpp--sec" id="vpCta2">
+          <i class="fa-brands fa-whatsapp"></i>
+          Quero mais informações
+        </a>
+      </section>
+
+      <!-- FINANCIAMENTO -->
+      <section class="vp-section anim-up">
+        <button class="vp-finance-toggle-header" id="vpFinanceToggle" type="button" aria-expanded="false">
+          <div class="vp-finance-toggle-left">
+            <span class="vp-finance-toggle-icon"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+            <h2 class="vp-section-title">Simule seu financiamento</h2>
+          </div>
+          <i class="fa-solid fa-chevron-down vp-finance-chevron"></i>
+        </button>
+
+        <div class="vp-finance-body" id="vpFinanceBody">
+        <p class="vp-finance-sub">Preencha os dados abaixo e envie uma simulação direto para o WhatsApp do vendedor.</p>
+
+        <div class="vp-finance-form">
+
+          <!-- Entrada -->
+          <div class="vp-finance-field">
+            <label>Valor da entrada</label>
+            <div class="vp-finance-input-wrap">
+              <span>R$</span>
+              <input type="text" id="finEntrada" placeholder="Ex: 10.000" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+
+          <!-- CNH -->
+          <div class="vp-finance-field">
+            <label>Possui CNH?</label>
+            <div class="vp-finance-toggle">
+              <button class="vp-toggle-btn active" id="cnhSim" type="button">Sim, tenho CNH</button>
+              <button class="vp-toggle-btn" id="cnhNao" type="button">Não tenho</button>
+            </div>
+          </div>
+
+          <!-- Parcelas -->
+          <div class="vp-finance-field">
+            <label>Quantidade de parcelas desejada</label>
+            <div class="vp-parcelas-wrap" id="parcelasWrap">
+              <button class="vp-parcela-btn" type="button" data-p="24">24x</button>
+              <button class="vp-parcela-btn" type="button" data-p="36">36x</button>
+              <button class="vp-parcela-btn" type="button" data-p="48">48x</button>
+              <button class="vp-parcela-btn" type="button" data-p="60">60x</button>
+            </div>
+          </div>
+
+          <!-- Valor da parcela -->
+          <div class="vp-finance-field">
+            <label>Valor da parcela desejada</label>
+            <div class="vp-finance-input-wrap">
+              <span>R$</span>
+              <input type="text" id="finParcela" placeholder="Ex: 1.500" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+
+          <!-- CPF -->
+          <div class="vp-finance-field" style="grid-column: 1 / -1">
+            <label>CPF <span class="vp-cpf-safe"><i class="fa-solid fa-lock"></i> Seus dados são enviados apenas ao vendedor, via WhatsApp</span></label>
+            <div class="vp-finance-input-wrap">
+              <span><i class="fa-solid fa-id-card"></i></span>
+              <input type="text" id="finCpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" autocomplete="off">
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <button class="vp-finance-submit" id="vpFinanceSubmit" type="button">
+            <i class="fa-brands fa-whatsapp"></i>
+            Enviar simulação no WhatsApp
+          </button>
+
+        </div>
+        </div><!-- /vp-finance-body -->
+      </section>
+
+
+      <!-- RELACIONADOS -->
+      <section class="vp-section anim-up" id="vpRelatedSection">
+        <h2 class="vp-section-title">Você também pode gostar</h2>
+        <div class="vp-related-carousel">
+          <div class="vp-related-stage">
+            <div class="vp-related-viewport" id="vpRelatedViewport">
+              <div class="vp-related-grid" id="vpRelatedGrid"></div>
+            </div>
+            <button class="vp-rel-btn vp-rel-prev" id="vpRelPrev" aria-label="Anterior">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="vp-rel-btn vp-rel-next" id="vpRelNext" aria-label="Próxima">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="vp-rel-dots" id="vpRelDots"></div>
+        </div>
+      </section>
+
+    </div><!-- /vp-container -->
+  </main>
+
+  <!-- BARRA MOBILE FIXA -->
+  <div class="vp-mobile-bar" id="vpMobileBar">
+    <div class="vp-mobile-bar-price" id="vpMobilePrice"></div>
+    <a href="#" class="vp-mobile-bar-btn" id="vpMobileBtn">
+      <i class="fa-brands fa-whatsapp"></i>
+      Chamar no WhatsApp
+    </a>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="vp-lightbox" id="vpLightbox">
+    <button class="vp-lb-close" id="vpLbClose"><i class="fa-solid fa-xmark"></i></button>
+    <button class="vp-lb-nav vp-lb-prev" id="vpLbPrev"><i class="fa-solid fa-chevron-left"></i></button>
+    <button class="vp-lb-nav vp-lb-next" id="vpLbNext"><i class="fa-solid fa-chevron-right"></i></button>
+    <div class="vp-lb-img-wrap"><img src="" id="vpLbImg" alt=""></div>
+    <div class="vp-lb-counter" id="vpLbCounter"></div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="vp-footer">
+    <p>© 2025 Bravel Veículos — Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</p>
+  </footer>
+
+  <script src="vehicles.js"></script>
+  <script>
+    // ─── Lê parâmetro da URL ──────────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const vid = parseInt(params.get('id') ?? '0', 10);
+    const v = BRAVEL_VEHICLES.find(x => x.id === vid);
+
+    if (!v) {
+      document.querySelector('.vp-main').innerHTML =
+        '<div style="text-align:center;padding:6rem 1.5rem;color:rgba(255,255,255,0.4)">' +
+        '<p style="font-size:1.1rem">Veículo não encontrado.</p><br>' +
+        '<a href="index.html#estoque" style="color:#cc1111;font-weight:700">← Voltar ao estoque</a></div>';
+      throw new Error('Veículo não encontrado');
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────
+    const typeLabels = { suv:'SUV', sedan:'Sedan', hatch:'Hatchback', pickup:'Pick-up', moto:'Moto' };
+
+    const wppLink = () => {
+      const msg = `Olá, tenho interesse no ${v.model} ${v.version} ${v.year} anunciado por ${fmtPrice(v.price)}. Gostaria de mais informações.`;
+      return `https://wa.me/${BRAVEL_WPP}?text=${encodeURIComponent(msg)}`;
+    };
+
+    // ─── Meta / título ───────────────────────────────────────────
+    document.title = `${v.model} ${v.year} | Bravel Veículos`;
+    document.getElementById('metaDesc').content =
+      `${v.model} ${v.version} ${v.year}, ${v.km}, câmbio ${v.transmission}. ${fmtPrice(v.price)} na Bravel Veículos — Primavera do Leste MT.`;
+
+    // ─── Informações básicas ──────────────────────────────────────
+    document.getElementById('vpTypeLabel').textContent = typeLabels[v.type] || v.type;
+    document.getElementById('vpTitle').textContent = v.model;
+    document.getElementById('vpVersion').textContent = v.version;
+    document.getElementById('vpEmoji').textContent = v.emoji;
+    document.getElementById('vpPrice').textContent = fmtPrice(v.price);
+    document.getElementById('vpMobilePrice').textContent = fmtPrice(v.price);
+
+    // ─── Links WhatsApp ───────────────────────────────────────────
+    const wpp = wppLink();
+    ['vpWppHeader','vpCta1','vpCta2','vpMobileBtn'].forEach(id => {
+      document.getElementById(id).href = wpp;
+    });
+
+    // ─── Galeria ──────────────────────────────────────────────────
+    const photos = v.photos || [];
+    const galleryMain = document.getElementById('vpGalleryMain');
+    const thumbsWrap  = document.getElementById('vpThumbs');
+    const counter     = document.getElementById('vpGalCounter');
+    let galCurr = 0;
+
+    // Slides
+    const slides = photos.map((src, i) => {
+      const img = document.createElement('img');
+      img.src = src; img.alt = v.model;
+      img.className = 'vp-slide' + (i === 0 ? ' active' : '');
+      img.loading = i === 0 ? 'eager' : 'lazy';
+      img.onerror = () => { img.style.display = 'none'; };
+      galleryMain.appendChild(img);
+      return img;
+    });
+
+    // Miniaturas
+    const thumbEls = photos.map((src, i) => {
+      const div = document.createElement('div');
+      div.className = 'vp-thumb' + (i === 0 ? ' active' : '');
+      const img = document.createElement('img');
+      img.src = src; img.alt = `Foto ${i+1}`; img.loading = 'lazy';
+      img.onerror = () => { div.style.display = 'none'; };
+      div.appendChild(img);
+      div.addEventListener('click', () => goTo(i));
+      thumbsWrap.appendChild(div);
+      return div;
+    });
+
+    function updateCounter() {
+      counter.textContent = photos.length > 1
+        ? `${String(galCurr+1).padStart(2,'0')} / ${String(photos.length).padStart(2,'0')}`
+        : '';
+    }
+
+    function goTo(idx) {
+      if (photos.length < 2 || idx === galCurr) return;
+      const prev = galCurr; galCurr = idx;
+      slides[galCurr].classList.add('active');
+      thumbEls[prev]?.classList.remove('active');
+      thumbEls[galCurr]?.classList.add('active');
+      updateCounter();
+      setTimeout(() => slides[prev].classList.remove('active'), 450);
+    }
+
+    updateCounter();
+
+    if (photos.length < 2) {
+      document.getElementById('vpGalPrev').style.display = 'none';
+      document.getElementById('vpGalNext').style.display = 'none';
+      document.getElementById('vpGalCounter').style.display = 'none';
+    }
+
+    document.getElementById('vpGalPrev').addEventListener('click', e => {
+      e.stopPropagation();
+      goTo((galCurr - 1 + photos.length) % photos.length);
+    });
+    document.getElementById('vpGalNext').addEventListener('click', e => {
+      e.stopPropagation();
+      goTo((galCurr + 1) % photos.length);
+    });
+
+    // Click na foto → lightbox
+    galleryMain.addEventListener('click', e => {
+      if (e.target.classList.contains('vp-slide')) openLightbox(galCurr);
+    });
+    document.getElementById('vpGalAmpliar').addEventListener('click', e => {
+      e.stopPropagation(); openLightbox(galCurr);
+    });
+
+    // Swipe touch no mobile
+    let touchX = 0;
+    galleryMain.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+    galleryMain.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 40)
+        goTo(dx < 0 ? (galCurr + 1) % photos.length : (galCurr - 1 + photos.length) % photos.length);
+    }, { passive: true });
+
+    // ─── Quick specs ──────────────────────────────────────────────
+    const qsItems = [
+      { icon: 'fa-calendar-days', val: v.year },
+      { icon: 'fa-gauge-high',    val: v.km },
+      { icon: 'fa-gears',         val: v.transmission },
+      { icon: 'fa-gas-pump',      val: v.fuel },
+      ...(v.color    ? [{ icon: 'fa-palette',      val: v.color }]    : []),
+    ];
+    const qsGrid = document.getElementById('vpQuickSpecs');
+    qsItems.forEach(({ icon, val }) => {
+      qsGrid.innerHTML += `<div class="vp-quick-spec"><i class="fa-solid ${icon}"></i><span>${val}</span></div>`;
+    });
+
+    // ─── Características ──────────────────────────────────────────
+    const chars = [
+      { label:'Ano',           icon:'fa-calendar-days', val: v.year },
+      { label:'Quilometragem', icon:'fa-gauge-high',    val: v.km },
+      { label:'Câmbio',        icon:'fa-gears',         val: v.transmission },
+      { label:'Combustível',   icon:'fa-gas-pump',      val: v.fuel },
+      ...(v.color     ? [{ label:'Cor',             icon:'fa-palette',      val: v.color }]     : []),
+      { label:'Versão',        icon:'fa-tag',           val: v.version },
+      ...(v.plate_end ? [{ label:'Final da placa',  icon:'fa-id-card',      val: v.plate_end }] : []),
+    ];
+    const charsGrid = document.getElementById('vpCharsGrid');
+    chars.forEach(({ label, icon, val }) => {
+      charsGrid.innerHTML += `
+        <div class="vp-char-card">
+          <i class="fa-solid ${icon} vp-char-icon"></i>
+          <div class="vp-char-label">${label}</div>
+          <div class="vp-char-value">${val}</div>
+        </div>`;
+    });
+
+    // ─── Opcionais ────────────────────────────────────────────────
+    const optionals = v.optionals || [];
+    if (optionals.length) {
+      document.getElementById('vpOptionalsSection').classList.remove('hidden');
+      document.getElementById('vpOptionalsCount').textContent = `${optionals.length} itens`;
+      const og = document.getElementById('vpOptionalsGrid');
+      optionals.forEach(opt => {
+        og.innerHTML += `<div class="vp-optional-item"><i class="fa-solid fa-check"></i><span>${opt}</span></div>`;
+      });
+    }
+
+    // ─── Descrição ────────────────────────────────────────────────
+    document.getElementById('vpDesc').textContent = v.description ||
+      `${v.model} ${v.version}, ano ${v.year}, com ${v.km} rodados. ` +
+      `Motor ${v.fuel.toLowerCase()}, câmbio ${v.transmission.toLowerCase()}. ` +
+      `Veículo em ótimo estado, revisado e com histórico disponível para consulta. ` +
+      `Atendemos em Primavera do Leste - MT. Entre em contato para agendar uma visita ou receber mais fotos.`;
+
+    // ─── Relacionados ─────────────────────────────────────────────
+    const others = BRAVEL_VEHICLES.filter(x => x.id !== v.id);
+    const sameType = others.filter(x => x.type === v.type || x.brand === v.brand);
+    const rest = others.filter(x => !sameType.includes(x));
+    const related = [...sameType, ...rest].slice(0, 6);
+
+    if (!related.length) {
+      document.getElementById('vpRelatedSection').style.display = 'none';
+    } else {
+      const rg = document.getElementById('vpRelatedGrid');
+      related.forEach(r => {
+        const thumb = r.photos?.[0]
+          ? `<img src="${r.photos[0]}" alt="${r.model}" loading="lazy" onerror="this.style.display='none'">`
+          : '';
+        rg.innerHTML += `
+          <a href="veiculo.html?id=${r.id}" class="vp-related-card">
+            <div class="vp-related-img" style="background:${r.gradient}">
+              <div class="vp-related-fallback">${r.emoji}</div>
+              ${thumb}
+            </div>
+            <div class="vp-related-body">
+              <div class="vp-related-model">${r.model}</div>
+              <div class="vp-related-version">${r.version}</div>
+              <div class="vp-related-price-row">
+                <div class="vp-related-price">${fmtPrice(r.price)}</div>
+                <span class="vp-related-btn">Ver detalhes <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+            </div>
+          </a>`;
+      });
+      initRelatedCarousel();
+    }
+
+    function initRelatedCarousel() {
+      const viewport = document.getElementById('vpRelatedViewport');
+      const track    = document.getElementById('vpRelatedGrid');
+      const prevBtn  = document.getElementById('vpRelPrev');
+      const nextBtn  = document.getElementById('vpRelNext');
+      const dotsWrap = document.getElementById('vpRelDots');
+      if (!viewport || !track) return;
+
+      const GAP = 20;
+
+      function getPerPage() {
+        const vw = viewport.offsetWidth;
+        return vw >= 800 ? 3 : vw >= 520 ? 2 : 1;
+      }
+
+      function sizeCards() {
+        const perPage = getPerPage();
+        const vw = viewport.offsetWidth;
+        const cardW = perPage === 1
+          ? vw * 0.88
+          : (vw - GAP * (perPage - 1)) / perPage;
+        track.querySelectorAll('.vp-related-card').forEach(c => { c.style.width = cardW + 'px'; });
+        return cardW;
+      }
+
+      function totalPages() {
+        return Math.ceil(track.querySelectorAll('.vp-related-card').length / getPerPage());
+      }
+
+      function currentPage() {
+        const cardW = sizeCards();
+        const pageW = getPerPage() * (cardW + GAP);
+        return Math.round(viewport.scrollLeft / pageW);
+      }
+
+      function scrollToPage(page) {
+        const cardW = sizeCards();
+        const pageW = getPerPage() * (cardW + GAP);
+        viewport.scrollTo({ left: page * pageW, behavior: 'smooth' });
+      }
+
+      function buildDots() {
+        dotsWrap.innerHTML = '';
+        for (let i = 0; i < totalPages(); i++) {
+          const d = document.createElement('button');
+          d.className = 'vp-rel-dot';
+          d.setAttribute('aria-label', `Página ${i + 1}`);
+          d.addEventListener('click', () => scrollToPage(i));
+          dotsWrap.appendChild(d);
+        }
+      }
+
+      function updateUI() {
+        const page  = currentPage();
+        const total = totalPages();
+        dotsWrap.querySelectorAll('.vp-rel-dot').forEach((d, i) => d.classList.toggle('active', i === page));
+        prevBtn.disabled = page === 0;
+        nextBtn.disabled = page >= total - 1;
+      }
+
+      prevBtn.addEventListener('click', () => scrollToPage(Math.max(0, currentPage() - 1)));
+      nextBtn.addEventListener('click', () => scrollToPage(Math.min(totalPages() - 1, currentPage() + 1)));
+      viewport.addEventListener('scroll', updateUI, { passive: true });
+      window.addEventListener('resize', () => { sizeCards(); buildDots(); updateUI(); });
+
+      sizeCards();
+      buildDots();
+      updateUI();
+    }
+
+    // ─── Lightbox ─────────────────────────────────────────────────
+    let lbIdx = 0;
+    const lightbox = document.getElementById('vpLightbox');
+
+    function openLightbox(idx) {
+      if (!photos.length) return;
+      lbIdx = idx; updateLb();
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function updateLb() {
+      document.getElementById('vpLbImg').src = photos[lbIdx];
+      document.getElementById('vpLbCounter').textContent =
+        photos.length > 1 ? `${lbIdx + 1} / ${photos.length}` : '';
+      document.getElementById('vpLbPrev').style.display = photos.length < 2 ? 'none' : '';
+      document.getElementById('vpLbNext').style.display = photos.length < 2 ? 'none' : '';
+    }
+    function closeLb() {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('vpLbClose').addEventListener('click', closeLb);
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLb(); });
+    document.getElementById('vpLbPrev').addEventListener('click', e => {
+      e.stopPropagation(); lbIdx = (lbIdx - 1 + photos.length) % photos.length; updateLb();
+    });
+    document.getElementById('vpLbNext').addEventListener('click', e => {
+      e.stopPropagation(); lbIdx = (lbIdx + 1) % photos.length; updateLb();
+    });
+    document.addEventListener('keydown', e => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape')      closeLb();
+      if (e.key === 'ArrowLeft')  { lbIdx = (lbIdx - 1 + photos.length) % photos.length; updateLb(); }
+      if (e.key === 'ArrowRight') { lbIdx = (lbIdx + 1) % photos.length; updateLb(); }
+    });
+
+    // ─── Toggle financiamento ────────────────────────────────────
+    const vpFinanceToggle = document.getElementById('vpFinanceToggle');
+    const vpFinanceBody   = document.getElementById('vpFinanceBody');
+    vpFinanceToggle.addEventListener('click', () => {
+      const open = vpFinanceToggle.getAttribute('aria-expanded') === 'true';
+      vpFinanceToggle.setAttribute('aria-expanded', !open);
+      vpFinanceBody.classList.toggle('open', !open);
+    });
+
+    // ─── Financiamento ───────────────────────────────────────────
+    let cnh = 'Sim';
+    let parcelas = null;
+
+    // Toggle CNH
+    document.getElementById('cnhSim').addEventListener('click', () => {
+      cnh = 'Sim';
+      document.getElementById('cnhSim').classList.add('active');
+      document.getElementById('cnhNao').classList.remove('active');
+    });
+    document.getElementById('cnhNao').addEventListener('click', () => {
+      cnh = 'Não';
+      document.getElementById('cnhNao').classList.add('active');
+      document.getElementById('cnhSim').classList.remove('active');
+    });
+
+    // Seleção de parcelas
+    document.querySelectorAll('.vp-parcela-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.vp-parcela-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        parcelas = btn.dataset.p;
+      });
+    });
+
+    // Formatação de moeda nos inputs
+    function maskCurrency(input) {
+      input.addEventListener('input', () => {
+        let raw = input.value.replace(/\D/g, '');
+        if (!raw) { input.value = ''; return; }
+        const num = parseInt(raw, 10) / 100;
+        input.value = num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      });
+    }
+    const finEntradaEl = document.getElementById('finEntrada');
+    const finParcelaEl = document.getElementById('finParcela');
+    const finCpfEl     = document.getElementById('finCpf');
+    maskCurrency(finEntradaEl);
+    maskCurrency(finParcelaEl);
+
+    // Máscara CPF
+    finCpfEl.addEventListener('input', () => {
+      let d = finCpfEl.value.replace(/\D/g, '').slice(0, 11);
+      if (d.length > 9)      d = d.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+      else if (d.length > 6) d = d.replace(/(\d{3})(\d{3})(\d{1,3})/,       '$1.$2.$3');
+      else if (d.length > 3) d = d.replace(/(\d{3})(\d{1,3})/,               '$1.$2');
+      finCpfEl.value = d;
+    });
+
+    // Envio para WhatsApp
+    document.getElementById('vpFinanceSubmit').addEventListener('click', () => {
+      const entrada     = finEntradaEl.value ? `R$ ${finEntradaEl.value}` : 'Não informado';
+      const valorParc   = finParcelaEl.value ? `R$ ${finParcelaEl.value}` : 'Não informado';
+      const qtdParcelas = parcelas ? `${parcelas}x` : 'Não informado';
+      const cpf         = finCpfEl.value || 'Não informado';
+
+      const msg =
+        `Olá! Tenho interesse em financiar o *${v.model} ${v.version}* — ${v.year} (${fmtPrice(v.price)}).\n\n` +
+        `*Simulação de financiamento:*\n` +
+        `• Entrada: ${entrada}\n` +
+        `• Possui CNH: ${cnh}\n` +
+        `• Parcelas desejadas: ${qtdParcelas}\n` +
+        `• Valor por parcela: ${valorParc}\n` +
+        `• CPF: ${cpf}\n\n` +
+        `Poderia me enviar uma proposta?`;
+
+      window.open(`https://wa.me/${BRAVEL_WPP}?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+
+    // ─── Animações de scroll ──────────────────────────────────────
+    const animObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          animObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.anim-up').forEach(el => animObserver.observe(el));
+  </script>
+</body>
+</html>

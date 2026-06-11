@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Estoque completo de seminovos na Bravel Veículos — Primavera do Leste MT. Carros e motos revisados com transparência e os melhores preços da região.">
+  <title>Estoque Completo | Bravel Veículos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css?v=20260611h">
+  <style>
+    /* ── Estilos específicos do estoque.html ── */
+
+    .estoque-page-hero {
+      padding-top: 72px; /* header fixo */
+      background: var(--black);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .estoque-page-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(135deg, rgba(204,17,17,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 50%, rgba(204,17,17,0.08) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    .estoque-page-hero-inner {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto;
+      padding: 3rem 1.5rem 0;
+    }
+
+    .estoque-page-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3rem; font-weight: 900;
+      color: var(--white); line-height: 1.1;
+      margin-bottom: 0.65rem;
+    }
+
+    .estoque-page-subtitle {
+      font-size: 0.95rem; color: rgba(255,255,255,0.42);
+      max-width: 520px; line-height: 1.65;
+      margin-bottom: 2rem;
+    }
+
+    /* Trust bar inline */
+    .estoque-trust-row {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem;
+      padding-bottom: 2.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      margin-bottom: 0;
+    }
+
+    .estoque-trust-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.78rem; font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 2rem; padding: 0.35rem 0.85rem;
+    }
+    .estoque-trust-badge i { color: var(--red); font-size: 0.75rem; }
+
+    /* Seção principal do grid */
+    #estoque-main {
+      padding: 2.5rem 1.5rem 5rem;
+      background: var(--black);
+    }
+
+    /* Contador de resultados */
+    .estoque-results-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2rem; flex-wrap: wrap; gap: 0.75rem;
+    }
+    .estoque-results-count {
+      font-size: 0.82rem; color: rgba(255,255,255,0.35); font-weight: 500;
+    }
+    .estoque-results-count strong { color: var(--white); font-weight: 700; }
+
+    /* Botão voltar */
+    .estoque-back {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      font-size: 0.82rem; font-weight: 600;
+      color: rgba(255,255,255,0.4);
+      transition: color 0.2s;
+    }
+    .estoque-back:hover { color: var(--white); }
+    .estoque-back i { font-size: 0.72rem; }
+
+    /* Filtros da página de estoque */
+    .estoque-filters-wrap {
+      padding: 2rem 0 0;
+    }
+
+    /* Ajuste mobile */
+    @media (max-width: 768px) {
+      .estoque-page-hero { padding-top: 56px; }
+      .estoque-page-hero-inner { padding: 2rem 1.25rem 0; }
+      .estoque-page-title { font-size: 2rem; }
+      .estoque-page-subtitle { font-size: 0.88rem; }
+      #estoque-main { padding: 2rem 1.25rem 4rem; }
+    }
+
+    /* ══ CARDS — Desktop (padrão, grade 3 col, dark) ══ */
+    #carsGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; margin-top: 2.5rem;
+    }
+
+    .car-list-card {
+      display: flex; flex-direction: column;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 1rem; overflow: hidden; cursor: pointer;
+      opacity: 0; transform: translateY(20px);
+      transition: transform 0.28s, box-shadow 0.28s, border-color 0.28s, opacity 0.3s;
+      transition-delay: var(--delay, 0s);
+    }
+    .car-list-card.visible { opacity: 1; transform: translateY(0); }
+    .car-list-card:hover {
+      transform: translateY(-7px) !important;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      border-color: rgba(204,17,17,0.35);
+    }
+
+    .clc-top { display: flex; flex-direction: column; }
+
+    .clc-thumb {
+      width: 100%; aspect-ratio: 16/9;
+      position: relative; overflow: hidden; background: #111; flex-shrink: 0;
+    }
+    .clc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .clc-thumb .car-badge { position: absolute; top: 0.6rem; left: 0.6rem; }
+
+    .clc-info { padding: 1.25rem 1.25rem 0; display: flex; flex-direction: column; }
+    .clc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.2rem; }
+    .clc-model { font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 800; color: var(--white); }
+    .clc-fuel-tag { display: none; }
+    .clc-version { font-size: 0.78rem; color: var(--silver-dim); margin-bottom: 1rem; }
+    .clc-specs { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
+    .clc-spec { font-size: 0.75rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.28rem; }
+    .clc-spec i { color: var(--red); font-size: 0.68rem; }
+    .clc-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.55rem; color: var(--white); line-height: 1; letter-spacing: 0.03em; margin-bottom: 1rem; }
+    .clc-meta { display: none; }
+
+    .clc-actions { padding: 0 1.25rem 1.25rem; display: flex; flex-direction: column; }
+    .clc-btn-detail { display: none; }
+    .clc-btn-wpp {
+      width: 100%; padding: 0.75rem;
+      background: var(--wpp); border-radius: 0.5rem;
+      font-size: 0.85rem; font-weight: 600; color: var(--white);
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      transition: background 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .clc-btn-wpp:hover { background: var(--wpp-dark); }
+
+    /* ══ CARDS — Mobile (lista compacta, paleta do site) ══ */
+    @media (max-width: 640px) {
+      #carsGrid { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.75rem; }
+
+      .car-list-card {
+        flex-direction: column; border-radius: 0.875rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        box-shadow: none;
+      }
+      .car-list-card:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 28px rgba(0,0,0,0.5); border-color: rgba(204,17,17,0.3); }
+
+      .clc-top { flex-direction: row; }
+
+      .clc-thumb {
+        width: 120px; height: 100px; flex-shrink: 0;
+        aspect-ratio: unset; border-radius: 0.875rem 0 0 0;
+      }
+      .clc-thumb .car-badge { top: 0.3rem; left: 0.3rem; font-size: 0.52rem; padding: 0.1rem 0.38rem; }
+
+      .clc-info { flex: 1; padding: 0.6rem 0.75rem; gap: 0.14rem; min-width: 0; display: flex; flex-direction: column; }
+
+      .clc-head { margin-bottom: 0; gap: 0.35rem; }
+      .clc-model { font-size: 0.88rem; font-weight: 800; color: var(--white); line-height: 1.2; }
+
+      .clc-fuel-tag {
+        display: inline-block;
+        font-size: 0.57rem; font-weight: 700; color: rgba(255,255,255,0.45);
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+        padding: 0.1rem 0.38rem; border-radius: 0.2rem;
+        white-space: nowrap; flex-shrink: 0; margin-top: 0.08rem;
+        font-family: 'Inter', sans-serif; letter-spacing: 0.04em;
+      }
+
+      .clc-version { font-size: 0.69rem; color: var(--silver-dim); margin-bottom: 0; }
+
+      .clc-specs { gap: 0.2rem 0.5rem; margin-bottom: 0; }
+      .clc-spec { font-size: 0.65rem; color: rgba(255,255,255,0.38); }
+      .clc-spec i { color: var(--red); font-size: 0.6rem; }
+
+      .clc-price {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.25rem; color: var(--white);
+        letter-spacing: 0.03em; margin-bottom: 0; line-height: 1.1;
+      }
+
+      .clc-meta { display: flex; flex-direction: column; gap: 0.04rem; }
+      .clc-meta-item { font-size: 0.6rem; color: rgba(255,255,255,0.28); display: flex; align-items: center; gap: 0.22rem; }
+      .clc-meta-item i { font-size: 0.55rem; color: rgba(255,255,255,0.2); }
+
+      .clc-actions {
+        flex-direction: row; gap: 0.45rem;
+        padding: 0.5rem 0.65rem 0.6rem;
+        border-top: 1px solid rgba(255,255,255,0.06);
+      }
+      .clc-btn-detail {
+        display: block; flex: 1; padding: 0.52rem 0;
+        text-align: center;
+        border: 1.5px solid rgba(255,255,255,0.18); border-radius: 0.4rem;
+        font-size: 0.73rem; font-weight: 700; color: var(--white);
+        transition: background 0.2s, border-color 0.2s; font-family: 'Inter', sans-serif;
+      }
+      .clc-btn-detail:hover { background: var(--red); border-color: var(--red); }
+      .clc-btn-wpp {
+        flex: 1; padding: 0.52rem 0; width: auto;
+        border-radius: 0.4rem; font-size: 0.73rem; gap: 0.28rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER (fixo — links apontam para index.html)
+  ============================================================ -->
+  <header id="header" class="scrolled">
+    <nav class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <img src="site/bravel-logo.png" alt="Bravel Veículos" class="nav-logo-img">
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="estoque.html" style="color:var(--white)">Estoque</a></li>
+        <li><a href="index.html#sobre">Sobre</a></li>
+        <li><a href="index.html#servicos">Serviços</a></li>
+        <li><a href="index.html#contato">Contato</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <a href="https://wa.me/556696400156?text=Olá!%20Vi%20o%20site%20da%20Bravel%20Veículos%20e%20gostaria%20de%20mais%20informações." target="_blank" class="btn btn-whatsapp-nav">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </a>
+        <button class="menu-dots" id="menuDots" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+      <ul>
+        <li><a href="estoque.html" class="mobile-link" style="color:var(--white)">Estoque</a></li>
+        <li><a href="index.html#sobre" class="mobile-link">Sobre</a></li>
+        <li><a href="index.html#servicos" class="mobile-link">Serviços</a></li>
+        <li><a href="index.html#contato" class="mobile-link">Contato</a></li>
+        <li>
+          <a href="https://wa.me/556696400156" target="_blank" class="mobile-whatsapp">
+            <i class="fa-brands fa-whatsapp"></i> Falar no WhatsApp
+          </a>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HERO / BANNER DA PÁGINA
+  ============================================================ -->
+  <div class="estoque-page-hero">
+    <div class="estoque-page-hero-inner">
+
+      <a href="index.html" class="estoque-back" style="animation:fadeUp 0.45s ease 0.05s both">
+        <i class="fa-solid fa-chevron-left"></i> Voltar para o início
+      </a>
+
+      <div style="height:1.25rem"></div>
+
+      <span class="section-label" style="animation:fadeUp 0.5s ease 0.15s both">ESTOQUE COMPLETO</span>
+      <h1 class="estoque-page-title" style="animation:fadeUp 0.6s ease 0.28s both">
+        Todos os nossos <span class="title-accent">veículos.</span>
+      </h1>
+      <p class="estoque-page-subtitle" style="animation:fadeUp 0.6s ease 0.42s both">
+        Seminovos revisados, com histórico aberto e preço justo. Filtre por tipo ou faixa de valor e encontre o seu.
+      </p>
+
+      <div class="estoque-trust-row" style="animation:fadeUp 0.6s ease 0.56s both">
+        <span class="estoque-trust-badge"><i class="fa-solid fa-shield-halved"></i> Revisados</span>
+        <span class="estoque-trust-badge"><i class="fa-solid fa-file-lines"></i> Histórico aberto</span>
+        <span class="estoque-trust-badge"><i class="fa-solid fa-right-left"></i> Aceita troca</span>
+        <span class="estoque-trust-badge"><i class="fa-regular fa-clock"></i> Proposta na hora</span>
+        <span class="estoque-trust-badge"><i class="fa-solid fa-hand-holding-dollar"></i> Financiamento em 24h</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FILTROS + GRID
+  ============================================================ -->
+  <section id="estoque-main">
+    <div class="container">
+
+      <div class="estoque-filters-wrap anim-up">
+        <div class="filters-wrap">
+          <div class="filter-row">
+            <span class="filter-row-label">TIPO</span>
+            <div class="filter-bar" id="typeFilters">
+              <button class="filter-btn active" data-filter="type" data-value="all">Todos</button>
+              <button class="filter-btn" data-filter="type" data-value="sedan">Sedan</button>
+              <button class="filter-btn" data-filter="type" data-value="hatch">Hatch</button>
+              <button class="filter-btn" data-filter="type" data-value="suv">SUV</button>
+              <button class="filter-btn" data-filter="type" data-value="pickup">Pick-up</button>
+              <button class="filter-btn" data-filter="type" data-value="moto">Motos</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-row-label">FAIXA</span>
+            <div class="filter-bar" id="priceFilters">
+              <button class="filter-btn active" data-filter="price" data-value="all">Todas</button>
+              <button class="filter-btn" data-filter="price" data-value="60">Até 60 mil</button>
+              <button class="filter-btn" data-filter="price" data-value="60-80">60–80 mil</button>
+              <button class="filter-btn" data-filter="price" data-value="80-100">80–100 mil</button>
+              <button class="filter-btn" data-filter="price" data-value="100">Acima de 100 mil</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="estoque-results-bar anim-up">
+        <p class="estoque-results-count" id="resultsCount"></p>
+      </div>
+
+      <div class="cars-grid" id="carsGrid"></div>
+
+      <div class="no-results hidden" id="noResults">
+        <i class="fa-solid fa-car-burst"></i>
+        <p>Nenhum veículo encontrado com esse filtro.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer>
+    <div class="footer-grid container">
+      <div class="footer-brand">
+        <img src="site/bravel-logo.png" alt="Bravel Veículos" class="footer-logo-img">
+        <p>Sua loja de confiança em Primavera do Leste. Seminovos revisados, atendimento transparente e os melhores preços do Mato Grosso.</p>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/bravelveiculos/" target="_blank" class="social-btn" aria-label="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://wa.me/556696400156" target="_blank" class="social-btn" aria-label="WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="estoque.html">Estoque</a></li>
+          <li><a href="index.html#sobre">Sobre nós</a></li>
+          <li><a href="index.html#servicos">Serviços</a></li>
+          <li><a href="index.html#contato">Contato</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Serviços</h4>
+        <ul>
+          <li><a href="index.html#servicos">Compra de Veículos</a></li>
+          <li><a href="index.html#servicos">Venda de Seminovos</a></li>
+          <li><a href="index.html#servicos">Troca / Permuta</a></li>
+          <li><a href="index.html#servicos">Financiamento</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom container">
+      <p>© 2025 Bravel Veículos — Todos os direitos reservados.</p>
+      <p>Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</p>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
+    <button class="lb-close" id="lbClose" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Próxima"><i class="fa-solid fa-chevron-right"></i></button>
+    <div class="lb-img-wrap"><img src="" id="lbImg" alt="Foto do veículo"></div>
+    <div class="lb-counter" id="lbCounter"></div>
+  </div>
+
+  <!-- WhatsApp flutuante -->
+  <a href="https://wa.me/556696400156?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20mais%20informações." target="_blank" class="whatsapp-float" aria-label="Chamar no WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script src="vehicles.js"></script>
+  <script>
+    // ─── Helpers ─────────────────────────────────────────────────
+    const wppMsg = v => encodeURIComponent(
+      `Olá! Vi no site da Bravel Veículos e tenho interesse no ${v.model} ${v.year} por ${fmtPrice(v.price)}. Ainda está disponível?`
+    );
+
+    // ─── Render cards ─────────────────────────────────────────────
+    function renderCars(list) {
+      const grid  = document.getElementById('carsGrid');
+      const none  = document.getElementById('noResults');
+      const count = document.getElementById('resultsCount');
+
+      if (!list.length) {
+        grid.innerHTML = '';
+        none.classList.remove('hidden');
+        count.innerHTML = 'Nenhum resultado';
+        return;
+      }
+      none.classList.add('hidden');
+      count.innerHTML = `<strong>${list.length}</strong> veículo${list.length > 1 ? 's' : ''} encontrado${list.length > 1 ? 's' : ''}`;
+
+      grid.innerHTML = list.map((v, i) => {
+        const thumb = v.photos && v.photos.length ? v.photos[0] : null;
+        const thumbHtml = thumb
+          ? `<img src="${thumb}" alt="${v.model}" loading="lazy">`
+          : `<div style="background:${v.gradient};width:100%;height:100%;min-height:100px;display:flex;align-items:center;justify-content:center;font-size:3rem">${v.emoji}</div>`;
+        const fuelTag = `${v.transmission.slice(0,3)}/${v.fuel.slice(0,3)}`;
+        return `
+          <article class="car-list-card" data-type="${v.type}" data-price="${v.price}" data-id="${v.id}" style="--delay:${i * 0.05}s">
+            <div class="clc-top">
+              <div class="clc-thumb">
+                ${thumbHtml}
+                ${v.badge ? `<span class="car-badge">${v.badge}</span>` : ''}
+              </div>
+              <div class="clc-info">
+                <div class="clc-head">
+                  <h3 class="clc-model">${v.model}</h3>
+                  <span class="clc-fuel-tag">${fuelTag}</span>
+                </div>
+                <p class="clc-version">${v.version}</p>
+                <div class="clc-specs">
+                  <span class="clc-spec"><i class="fa-solid fa-calendar-days"></i> ${v.year}</span>
+                  <span class="clc-spec"><i class="fa-solid fa-gauge-high"></i> ${v.km}</span>
+                </div>
+                <div class="clc-price">${fmtPrice(v.price)}</div>
+                <div class="clc-meta">
+                  <span class="clc-meta-item"><i class="fa-solid fa-store"></i> Bravel Veículos</span>
+                  <span class="clc-meta-item"><i class="fa-solid fa-location-dot"></i> ${v.location}</span>
+                </div>
+              </div>
+            </div>
+            <div class="clc-actions">
+              <a href="veiculo.html?id=${v.id}" class="clc-btn-detail">Ver detalhes</a>
+              <a href="https://wa.me/${BRAVEL_WPP}?text=${wppMsg(v)}" target="_blank" class="clc-btn-wpp">
+                <i class="fa-brands fa-whatsapp"></i> Whatsapp
+              </a>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      setTimeout(observeCards, 30);
+    }
+
+    // ─── Filtros ─────────────────────────────────────────────────
+    let activeType = 'all', activePrice = 'all';
+
+    function applyFilters() {
+      let r = BRAVEL_VEHICLES;
+      if (activeType !== 'all') r = r.filter(v => v.type === activeType);
+      if (activePrice !== 'all') {
+        const ranges = {
+          '60':     v => v.price < 60000,
+          '60-80':  v => v.price >= 60000 && v.price <= 80000,
+          '80-100': v => v.price > 80000 && v.price <= 100000,
+          '100':    v => v.price > 100000
+        };
+        r = r.filter(ranges[activePrice]);
+      }
+      renderCars(r);
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const { filter, value } = btn.dataset;
+        document.querySelectorAll(`.filter-btn[data-filter="${filter}"]`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (filter === 'type')  activeType  = value;
+        if (filter === 'price') activePrice = value;
+        applyFilters();
+      });
+    });
+
+    document.getElementById('carsGrid').addEventListener('click', e => {
+      if (e.target.closest('.clc-btn-detail, .clc-btn-wpp')) return;
+      const card = e.target.closest('.car-list-card');
+      if (card) window.location.href = `veiculo.html?id=${card.dataset.id}`;
+    });
+
+    // ─── Lightbox ─────────────────────────────────────────────────
+    let lbPhotos = [], lbIdx = 0;
+    function openLightbox(photos, idx) { lbPhotos = photos; lbIdx = idx; updateLightbox(); document.getElementById('lightbox').classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function updateLightbox() { document.getElementById('lbImg').src = lbPhotos[lbIdx]; document.getElementById('lbCounter').textContent = lbPhotos.length > 1 ? `${lbIdx + 1} / ${lbPhotos.length}` : ''; document.getElementById('lbPrev').style.display = lbPhotos.length < 2 ? 'none' : ''; document.getElementById('lbNext').style.display = lbPhotos.length < 2 ? 'none' : ''; }
+    function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; }
+    document.getElementById('lbClose').addEventListener('click', closeLightbox);
+    document.getElementById('lightbox').addEventListener('click', e => { if (e.target.id === 'lightbox') closeLightbox(); });
+    document.getElementById('lbPrev').addEventListener('click', e => { e.stopPropagation(); lbIdx = (lbIdx - 1 + lbPhotos.length) % lbPhotos.length; updateLightbox(); });
+    document.getElementById('lbNext').addEventListener('click', e => { e.stopPropagation(); lbIdx = (lbIdx + 1) % lbPhotos.length; updateLightbox(); });
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') { lbIdx = (lbIdx - 1 + lbPhotos.length) % lbPhotos.length; updateLightbox(); }
+      if (e.key === 'ArrowRight') { lbIdx = (lbIdx + 1) % lbPhotos.length; updateLightbox(); }
+    });
+
+    // ─── IntersectionObserver — cards ────────────────────────────
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+
+    function observeCards() {
+      document.querySelectorAll('.car-list-card').forEach(el => observer.observe(el));
+    }
+
+    // ─── IntersectionObserver — seções ───────────────────────────
+    const animObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          animObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.anim-up, .anim-left, .anim-right').forEach(el => animObserver.observe(el));
+
+    // ─── Header scroll ────────────────────────────────────────────
+    const headerEl = document.getElementById('header');
+    window.addEventListener('scroll', () => headerEl.classList.toggle('scrolled', scrollY > 20), { passive: true });
+
+    // ─── Menu mobile ─────────────────────────────────────────────
+    const menuDots   = document.getElementById('menuDots');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuDots.addEventListener('click', e => { e.stopPropagation(); mobileMenu.classList.toggle('open'); menuDots.classList.toggle('active'); });
+    document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', () => { mobileMenu.classList.remove('open'); menuDots.classList.remove('active'); }));
+    document.addEventListener('click', e => { if (!menuDots.contains(e.target) && !mobileMenu.contains(e.target)) { mobileMenu.classList.remove('open'); menuDots.classList.remove('active'); } });
+
+    // ─── Init ────────────────────────────────────────────────────
+    renderCars(BRAVEL_VEHICLES);
+  </script>
+</body>
+</html>

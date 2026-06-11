@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Bravel Veículos — Sua loja de carros seminovos em Primavera do Leste MT. Financiamento fácil, troca garantida e os melhores preços da região.">
+  <title>Bravel Veículos | Primavera do Leste - MT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css?v=20260611j">
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+  ============================================================ -->
+  <header id="header">
+    <nav class="nav-container">
+      <a href="#hero" class="nav-logo">
+        <img src="site/bravel-logo.png" alt="Bravel Veículos" class="nav-logo-img">
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="estoque.html">Estoque</a></li>
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#servicos">Serviços</a></li>
+        <li><a href="#contato">Contato</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <a href="https://wa.me/556696400156?text=Olá!%20Vi%20o%20site%20da%20Bravel%20Veículos%20e%20gostaria%20de%20mais%20informações." target="_blank" class="btn btn-whatsapp-nav">
+          <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        </a>
+        <button class="menu-dots" id="menuDots" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+      <ul>
+        <li><a href="estoque.html" class="mobile-link">Estoque</a></li>
+        <li><a href="#sobre" class="mobile-link">Sobre</a></li>
+        <li><a href="#servicos" class="mobile-link">Serviços</a></li>
+        <li><a href="#contato" class="mobile-link">Contato</a></li>
+        <li>
+          <a href="https://wa.me/556696400156" target="_blank" class="mobile-whatsapp">
+            <i class="fa-brands fa-whatsapp"></i> Falar no WhatsApp
+          </a>
+        </li>
+        <li>
+          <a href="https://www.google.com/maps/search/?api=1&query=Avenida+Amazonas+45+Primavera+do+Leste+MT" target="_blank" class="mobile-location">
+            <i class="fa-solid fa-map-location-dot"></i> Como chegar
+          </a>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <section id="hero">
+    <!-- Logo como imagem de fundo com overlay -->
+    <div class="hero-bg-logo-wrap" aria-hidden="true">
+      <img src="site/fachada-bravel.jpg" alt="" class="hero-bg-logo-img">
+    </div>
+    <div class="hero-bg-grid"></div>
+    <div class="hero-bg-glow"></div>
+
+    <div class="hero-content container">
+      <div class="hero-text">
+        <p class="hero-label">CONCESSIONÁRIA NO MT &nbsp;|&nbsp; DESDE 2022</p>
+        <h1 class="hero-title">
+          O carro certo,<br>sem <span class="title-accent">enrolação.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Cada veículo é revisado, vistoriado e entregue com histórico aberto. Compra, venda e troca com proposta na hora sem letras miúdas, sem promessa que não cumpre.
+        </p>
+
+        <!-- Feature icons -->
+        <div class="hero-features">
+          <div class="hero-feature">
+            <div class="hero-feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <span>Veículos<br>revisados</span>
+          </div>
+          <div class="hero-feature">
+            <div class="hero-feature-icon"><i class="fa-solid fa-file-lines"></i></div>
+            <span>Histórico<br>aberto</span>
+          </div>
+          <div class="hero-feature">
+            <div class="hero-feature-icon"><i class="fa-solid fa-right-left"></i></div>
+            <span>Compra, venda<br>e troca</span>
+          </div>
+          <div class="hero-feature">
+            <div class="hero-feature-icon"><i class="fa-regular fa-clock"></i></div>
+            <span>Proposta<br>na hora</span>
+          </div>
+        </div>
+
+        <div class="hero-ctas">
+          <a href="estoque.html" class="btn btn-red">
+            Ver estoque &nbsp;→
+          </a>
+          <a href="https://wa.me/556696400156?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20os%20veículos%20da%20Bravel." target="_blank" class="hero-cta-link">
+            <span class="hero-cta-dot"></span> Falar com um consultor
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <a href="#stats" class="hero-scroll-indicator">
+      <i class="fa-solid fa-chevron-down"></i>
+    </a>
+  </section>
+
+  <!-- ============================================================
+       STATS BAR
+  ============================================================ -->
+
+  <!-- ============================================================
+       ESTOQUE
+  ============================================================ -->
+  <section id="estoque">
+    <div class="container">
+      <div class="estoque-header anim-up">
+        <span class="section-label">ESTOQUE</span>
+        <div class="estoque-title-row">
+          <h2 class="estoque-title">Encontre seu <span class="title-accent">próximo veículo.</span></h2>
+        </div>
+        <p class="estoque-subtitle">Toque em qualquer veículo para abrir o chat e tirar dúvidas na hora.</p>
+      </div>
+
+<div class="destaque-badge-wrap anim-up">
+        <span class="destaque-badge"><i class="fa-solid fa-star"></i> Destaque no estoque</span>
+      </div>
+
+      <div class="carousel-wrap" id="carouselWrap">
+        <div class="carousel-stage">
+          <div class="carousel-viewport" id="carouselViewport">
+            <div class="cars-grid" id="carsGrid"></div>
+          </div>
+          <button class="carousel-btn carousel-prev" id="carouselPrev" aria-label="Anterior">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button class="carousel-btn carousel-next" id="carouselNext" aria-label="Próxima">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+        <div class="carousel-dots" id="carouselDots"></div>
+      </div>
+      <div class="no-results hidden" id="noResults">
+        <i class="fa-solid fa-car-burst"></i>
+        <p>Nenhum veículo encontrado com esse filtro.</p>
+      </div>
+      <div class="estoque-ver-mais anim-up">
+        <a href="estoque.html" class="btn btn-ghost" style="font-size:0.82rem;padding:0.45rem 1.1rem">
+          Ver estoque completo <i class="fa-solid fa-arrow-right" style="font-size:0.72rem"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SOBRE
+  ============================================================ -->
+  <section id="sobre">
+    <div class="container">
+      <div class="sobre-layout">
+
+        <div class="sobre-text anim-left">
+          <span class="section-label">QUEM SOMOS</span>
+          <h2 class="sobre-title">Transparência<br>do início <span class="title-accent">ao fim.</span></h2>
+          <p class="sobre-desc">
+            A Bravel Veículos nasceu em 2022 com um objetivo claro: oferecer seminovos de qualidade com transparência e preços justos. Cada veículo passa por inspeção antes de ser oferecido — você sabe tudo antes de assinar.
+          </p>
+          <div class="sobre-ctas">
+            <a href="estoque.html" class="btn btn-dark">
+              <i class="fa-solid fa-arrow-right"></i> Ver veículos
+            </a>
+            <a href="https://www.instagram.com/bravelveiculos/" target="_blank" class="btn btn-outline-dark">
+              <i class="fa-brands fa-instagram"></i> @bravelveiculos
+            </a>
+          </div>
+        </div>
+
+        <div class="sobre-cards anim-right">
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-headset"></i></div>
+            <div class="stat-card-body">
+              <div class="stat-card-heading">Atendimento transparente</div>
+              <div class="stat-card-desc">Do primeiro contato até a entrega das chaves</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+            <div class="stat-card-body">
+              <div class="stat-card-heading">Negociação justa</div>
+              <div class="stat-card-desc">Proposta clara, sem letras miúdas</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-regular fa-clock"></i></div>
+            <div class="stat-card-body">
+              <div class="stat-card-number">24h</div>
+              <div class="stat-card-label">APROVAÇÃO</div>
+              <div class="stat-card-desc">Financiamento em 1 dia útil</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon"><i class="fa-solid fa-medal"></i></div>
+            <div class="stat-card-body">
+              <div class="stat-card-heading">Pós-venda de confiança</div>
+              <div class="stat-card-desc">Suporte mesmo depois da compra</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       AVALIAÇÕES GOOGLE
+  ============================================================ -->
+  <section id="avaliacoes">
+    <div class="container">
+
+      <div class="av-header anim-up">
+        <div>
+          <span class="section-label">AVALIAÇÕES</span>
+          <h2 class="av-title">O que dizem <span class="title-accent">de nós.</span></h2>
+        </div>
+        <a href="https://www.google.com/search?q=bravel+veiculos+primavera+do+leste#lrd=0x9377250c929789f7:0xf6a773be3ca52209,1" target="_blank" rel="noopener" class="av-google-badge">
+          <div class="av-badge-top">
+            <img src="site/google-g.svg" class="av-g-logo" alt="Google">
+            <div>
+              <div class="av-score-num">5.0</div>
+              <div class="av-score-stars">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+              </div>
+            </div>
+          </div>
+          <div class="av-badge-bottom">
+            <span class="av-badge-count">4 avaliações</span>
+            <span class="av-badge-dot">·</span>
+            <span class="av-badge-verified"><i class="fa-solid fa-circle-check"></i> Verificado pelo Google</span>
+            <i class="fa-solid fa-arrow-right av-badge-arrow"></i>
+          </div>
+        </a>
+      </div>
+
+      <div class="av-grid">
+
+        <article class="av-card anim-up">
+          <div class="av-card-head">
+            <div class="av-avatar" style="background:#3a86ff">RS</div>
+            <div class="av-card-meta">
+              <div class="av-reviewer-name">Rafael Santiago <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-rating">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                <span class="av-time">há 4 meses</span>
+              </div>
+            </div>
+            <img src="site/google-g.svg" class="av-card-g" alt="Google">
+          </div>
+          <p class="av-card-text">Melhor loja da região!! Atendimento diferenciado</p>
+          <div class="av-card-foot">
+            <span class="av-verified-tag"><i class="fa-solid fa-circle-check"></i> VERIFICADO</span>
+            <a href="https://www.google.com/search?q=bravel+veiculos+primavera+do+leste" target="_blank" rel="noopener" class="av-ver-google"><img src="site/google-g.svg" class="av-g-sm" alt="Google"> Ver no Google →</a>
+          </div>
+        </article>
+
+        <article class="av-card anim-up">
+          <div class="av-card-head">
+            <div class="av-avatar" style="background:#cc1111">AB</div>
+            <div class="av-card-meta">
+              <div class="av-reviewer-name">Aline Barroso <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-rating">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                <span class="av-time">há 2 anos</span>
+              </div>
+            </div>
+            <img src="site/google-g.svg" class="av-card-g" alt="Google">
+          </div>
+          <p class="av-card-text">Melhor revendedora da cidade. Recomendo</p>
+          <div class="av-card-foot">
+            <span class="av-verified-tag"><i class="fa-solid fa-circle-check"></i> VERIFICADO</span>
+            <a href="https://www.google.com/search?q=bravel+veiculos+primavera+do+leste" target="_blank" rel="noopener" class="av-ver-google"><img src="site/google-g.svg" class="av-g-sm" alt="Google"> Ver no Google →</a>
+          </div>
+        </article>
+
+        <article class="av-card anim-up">
+          <div class="av-card-head">
+            <div class="av-avatar" style="background:#2d9d5f">CM</div>
+            <div class="av-card-meta">
+              <div class="av-reviewer-name">Claudionor Moura <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-rating">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                <span class="av-time">há 2 anos</span>
+              </div>
+            </div>
+            <img src="site/google-g.svg" class="av-card-g" alt="Google">
+          </div>
+          <p class="av-card-text" style="font-style:italic">Recomendou a Bravel Veículos com 5 estrelas no Google.</p>
+          <div class="av-card-foot">
+            <span class="av-verified-tag"><i class="fa-solid fa-circle-check"></i> VERIFICADO</span>
+            <a href="https://www.google.com/search?q=bravel+veiculos+primavera+do+leste" target="_blank" rel="noopener" class="av-ver-google"><img src="site/google-g.svg" class="av-g-sm" alt="Google"> Ver no Google →</a>
+          </div>
+        </article>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SERVIÇOS
+  ============================================================ -->
+  <section id="servicos">
+    <div class="container">
+      <div class="servicos-layout">
+
+        <div class="servicos-header anim-left">
+          <span class="section-label">SERVIÇOS</span>
+          <h2 class="servicos-title">Tudo num<br>lugar <span class="title-accent">só.</span></h2>
+          <p class="servicos-subtitle">Da avaliação à entrega da chave — você não precisa correr atrás de nada.</p>
+        </div>
+
+        <div class="servicos-list anim-up">
+          <div class="servico-item">
+            <div class="servico-top">
+              <h3 class="servico-name">Compramos seu carro</h3>
+            </div>
+            <p class="servico-desc">Avaliação na hora e proposta justa. Pagamento à vista, no PIX ou transferência no mesmo dia.</p>
+          </div>
+          <div class="servico-item">
+            <div class="servico-top">
+<h3 class="servico-name">Vendemos com garantia</h3>
+            </div>
+            <p class="servico-desc">Estoque selecionado, revisado e com histórico aberto. Você sabe tudo antes de assinar.</p>
+          </div>
+          <div class="servico-item">
+            <div class="servico-top">
+<h3 class="servico-name">Aceitamos na troca</h3>
+            </div>
+            <p class="servico-desc">Use seu carro como entrada — a gente avalia, ajusta a diferença e fecha o negócio.</p>
+          </div>
+          <div class="servico-item">
+            <div class="servico-top">
+<h3 class="servico-name">Financiamos rápido</h3>
+            </div>
+            <p class="servico-desc">Parceria com Santander, Bradesco, Itaú, BV e Pan. Resposta em até 24h e entrada a partir de 20%.</p>
+          </div>
+          <div class="servico-item">
+            <div class="servico-top">
+<h3 class="servico-name">Garantia de verdade</h3>
+            </div>
+            <p class="servico-desc">3 a 6 meses de cobertura de motor e câmbio nos veículos elegíveis. Por escrito, no contrato.</p>
+          </div>
+          <div class="servico-item">
+            <div class="servico-top">
+<h3 class="servico-name">Cuidamos do papel</h3>
+            </div>
+            <p class="servico-desc">Transferência, DUT, IPVA e licenciamento. Você sai daqui só com a chave na mão.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CONTATO
+  ============================================================ -->
+  <section id="contato">
+    <div class="contato-grid container">
+      <div class="contato-info anim-left">
+        <h2 class="section-title">Fale <span class="title-accent">conosco</span></h2>
+        <p class="section-subtitle">Estamos prontos para te atender</p>
+
+        <a href="https://www.google.com/maps/search/?api=1&query=Avenida+Amazonas+45+Primavera+do+Leste+MT" target="_blank" rel="noopener" class="contato-item">
+          <div class="contato-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="contato-text">
+            <div class="contato-label">Endereço</div>
+            <div class="contato-value">Av. Amazonas, 45 — Primavera II<br>Primavera do Leste — MT</div>
+          </div>
+        </a>
+
+        <div class="contato-item">
+          <div class="contato-icon"><i class="fa-solid fa-phone"></i></div>
+          <div class="contato-text">
+            <div class="contato-label">Telefone / WhatsApp</div>
+            <div class="contato-value">(66) 9640-0156</div>
+          </div>
+        </div>
+
+        <a href="https://www.instagram.com/bravelveiculos/" target="_blank" rel="noopener" class="contato-item">
+          <div class="contato-icon"><i class="fa-brands fa-instagram"></i></div>
+          <div class="contato-text">
+            <div class="contato-label">Instagram</div>
+            <div class="contato-value">@bravelveiculos</div>
+          </div>
+        </a>
+
+        <div class="contato-item">
+          <div class="contato-icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="contato-text">
+            <div class="contato-label">Horário de Atendimento</div>
+            <div class="contato-value">Seg–Sex: 8h às 18h<br>Sáb: 8h às 13h</div>
+          </div>
+        </div>
+
+        <div class="contato-ctas">
+          <a href="https://wa.me/556696400156?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20mais%20informações." target="_blank" class="btn btn-whatsapp-big">
+            <i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp
+          </a>
+          <a href="https://www.google.com/maps/search/?api=1&query=Avenida+Amazonas+45+Primavera+do+Leste+MT" target="_blank" class="btn btn-outline-dark">
+            <i class="fa-solid fa-map-location-dot"></i> Ver no Mapa
+          </a>
+        </div>
+      </div>
+
+      <div class="contato-map anim-right">
+        <iframe
+          src="https://maps.google.com/maps?q=Avenida+Amazonas,+45,+Primavera+II,+Primavera+do+Leste,+MT,+Brasil&output=embed&hl=pt-BR&z=16"
+          title="Localização Bravel Veículos"
+          allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer>
+    <div class="footer-grid container">
+      <div class="footer-brand">
+        <img src="site/bravel-logo.png" alt="Bravel Veículos" class="footer-logo-img">
+        <p>Sua loja de confiança em Primavera do Leste. Seminovos revisados, atendimento transparente e os melhores preços do Mato Grosso.</p>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/bravelveiculos/" target="_blank" class="social-btn" aria-label="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://wa.me/556696400156" target="_blank" class="social-btn" aria-label="WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="#estoque">Estoque</a></li>
+          <li><a href="#sobre">Sobre nós</a></li>
+          <li><a href="#servicos">Serviços</a></li>
+          <li><a href="#contato">Contato</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Serviços</h4>
+        <ul>
+          <li><a href="#servicos">Compra de Veículos</a></li>
+          <li><a href="#servicos">Venda de Seminovos</a></li>
+          <li><a href="#servicos">Troca / Permuta</a></li>
+          <li><a href="#servicos">Financiamento</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom container">
+      <p>© 2025 Bravel Veículos — Todos os direitos reservados.</p>
+      <p>Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</p>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true">
+    <button class="lb-close" id="lbClose" aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Próxima"><i class="fa-solid fa-chevron-right"></i></button>
+    <div class="lb-img-wrap"><img src="" id="lbImg" alt="Foto do veículo"></div>
+    <div class="lb-counter" id="lbCounter"></div>
+  </div>
+
+  <!-- WhatsApp flutuante -->
+  <a href="https://wa.me/556696400156?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20mais%20informações." target="_blank" class="whatsapp-float" aria-label="Chamar no WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script src="vehicles.js"></script>
+  <script>
+    // ─── Helpers ─────────────────────────────────────────────────────────────
+    const wppMsg = v => encodeURIComponent(`Olá! Vi no site da Bravel Veículos e tenho interesse no ${v.model} ${v.year} por ${fmtPrice(v.price)}. Ainda está disponível?`);
+
+    // ─── Render cards ─────────────────────────────────────────────────────────
+    function renderCars(list) {
+      const grid = document.getElementById('carsGrid');
+      const none = document.getElementById('noResults');
+
+      if (!list.length) {
+        grid.innerHTML = '';
+        none.classList.remove('hidden');
+        return;
+      }
+      none.classList.add('hidden');
+
+      grid.innerHTML = list.map((v, i) => {
+        const photos = v.photos || [];
+        const photoHtml = photos.map((p, pi) =>
+          `<img src="${p}" class="car-gallery-img${pi===0?' active':''}" alt="${v.model}" loading="lazy" onerror="this.style.display='none'">`
+        ).join('');
+        const navHtml = photos.length > 1 ? `
+          <button class="gallery-nav gallery-prev" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="gallery-nav gallery-next" aria-label="Próxima"><i class="fa-solid fa-chevron-right"></i></button>
+          <div class="gallery-dots">${photos.map((_,pi)=>`<span class="dot${pi===0?' active':''}"></span>`).join('')}</div>
+        ` : '';
+        const photosAttr = photos.length ? `data-photos='${JSON.stringify(photos)}'` : '';
+        const total = String(photos.length).padStart(2,'0');
+        const galleryOverlay = photos.length ? `
+          <div class="gallery-counter">01 / ${total}</div>
+          <button class="gallery-ampliar"><i class="fa-solid fa-expand"></i> AMPLIAR</button>
+        ` : '';
+        return `
+          <article class="car-card" data-type="${v.type}" data-price="${v.price}" data-id="${v.id}" style="--delay:${i * 0.07}s;cursor:pointer">
+            <div class="car-gallery" style="background:${v.gradient}" ${photosAttr}>
+              <div class="car-gallery-fallback"><span class="car-emoji-icon">${v.emoji}</span></div>
+              ${photoHtml}
+              ${galleryOverlay}
+              ${navHtml}
+              ${v.badge ? `<span class="car-badge">${v.badge}</span>` : ''}
+            </div>
+            <div class="car-body">
+              <h3 class="car-model">${v.model}</h3>
+              <p class="car-version">${v.version}</p>
+              <div class="car-specs">
+                <span class="car-spec"><i class="fa-solid fa-calendar-days"></i> ${v.year}</span>
+                <span class="car-spec"><i class="fa-solid fa-gauge-high"></i> ${v.km}</span>
+                <span class="car-spec"><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
+              </div>
+              <div class="car-price-row">
+                <div class="car-price">${fmtPrice(v.price)}</div>
+                <span class="car-transmission"><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
+              </div>
+              <a href="veiculo.html?id=${v.id}" class="btn-ver-detalhes">
+                Ver detalhes <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      setTimeout(observeCards, 30);
+    }
+
+// ─── Gallery navigation ───────────────────────────────────────────────────
+    function galleryUpdateCounter(gallery, curr, total) {
+      const counter = gallery.querySelector('.gallery-counter');
+      if (counter) counter.textContent = `${String(curr+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
+    }
+
+    document.getElementById('carsGrid').addEventListener('click', e => {
+      // Setas de navegação — tratadas primeiro para não navegar
+      const navBtn = e.target.closest('.gallery-prev, .gallery-next');
+      if (navBtn) {
+        const gallery = navBtn.closest('.car-gallery');
+        const imgs = [...gallery.querySelectorAll('.car-gallery-img')].filter(img => img.style.display !== 'none');
+        const dots = [...gallery.querySelectorAll('.dot')];
+        if (imgs.length < 2) return;
+        let curr = imgs.findIndex(img => img.classList.contains('active'));
+        if (curr === -1) curr = 0;
+        const prevIdx = curr;
+        curr = navBtn.classList.contains('gallery-prev') ? (curr - 1 + imgs.length) % imgs.length : (curr + 1) % imgs.length;
+        imgs[curr].classList.add('active');
+        if (dots[prevIdx]) dots[prevIdx].classList.remove('active');
+        if (dots[curr]) dots[curr].classList.add('active');
+        galleryUpdateCounter(gallery, curr, imgs.length);
+        setTimeout(() => imgs[prevIdx].classList.remove('active'), 420);
+        return;
+      }
+      // Botão AMPLIAR
+      const ampliarBtn = e.target.closest('.gallery-ampliar');
+      if (ampliarBtn) {
+        const gallery = ampliarBtn.closest('.car-gallery');
+        const photos = JSON.parse(gallery.dataset.photos || '[]');
+        const imgs = [...gallery.querySelectorAll('.car-gallery-img')].filter(img => img.style.display !== 'none');
+        const curr = imgs.findIndex(img => img.classList.contains('active'));
+        openLightbox(photos, Math.max(0, curr));
+        return;
+      }
+      // Clique direto na foto ativa → lightbox
+      const clickedImg = e.target.closest('.car-gallery-img');
+      if (clickedImg && clickedImg.classList.contains('active') && clickedImg.style.display !== 'none') {
+        const gallery = clickedImg.closest('.car-gallery');
+        const photos = JSON.parse(gallery.dataset.photos || '[]');
+        if (!photos.length) return;
+        const loadedImgs = [...gallery.querySelectorAll('.car-gallery-img')].filter(img => img.style.display !== 'none');
+        openLightbox(photos, Math.max(0, loadedImgs.indexOf(clickedImg)));
+        return;
+      }
+      // Botão WhatsApp — deixa o <a> funcionar normalmente
+      if (e.target.closest('.btn-ver-detalhes')) return;
+      // Qualquer outra área do card → página do veículo
+      const card = e.target.closest('.car-card');
+      if (card) window.location.href = `veiculo.html?id=${card.dataset.id}`;
+    });
+
+    // ─── Lightbox ─────────────────────────────────────────────────────────────
+    let lbPhotos = [], lbIdx = 0;
+
+    function openLightbox(photos, idx) {
+      lbPhotos = photos; lbIdx = idx;
+      updateLightbox();
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function updateLightbox() {
+      document.getElementById('lbImg').src = lbPhotos[lbIdx];
+      document.getElementById('lbCounter').textContent = lbPhotos.length > 1 ? `${lbIdx + 1} / ${lbPhotos.length}` : '';
+      document.getElementById('lbPrev').style.display = lbPhotos.length < 2 ? 'none' : '';
+      document.getElementById('lbNext').style.display = lbPhotos.length < 2 ? 'none' : '';
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('lbClose').addEventListener('click', closeLightbox);
+    document.getElementById('lightbox').addEventListener('click', e => { if (e.target.id === 'lightbox') closeLightbox(); });
+    document.getElementById('lbPrev').addEventListener('click', e => { e.stopPropagation(); lbIdx = (lbIdx - 1 + lbPhotos.length) % lbPhotos.length; updateLightbox(); });
+    document.getElementById('lbNext').addEventListener('click', e => { e.stopPropagation(); lbIdx = (lbIdx + 1) % lbPhotos.length; updateLightbox(); });
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') { lbIdx = (lbIdx - 1 + lbPhotos.length) % lbPhotos.length; updateLightbox(); }
+      if (e.key === 'ArrowRight') { lbIdx = (lbIdx + 1) % lbPhotos.length; updateLightbox(); }
+    });
+
+    // ─── Intersection Observer (cards + animações de seção) ───────────────────
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+
+    function observeCards() {
+      document.querySelectorAll('.car-card, .service-card, .sobre-stat').forEach(el => observer.observe(el));
+    }
+
+    // Observer para classes anim-up / anim-left / anim-right
+    const animObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          animObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.anim-up, .anim-left, .anim-right').forEach(el => animObserver.observe(el));
+
+
+    // ─── Header scroll ────────────────────────────────────────────────────────
+    const headerEl = document.getElementById('header');
+    window.addEventListener('scroll', () => headerEl.classList.toggle('scrolled', scrollY > 60), { passive: true });
+
+    // ─── Menu mobile ─────────────────────────────────────────────────────────
+    const menuDots   = document.getElementById('menuDots');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    menuDots.addEventListener('click', e => {
+      e.stopPropagation();
+      mobileMenu.classList.toggle('open');
+      menuDots.classList.toggle('active');
+    });
+    document.querySelectorAll('.mobile-link, .mobile-whatsapp, .mobile-location').forEach(l => l.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
+      menuDots.classList.remove('active');
+    }));
+    document.addEventListener('click', e => {
+      if (!menuDots.contains(e.target) && !mobileMenu.contains(e.target)) {
+        mobileMenu.classList.remove('open');
+        menuDots.classList.remove('active');
+      }
+    });
+
+    // ─── Smooth scroll ────────────────────────────────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const t = document.querySelector(a.getAttribute('href'));
+        if (t) { e.preventDefault(); t.scrollIntoView({ behavior:'smooth', block:'start' }); }
+      });
+    });
+
+    // ─── Carrossel ────────────────────────────────────────────────────────────
+    function initCarousel() {
+      const viewport = document.getElementById('carouselViewport');
+      const track    = document.getElementById('carsGrid');
+      const prevBtn  = document.getElementById('carouselPrev');
+      const nextBtn  = document.getElementById('carouselNext');
+      const dotsWrap = document.getElementById('carouselDots');
+      if (!viewport || !track) return;
+
+      const GAP = 24;
+
+      function getPerPage() {
+        const vw = viewport.offsetWidth;
+        return vw >= 860 ? 2 : 1;
+      }
+
+      function sizeCards() {
+        const perPage = getPerPage();
+        const vw = viewport.offsetWidth;
+        const cardW = perPage === 1
+          ? vw * 0.85
+          : (vw - GAP * (perPage - 1)) / perPage;
+        track.querySelectorAll('.car-card').forEach(c => { c.style.width = cardW + 'px'; });
+        return cardW;
+      }
+
+      function totalPages() {
+        return Math.ceil(track.querySelectorAll('.car-card').length / getPerPage());
+      }
+
+      function currentPage() {
+        const cardW = sizeCards();
+        const pageW = getPerPage() * (cardW + GAP);
+        return Math.round(viewport.scrollLeft / pageW);
+      }
+
+      function scrollToPage(page) {
+        const cardW = sizeCards();
+        const pageW = getPerPage() * (cardW + GAP);
+        viewport.scrollTo({ left: page * pageW, behavior: 'smooth' });
+      }
+
+      function buildDots() {
+        dotsWrap.innerHTML = '';
+        for (let i = 0; i < totalPages(); i++) {
+          const d = document.createElement('button');
+          d.className = 'carousel-dot';
+          d.setAttribute('aria-label', `Página ${i + 1}`);
+          d.addEventListener('click', () => scrollToPage(i));
+          dotsWrap.appendChild(d);
+        }
+      }
+
+      function updateUI() {
+        const page  = currentPage();
+        const total = totalPages();
+        dotsWrap.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === page));
+        prevBtn.disabled = page === 0;
+        nextBtn.disabled = page >= total - 1;
+      }
+
+      prevBtn.addEventListener('click', () => scrollToPage(Math.max(0, currentPage() - 1)));
+      nextBtn.addEventListener('click', () => scrollToPage(Math.min(totalPages() - 1, currentPage() + 1)));
+      viewport.addEventListener('scroll', updateUI, { passive: true });
+      window.addEventListener('resize', () => { sizeCards(); buildDots(); updateUI(); });
+
+      sizeCards();
+      buildDots();
+      updateUI();
+    }
+
+    // ─── Init ────────────────────────────────────────────────────────────────
+    renderCars(BRAVEL_VEHICLES.filter(v => [0, 4, 5].includes(v.id)));
+    initCarousel();
+    observeCards();
+  </script>
+</body>
+</html>
