@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=20260616e">
+  <link rel="stylesheet" href="styles.css?v=20260616f">
 </head>
 <body>
 
@@ -150,7 +150,11 @@
             <i class="fa-solid fa-chevron-right"></i>
           </button>
         </div>
-        <div class="carousel-dots" id="carouselDots"></div>
+        <div class="carousel-footer">
+          <button class="carousel-mobile-btn" id="carouselPrevMob" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="carousel-dots" id="carouselDots"></div>
+          <button class="carousel-mobile-btn" id="carouselNextMob" aria-label="Próxima"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
       </div>
       <div class="no-results hidden" id="noResults">
         <i class="fa-solid fa-car-burst"></i>
@@ -836,6 +840,10 @@
 
       prevBtn.addEventListener('click', () => scrollToPage(Math.max(0, currentPage() - 1)));
       nextBtn.addEventListener('click', () => scrollToPage(Math.min(totalPages() - 1, currentPage() + 1)));
+      const prevMob = document.getElementById('carouselPrevMob');
+      const nextMob = document.getElementById('carouselNextMob');
+      prevMob?.addEventListener('click', () => scrollToPage(Math.max(0, currentPage() - 1)));
+      nextMob?.addEventListener('click', () => scrollToPage(Math.min(totalPages() - 1, currentPage() + 1)));
       viewport.addEventListener('scroll', updateUI, { passive: true });
       window.addEventListener('resize', () => { sizeCards(); buildDots(); updateUI(); });
 

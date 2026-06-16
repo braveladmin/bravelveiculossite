@@ -601,9 +601,15 @@ ul { list-style: none; }
 .carousel-prev { left: 0.5rem; }
 .carousel-next { right: 0.5rem; }
 
+.carousel-footer {
+  display: flex; justify-content: center; align-items: center;
+  gap: 0.75rem; margin-top: 1.25rem;
+}
+.carousel-mobile-btn {
+  display: none;
+}
 .carousel-dots {
   display: flex; justify-content: center; align-items: center; gap: 0.4rem;
-  margin-top: 1.25rem;
 }
 .carousel-dot {
   width: 7px; height: 7px; border-radius: 50%;
@@ -1462,9 +1468,16 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   /* Destaque carousel — mobile otimizado */
   .destaque-badge-wrap { margin-bottom: 1rem; }
   .carousel-wrap { margin-top: 1rem; margin-left: -1.5rem; margin-right: -1.5rem; }
-  .carousel-btn { opacity: 0.75; }
-  .carousel-prev { left: 0.6rem; }
-  .carousel-next { right: 0.6rem; }
+  .carousel-btn { display: none; }
+  .carousel-mobile-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.7); cursor: pointer; font-size: 0.7rem;
+    transition: background 0.2s; flex-shrink: 0;
+  }
+  .carousel-mobile-btn:active { background: rgba(255,255,255,0.16); }
 
   .trust-bar   { gap: 0.5rem; padding: 0.7rem 1.25rem; }
   .trust-item  { font-size: 0.8rem; padding: 0 0.75rem; }
