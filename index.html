@@ -7,9 +7,10 @@
   <title>Bravel Veículos | Primavera do Leste - MT</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=20260616f">
+  <link rel="stylesheet" href="styles.css?v=20260616g">
 </head>
 <body>
 
@@ -24,6 +25,7 @@
 
       <ul class="nav-links">
         <li><a href="estoque.html">Estoque</a></li>
+        <li><a href="vender.html">Vender meu veículo</a></li>
         <li><a href="#sobre">Sobre</a></li>
         <li><a href="#servicos">Serviços</a></li>
         <li><a href="#contato">Contato</a></li>
@@ -42,6 +44,7 @@
     <div class="mobile-menu" id="mobileMenu">
       <ul>
         <li><a href="estoque.html" class="mobile-link">Estoque</a></li>
+        <li><a href="vender.html" class="mobile-link">Vender meu veículo</a></li>
         <li><a href="#sobre" class="mobile-link">Sobre</a></li>
         <li><a href="#servicos" class="mobile-link">Serviços</a></li>
         <li><a href="#contato" class="mobile-link">Contato</a></li>
@@ -65,7 +68,7 @@
   <section id="hero">
     <!-- Logo como imagem de fundo com overlay -->
     <div class="hero-bg-logo-wrap" aria-hidden="true">
-      <img src="site/fachada-bravel.jpg" alt="" class="hero-bg-logo-img">
+      <img src="site/fachada-bravel.jpg" alt="" class="hero-bg-logo-img" fetchpriority="high">
     </div>
     <div class="hero-bg-grid"></div>
     <div class="hero-bg-glow"></div>
@@ -131,7 +134,7 @@
         <div class="estoque-title-row">
           <h2 class="estoque-title">Encontre seu <span class="title-accent">próximo veículo.</span></h2>
         </div>
-        <p class="estoque-subtitle">Toque em qualquer veículo para abrir o chat e tirar dúvidas na hora.</p>
+        <p class="estoque-subtitle">Selecione um veículo e veja todos os detalhes, fotos e condições de financiamento.</p>
       </div>
 
 <div class="destaque-badge-wrap anim-up">
@@ -261,7 +264,7 @@
 
         <article class="av-card anim-up">
           <div class="av-card-head">
-            <img src="site/avaliações/shara-nascimento.png" class="av-avatar" alt="Shara Nascimento">
+            <img src="site/avaliações/shara-nascimento.png" class="av-avatar" alt="Shara Nascimento" loading="lazy">
             <div class="av-card-meta">
               <div class="av-reviewer-name">Shara Nascimento <i class="fa-solid fa-circle-check av-check"></i></div>
               <div class="av-reviewer-sub">Local Guide · 18 avaliações</div>
@@ -280,7 +283,7 @@
 
         <article class="av-card anim-up">
           <div class="av-card-head">
-            <img src="site/avaliações/joao-andrade.png" class="av-avatar" alt="Joao Andrade">
+            <img src="site/avaliações/joao-andrade.png" class="av-avatar" alt="Joao Andrade" loading="lazy">
             <div class="av-card-meta">
               <div class="av-reviewer-name">Joao Andrade <i class="fa-solid fa-circle-check av-check"></i></div>
               <div class="av-reviewer-sub">2 avaliações · 6 fotos</div>
@@ -299,7 +302,7 @@
 
         <article class="av-card anim-up">
           <div class="av-card-head">
-            <img src="site/avaliações/vitor-pascheco.png" class="av-avatar" alt="Victor Pacheco">
+            <img src="site/avaliações/vitor-pascheco.png" class="av-avatar" alt="Victor Pacheco" loading="lazy">
             <div class="av-card-meta">
               <div class="av-reviewer-name">Victor Pacheco <i class="fa-solid fa-circle-check av-check"></i></div>
               <div class="av-reviewer-sub">Local Guide · 5 avaliações</div>
@@ -845,7 +848,11 @@
       prevMob?.addEventListener('click', () => scrollToPage(Math.max(0, currentPage() - 1)));
       nextMob?.addEventListener('click', () => scrollToPage(Math.min(totalPages() - 1, currentPage() + 1)));
       viewport.addEventListener('scroll', updateUI, { passive: true });
-      window.addEventListener('resize', () => { sizeCards(); buildDots(); updateUI(); });
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => { sizeCards(); buildDots(); updateUI(); }, 150);
+      });
 
       sizeCards();
       buildDots();
