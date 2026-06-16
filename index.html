@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=20260611j">
+  <link rel="stylesheet" href="styles.css?v=20260616d">
 </head>
 <body>
 
@@ -253,21 +253,21 @@
         </a>
       </div>
 
-      <div class="av-grid">
+      <div class="av-grid" id="avGrid">
 
         <article class="av-card anim-up">
           <div class="av-card-head">
-            <div class="av-avatar" style="background:#3a86ff">RS</div>
+            <img src="site/avaliações/shara-nascimento.png" class="av-avatar" alt="Shara Nascimento">
             <div class="av-card-meta">
-              <div class="av-reviewer-name">Rafael Santiago <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-reviewer-name">Shara Nascimento <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-reviewer-sub">Local Guide · 18 avaliações</div>
               <div class="av-rating">
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <span class="av-time">há 4 meses</span>
               </div>
             </div>
             <img src="site/google-g.svg" class="av-card-g" alt="Google">
           </div>
-          <p class="av-card-text">Melhor loja da região!! Atendimento diferenciado</p>
+          <p class="av-card-text">A Bravel realiza sonhos, uma empresa de sucesso sem dúvidas, super indico! O time Bravel tem pessoas excepcionais e de confiança!</p>
           <div class="av-card-foot">
             <span class="av-verified-tag"><i class="fa-solid fa-circle-check"></i> VERIFICADO</span>
             <a href="https://www.google.com/search?q=bravel+veiculos+primavera+do+leste" target="_blank" rel="noopener" class="av-ver-google"><img src="site/google-g.svg" class="av-g-sm" alt="Google"> Ver no Google →</a>
@@ -276,17 +276,17 @@
 
         <article class="av-card anim-up">
           <div class="av-card-head">
-            <div class="av-avatar" style="background:#cc1111">AB</div>
+            <img src="site/avaliações/joao-andrade.png" class="av-avatar" alt="Joao Andrade">
             <div class="av-card-meta">
-              <div class="av-reviewer-name">Aline Barroso <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-reviewer-name">Joao Andrade <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-reviewer-sub">2 avaliações · 6 fotos</div>
               <div class="av-rating">
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <span class="av-time">há 2 anos</span>
               </div>
             </div>
             <img src="site/google-g.svg" class="av-card-g" alt="Google">
           </div>
-          <p class="av-card-text">Melhor revendedora da cidade. Recomendo</p>
+          <p class="av-card-text">Atendimento personalizado, a equipe super atenciosa. A melhor loja de Primavera e região sem dúvidas!</p>
           <div class="av-card-foot">
             <span class="av-verified-tag"><i class="fa-solid fa-circle-check"></i> VERIFICADO</span>
             <a href="https://www.google.com/search?q=bravel+veiculos+primavera+do+leste" target="_blank" rel="noopener" class="av-ver-google"><img src="site/google-g.svg" class="av-g-sm" alt="Google"> Ver no Google →</a>
@@ -295,23 +295,33 @@
 
         <article class="av-card anim-up">
           <div class="av-card-head">
-            <div class="av-avatar" style="background:#2d9d5f">CM</div>
+            <img src="site/avaliações/vitor-pascheco.png" class="av-avatar" alt="Victor Pacheco">
             <div class="av-card-meta">
-              <div class="av-reviewer-name">Claudionor Moura <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-reviewer-name">Victor Pacheco <i class="fa-solid fa-circle-check av-check"></i></div>
+              <div class="av-reviewer-sub">Local Guide · 5 avaliações</div>
               <div class="av-rating">
                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                <span class="av-time">há 2 anos</span>
               </div>
             </div>
             <img src="site/google-g.svg" class="av-card-g" alt="Google">
           </div>
-          <p class="av-card-text" style="font-style:italic">Recomendou a Bravel Veículos com 5 estrelas no Google.</p>
+          <p class="av-card-text">Todos da Bravel estão de Parabéns</p>
           <div class="av-card-foot">
             <span class="av-verified-tag"><i class="fa-solid fa-circle-check"></i> VERIFICADO</span>
             <a href="https://www.google.com/search?q=bravel+veiculos+primavera+do+leste" target="_blank" rel="noopener" class="av-ver-google"><img src="site/google-g.svg" class="av-g-sm" alt="Google"> Ver no Google →</a>
           </div>
         </article>
 
+      </div>
+
+      <div class="av-rev-controls">
+        <button class="av-arrow" id="avPrev" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="av-rev-dots" id="avRevDots">
+          <span class="av-rev-dot av-rev-dot-active"></span>
+          <span class="av-rev-dot"></span>
+          <span class="av-rev-dot"></span>
+        </div>
+        <button class="av-arrow" id="avNext" aria-label="Próximo"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
 
     </div>
@@ -475,7 +485,7 @@
 
     <div class="footer-bottom container">
       <p>© 2025 Bravel Veículos — Todos os direitos reservados.</p>
-      <p>Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</p>
+      <a href="https://www.google.com/maps/search/?api=1&query=Av.+Amazonas,+45,+Primavera+do+Leste,+MT" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</a>
     </div>
   </footer>
 
@@ -539,20 +549,44 @@
               ${v.badge ? `<span class="car-badge">${v.badge}</span>` : ''}
             </div>
             <div class="car-body">
-              <h3 class="car-model">${v.model}</h3>
-              <p class="car-version">${v.version}</p>
-              <div class="car-specs">
-                <span class="car-spec"><i class="fa-solid fa-calendar-days"></i> ${v.year}</span>
-                <span class="car-spec"><i class="fa-solid fa-gauge-high"></i> ${v.km}</span>
-                <span class="car-spec"><i class="fa-solid fa-gas-pump"></i> ${v.fuel}</span>
+              <h3 class="car-name">${v.model}</h3>
+              <div class="car-tags">
+                <span>${v.year}</span>
+                <span>${v.km}</span>
+                <span>${v.transmission}</span>
+                <span>${v.fuel}</span>
               </div>
-              <div class="car-price-row">
-                <div class="car-price">${fmtPrice(v.price)}</div>
-                <span class="car-transmission"><i class="fa-solid fa-gears"></i> ${v.transmission}</span>
+              <div class="car-price-block">
+                <div class="car-price-bar"></div>
+                <div class="car-price-glow"></div>
+                <div class="car-price-content">
+                  <div class="car-pv-label">VALOR À VISTA</div>
+                  <div class="car-pv-value">${fmtPrice(v.price)}</div>
+                  <div class="car-conditions">
+                    <span class="car-cond"><span class="cond-dot"></span>ACEITA TROCA</span>
+                    <span class="car-cond"><span class="cond-dot"></span>FINANCIAMENTO</span>
+                  </div>
+                </div>
               </div>
-              <a href="veiculo.html?id=${v.id}" class="btn-ver-detalhes">
-                Ver detalhes <i class="fa-solid fa-arrow-right"></i>
-              </a>
+              <div class="car-ctas">
+                <a href="https://wa.me/${BRAVEL_WPP}?text=${wppMsg(v)}" target="_blank" class="car-btn-wpp" onclick="event.stopPropagation()">
+                  <i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp
+                </a>
+                <a href="veiculo.html?id=${v.id}" class="car-btn-detalhes" onclick="event.stopPropagation()">
+                  <i class="fa-solid fa-circle-info"></i> Mais informações
+                </a>
+              </div>
+              <div class="car-mobile-info">
+                <div class="car-mi-left">
+                  <span class="car-mi-brand">${v.brand}</span>
+                  <span class="car-mi-model">${v.model}</span>
+                  <span class="car-mi-specs">${v.year} · ${v.km} · ${v.transmission}</span>
+                </div>
+                <div class="car-mi-right">
+                  <span class="car-mi-price">${fmtPrice(v.price)}</span>
+                  <span class="car-mi-link">Detalhes <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+              </div>
             </div>
           </article>
         `;
@@ -697,6 +731,48 @@
       });
     });
 
+    // ─── Carrossel de avaliações (mobile) ────────────────────────────────────
+    (function () {
+      const grid    = document.getElementById('avGrid');
+      const dots    = document.querySelectorAll('#avRevDots .av-rev-dot');
+      const prevBtn = document.getElementById('avPrev');
+      const nextBtn = document.getElementById('avNext');
+      if (!grid) return;
+
+      const cards = grid.querySelectorAll('.av-card');
+      const total = cards.length;
+      let cur = 0;
+
+      function cardW() {
+        const gap = parseFloat(getComputedStyle(grid).gap) || 12;
+        return cards[0].offsetWidth + gap;
+      }
+
+      function goTo(idx) {
+        cur = Math.max(0, Math.min(total - 1, idx));
+        grid.scrollTo({ left: cur * cardW(), behavior: 'smooth' });
+        dots.forEach((d, i) => d.classList.toggle('av-rev-dot-active', i === cur));
+      }
+
+      prevBtn?.addEventListener('click', () => goTo(cur - 1));
+      nextBtn?.addEventListener('click', () => goTo(cur + 1));
+
+      grid.addEventListener('scroll', () => {
+        const idx = Math.min(total - 1, Math.round(grid.scrollLeft / cardW()));
+        if (idx !== cur) {
+          cur = idx;
+          dots.forEach((d, i) => d.classList.toggle('av-rev-dot-active', i === cur));
+        }
+      }, { passive: true });
+
+      let tx = 0;
+      grid.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+      grid.addEventListener('touchend', e => {
+        const dx = tx - e.changedTouches[0].clientX;
+        if (Math.abs(dx) > 35) goTo(cur + (dx > 0 ? 1 : -1));
+      }, { passive: true });
+    })();
+
     // ─── Carrossel ────────────────────────────────────────────────────────────
     function initCarousel() {
       const viewport = document.getElementById('carouselViewport');
@@ -710,14 +786,14 @@
 
       function getPerPage() {
         const vw = viewport.offsetWidth;
-        return vw >= 860 ? 2 : 1;
+        return vw >= 1024 ? 3 : vw >= 640 ? 2 : 1;
       }
 
       function sizeCards() {
         const perPage = getPerPage();
         const vw = viewport.offsetWidth;
         const cardW = perPage === 1
-          ? vw * 0.85
+          ? vw * 0.93
           : (vw - GAP * (perPage - 1)) / perPage;
         track.querySelectorAll('.car-card').forEach(c => { c.style.width = cardW + 'px'; });
         return cardW;
@@ -769,7 +845,7 @@
     }
 
     // ─── Init ────────────────────────────────────────────────────────────────
-    renderCars(BRAVEL_VEHICLES.filter(v => [0, 4, 5].includes(v.id)));
+    renderCars(BRAVEL_VEHICLES);
     initCarousel();
     observeCards();
   </script>

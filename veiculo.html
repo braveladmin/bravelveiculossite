@@ -7,16 +7,16 @@
   <meta name="description" id="metaDesc" content="Detalhes do veículo — Bravel Veículos">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@600;700&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="veiculo.css?v=2">
+  <link rel="stylesheet" href="veiculo.css?v=3">
 </head>
 <body>
 
   <!-- HEADER -->
   <header class="vp-header">
     <div class="vp-header-inner">
-      <a href="index.html#estoque" class="vp-back">
+      <a href="estoque.html" class="vp-back" id="vpBack">
         <i class="fa-solid fa-chevron-left"></i>
         <span>Voltar ao estoque</span>
       </a>
@@ -65,12 +65,20 @@
             <p class="vp-version" id="vpVersion"></p>
           </div>
 
-          <div class="vp-price-block" style="animation:fadeUp 0.5s ease 0.42s both">
-            <div class="vp-price" id="vpPrice"></div>
-            <div class="vp-price-note">à vista ou financiado</div>
-          </div>
+          <div class="vp-quick-specs" id="vpQuickSpecs" style="animation:fadeUp 0.5s ease 0.42s both"></div>
 
-          <div class="vp-quick-specs" id="vpQuickSpecs" style="animation:fadeUp 0.5s ease 0.52s both"></div>
+          <div class="vp-price-block" style="animation:fadeUp 0.5s ease 0.52s both">
+            <div class="vp-price-bar"></div>
+            <div class="vp-price-glow"></div>
+            <div class="vp-price-content">
+              <div class="vp-price-label">VALOR À VISTA</div>
+              <div class="vp-price" id="vpPrice"></div>
+              <div class="vp-price-badges">
+                <span class="vp-price-badge"><span class="vp-badge-dot"></span>ACEITA TROCA</span>
+                <span class="vp-price-badge"><span class="vp-badge-dot"></span>FINANCIAMENTO</span>
+              </div>
+            </div>
+          </div>
 
           <a href="#" class="vp-cta-wpp" id="vpCta1" style="animation:fadeUp 0.5s ease 0.62s both">
             <i class="fa-brands fa-whatsapp"></i>
@@ -83,14 +91,40 @@
             <span><i class="fa-solid fa-right-left"></i> Aceita troca</span>
             <span><i class="fa-regular fa-clock"></i> Proposta na hora</span>
           </div>
+
+          <a href="index.html#estoque" class="vp-btn-estoque" style="animation:fadeUp 0.5s ease 0.82s both">
+            <i class="fa-solid fa-arrow-right"></i>
+            Ver outros veículos
+          </a>
         </div>
 
       </div><!-- /vp-top-block -->
 
-      <!-- CARACTERÍSTICAS -->
-      <section class="vp-section anim-up">
-        <h2 class="vp-section-title">Características</h2>
-        <div class="vp-chars-grid" id="vpCharsGrid"></div>
+      <!-- DIFERENCIAIS -->
+      <section class="vp-section anim-up vp-trust-section">
+        <div class="vp-trust-grid">
+          <div class="vp-trust-card">
+            <i class="fa-solid fa-shield-halved vp-trust-icon"></i>
+            <div>
+              <div class="vp-trust-heading">Garantia</div>
+              <p class="vp-trust-desc">Procedência verificada e revisão antes da entrega.</p>
+            </div>
+          </div>
+          <div class="vp-trust-card">
+            <i class="fa-solid fa-right-left vp-trust-icon"></i>
+            <div>
+              <div class="vp-trust-heading">Aceita troca</div>
+              <p class="vp-trust-desc">Avaliamos seu carro como parte do pagamento.</p>
+            </div>
+          </div>
+          <div class="vp-trust-card">
+            <i class="fa-solid fa-credit-card vp-trust-icon"></i>
+            <div>
+              <div class="vp-trust-heading">Financiamento</div>
+              <p class="vp-trust-desc">Parcelamos com as melhores condições do mercado.</p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- OPCIONAIS -->
@@ -128,6 +162,11 @@
         <div class="vp-finance-body" id="vpFinanceBody">
         <p class="vp-finance-sub">Preencha os dados abaixo e envie uma simulação direto para o WhatsApp do vendedor.</p>
 
+        <div class="vp-finance-notice">
+          <i class="fa-solid fa-lock"></i>
+          <span>Seus dados são confidenciais e enviados <strong>somente para a loja</strong> via WhatsApp. Não armazenamos nenhuma informação.</span>
+        </div>
+
         <div class="vp-finance-form">
 
           <!-- Entrada -->
@@ -152,6 +191,7 @@
           <div class="vp-finance-field">
             <label>Quantidade de parcelas desejada</label>
             <div class="vp-parcelas-wrap" id="parcelasWrap">
+              <button class="vp-parcela-btn" type="button" data-p="12">12x</button>
               <button class="vp-parcela-btn" type="button" data-p="24">24x</button>
               <button class="vp-parcela-btn" type="button" data-p="36">36x</button>
               <button class="vp-parcela-btn" type="button" data-p="48">48x</button>
@@ -168,9 +208,45 @@
             </div>
           </div>
 
-          <!-- CPF -->
+          <!-- Nome / Razão Social -->
           <div class="vp-finance-field" style="grid-column: 1 / -1">
-            <label>CPF <span class="vp-cpf-safe"><i class="fa-solid fa-lock"></i> Seus dados são enviados apenas ao vendedor, via WhatsApp</span></label>
+            <label id="finNomeLabel">Nome completo</label>
+            <div class="vp-finance-input-wrap">
+              <span><i class="fa-solid fa-user"></i></span>
+              <input type="text" id="finNome" placeholder="Seu nome completo" autocomplete="off">
+            </div>
+          </div>
+
+          <!-- Telefone -->
+          <div class="vp-finance-field">
+            <label>Telefone / WhatsApp</label>
+            <div class="vp-finance-input-wrap">
+              <span><i class="fa-solid fa-phone"></i></span>
+              <input type="text" id="finTelefone" placeholder="(00) 00000-0000" inputmode="numeric" maxlength="15" autocomplete="off">
+            </div>
+          </div>
+
+          <!-- Data de nascimento -->
+          <div class="vp-finance-field">
+            <label>Data de nascimento</label>
+            <div class="vp-finance-input-wrap">
+              <span><i class="fa-solid fa-cake-candles"></i></span>
+              <input type="text" id="finNascimento" placeholder="DD/MM/AAAA" inputmode="numeric" maxlength="10" autocomplete="off">
+            </div>
+          </div>
+
+          <!-- Tipo de documento -->
+          <div class="vp-finance-field" style="grid-column: 1 / -1">
+            <label>Tipo de documento</label>
+            <div class="vp-finance-toggle">
+              <button class="vp-toggle-btn active" id="docCpf" type="button">CPF</button>
+              <button class="vp-toggle-btn" id="docCnpj" type="button">CNPJ</button>
+            </div>
+          </div>
+
+          <!-- CPF / CNPJ -->
+          <div class="vp-finance-field" style="grid-column: 1 / -1">
+            <label id="finDocLabel">CPF</label>
             <div class="vp-finance-input-wrap">
               <span><i class="fa-solid fa-id-card"></i></span>
               <input type="text" id="finCpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" autocomplete="off">
@@ -215,7 +291,7 @@
     <div class="vp-mobile-bar-price" id="vpMobilePrice"></div>
     <a href="#" class="vp-mobile-bar-btn" id="vpMobileBtn">
       <i class="fa-brands fa-whatsapp"></i>
-      Chamar no WhatsApp
+      Tenho interesse nesse veículo
     </a>
   </div>
 
@@ -230,7 +306,7 @@
 
   <!-- FOOTER -->
   <footer class="vp-footer">
-    <p>© 2025 Bravel Veículos — Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</p>
+    <p>© 2025 Bravel Veículos — <a href="https://www.google.com/maps/search/?api=1&query=Av.+Amazonas,+45,+Primavera+do+Leste,+MT" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</a></p>
   </footer>
 
   <script src="vehicles.js"></script>
@@ -244,7 +320,7 @@
       document.querySelector('.vp-main').innerHTML =
         '<div style="text-align:center;padding:6rem 1.5rem;color:rgba(255,255,255,0.4)">' +
         '<p style="font-size:1.1rem">Veículo não encontrado.</p><br>' +
-        '<a href="index.html#estoque" style="color:#cc1111;font-weight:700">← Voltar ao estoque</a></div>';
+        '<a href="estoque.html" style="color:#cc1111;font-weight:700">← Voltar ao estoque</a></div>';
       throw new Error('Veículo não encontrado');
     }
 
@@ -358,34 +434,20 @@
 
     // ─── Quick specs ──────────────────────────────────────────────
     const qsItems = [
-      { icon: 'fa-calendar-days', val: v.year },
-      { icon: 'fa-gauge-high',    val: v.km },
-      { icon: 'fa-gears',         val: v.transmission },
-      { icon: 'fa-gas-pump',      val: v.fuel },
-      ...(v.color    ? [{ icon: 'fa-palette',      val: v.color }]    : []),
+      { icon: 'fa-tag',           label: 'VERSÃO',      val: v.version },
+      { icon: 'fa-bolt',          label: 'MOTOR',        val: v.motor || '—' },
+      { icon: 'fa-calendar-days', label: 'ANO',          val: v.year },
+      { icon: 'fa-gauge-high',    label: 'KM',           val: v.km },
+      { icon: 'fa-gears',         label: 'CÂMBIO',       val: v.transmission },
+      { icon: 'fa-gas-pump',      label: 'COMBUSTÍVEL',  val: v.fuel },
+      ...(v.color ? [{ icon: 'fa-palette', label: 'COR', val: v.color }] : []),
     ];
     const qsGrid = document.getElementById('vpQuickSpecs');
-    qsItems.forEach(({ icon, val }) => {
-      qsGrid.innerHTML += `<div class="vp-quick-spec"><i class="fa-solid ${icon}"></i><span>${val}</span></div>`;
-    });
-
-    // ─── Características ──────────────────────────────────────────
-    const chars = [
-      { label:'Ano',           icon:'fa-calendar-days', val: v.year },
-      { label:'Quilometragem', icon:'fa-gauge-high',    val: v.km },
-      { label:'Câmbio',        icon:'fa-gears',         val: v.transmission },
-      { label:'Combustível',   icon:'fa-gas-pump',      val: v.fuel },
-      ...(v.color     ? [{ label:'Cor',             icon:'fa-palette',      val: v.color }]     : []),
-      { label:'Versão',        icon:'fa-tag',           val: v.version },
-      ...(v.plate_end ? [{ label:'Final da placa',  icon:'fa-id-card',      val: v.plate_end }] : []),
-    ];
-    const charsGrid = document.getElementById('vpCharsGrid');
-    chars.forEach(({ label, icon, val }) => {
-      charsGrid.innerHTML += `
-        <div class="vp-char-card">
-          <i class="fa-solid ${icon} vp-char-icon"></i>
-          <div class="vp-char-label">${label}</div>
-          <div class="vp-char-value">${val}</div>
+    qsItems.forEach(({ icon, label, val }) => {
+      qsGrid.innerHTML += `
+        <div class="vp-quick-spec">
+          <div class="vp-qs-top"><i class="fa-solid ${icon}"></i><span class="vp-qs-label">${label}</span></div>
+          <div class="vp-qs-value">${val}</div>
         </div>`;
     });
 
@@ -590,39 +652,114 @@
         input.value = num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       });
     }
-    const finEntradaEl = document.getElementById('finEntrada');
-    const finParcelaEl = document.getElementById('finParcela');
-    const finCpfEl     = document.getElementById('finCpf');
+    const finEntradaEl    = document.getElementById('finEntrada');
+    const finParcelaEl    = document.getElementById('finParcela');
+    const finCpfEl        = document.getElementById('finCpf');
+    const finNomeEl       = document.getElementById('finNome');
+    const finTelefoneEl   = document.getElementById('finTelefone');
+    const finNascimentoEl = document.getElementById('finNascimento');
     maskCurrency(finEntradaEl);
     maskCurrency(finParcelaEl);
 
-    // Máscara CPF
-    finCpfEl.addEventListener('input', () => {
-      let d = finCpfEl.value.replace(/\D/g, '').slice(0, 11);
-      if (d.length > 9)      d = d.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
-      else if (d.length > 6) d = d.replace(/(\d{3})(\d{3})(\d{1,3})/,       '$1.$2.$3');
-      else if (d.length > 3) d = d.replace(/(\d{3})(\d{1,3})/,               '$1.$2');
+    // Toggle CPF / CNPJ
+    let docType = 'CPF';
+    const finDocLabel  = document.getElementById('finDocLabel');
+    const finNomeLabel = document.getElementById('finNomeLabel');
+
+    function applyDocMask() {
+      let d = finCpfEl.value.replace(/\D/g, '');
+      if (docType === 'CPF') {
+        d = d.slice(0, 11);
+        if (d.length > 9)      d = d.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+        else if (d.length > 6) d = d.replace(/(\d{3})(\d{3})(\d{1,3})/,        '$1.$2.$3');
+        else if (d.length > 3) d = d.replace(/(\d{3})(\d{1,3})/,               '$1.$2');
+      } else {
+        d = d.slice(0, 14);
+        if (d.length > 12)     d = d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+        else if (d.length > 8) d = d.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/,        '$1.$2.$3/$4');
+        else if (d.length > 5) d = d.replace(/(\d{2})(\d{3})(\d{1,3})/,               '$1.$2.$3');
+        else if (d.length > 2) d = d.replace(/(\d{2})(\d{1,3})/,                       '$1.$2');
+      }
       finCpfEl.value = d;
+    }
+
+    finCpfEl.addEventListener('input', applyDocMask);
+
+    document.getElementById('docCpf').addEventListener('click', () => {
+      docType = 'CPF';
+      document.getElementById('docCpf').classList.add('active');
+      document.getElementById('docCnpj').classList.remove('active');
+      finDocLabel.textContent = 'CPF';
+      finCpfEl.placeholder = '000.000.000-00';
+      finCpfEl.maxLength = 14;
+      finCpfEl.value = '';
+      finNomeLabel.textContent = 'Nome completo';
+      finNomeEl.placeholder = 'Seu nome completo';
+    });
+
+    document.getElementById('docCnpj').addEventListener('click', () => {
+      docType = 'CNPJ';
+      document.getElementById('docCnpj').classList.add('active');
+      document.getElementById('docCpf').classList.remove('active');
+      finDocLabel.textContent = 'CNPJ';
+      finCpfEl.placeholder = '00.000.000/0000-00';
+      finCpfEl.maxLength = 18;
+      finCpfEl.value = '';
+      finNomeLabel.textContent = 'Razão Social';
+      finNomeEl.placeholder = 'Nome da empresa';
+    });
+
+    // Máscara telefone
+    finTelefoneEl.addEventListener('input', () => {
+      let d = finTelefoneEl.value.replace(/\D/g, '').slice(0, 11);
+      if (d.length > 6) d = d.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+      else if (d.length > 2) d = d.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+      finTelefoneEl.value = d;
+    });
+
+    // Máscara data de nascimento
+    finNascimentoEl.addEventListener('input', () => {
+      let d = finNascimentoEl.value.replace(/\D/g, '').slice(0, 8);
+      if (d.length > 4) d = d.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1/$2/$3');
+      else if (d.length > 2) d = d.replace(/(\d{2})(\d{0,2})/, '$1/$2');
+      finNascimentoEl.value = d;
     });
 
     // Envio para WhatsApp
     document.getElementById('vpFinanceSubmit').addEventListener('click', () => {
+      const nome        = finNomeEl.value.trim() || 'Não informado';
+      const telefone    = finTelefoneEl.value || 'Não informado';
+      const nascimento  = finNascimentoEl.value || 'Não informado';
       const entrada     = finEntradaEl.value ? `R$ ${finEntradaEl.value}` : 'Não informado';
       const valorParc   = finParcelaEl.value ? `R$ ${finParcelaEl.value}` : 'Não informado';
       const qtdParcelas = parcelas ? `${parcelas}x` : 'Não informado';
-      const cpf         = finCpfEl.value || 'Não informado';
+      const doc         = finCpfEl.value || 'Não informado';
 
       const msg =
         `Olá! Tenho interesse em financiar o *${v.model} ${v.version}* — ${v.year} (${fmtPrice(v.price)}).\n\n` +
+        `*Dados pessoais:*\n` +
+        `• Nome: ${nome}\n` +
+        `• Telefone: ${telefone}\n` +
+        `• Data de nascimento: ${nascimento}\n` +
+        `• ${docType}: ${doc}\n\n` +
         `*Simulação de financiamento:*\n` +
         `• Entrada: ${entrada}\n` +
         `• Possui CNH: ${cnh}\n` +
         `• Parcelas desejadas: ${qtdParcelas}\n` +
-        `• Valor por parcela: ${valorParc}\n` +
-        `• CPF: ${cpf}\n\n` +
+        `• Valor por parcela: ${valorParc}\n\n` +
         `Poderia me enviar uma proposta?`;
 
       window.open(`https://wa.me/${BRAVEL_WPP}?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+
+    // ─── Botão voltar ao estoque ──────────────────────────────────
+    document.getElementById('vpBack').addEventListener('click', e => {
+      e.preventDefault();
+      if (document.referrer && document.referrer.includes('estoque.html')) {
+        history.back();
+      } else {
+        window.location.href = 'estoque.html';
+      }
     });
 
     // ─── Animações de scroll ──────────────────────────────────────

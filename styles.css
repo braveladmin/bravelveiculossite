@@ -735,18 +735,193 @@ ul { list-style: none; }
   border-radius: 0.3rem; text-transform: uppercase; letter-spacing: 0.06em;
 }
 
-.car-body { padding: 1.25rem; }
-.car-model { font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 800; color: var(--white); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.car-version { font-size: 0.78rem; color: var(--silver-dim); margin-bottom: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ── Car body ── */
+.car-body { padding: 1rem 1.1rem 1.2rem; display: flex; flex-direction: column; gap: 0.75rem; }
 
-.car-specs { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
-.car-spec { display: flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; color: rgba(255,255,255,0.4); }
-.car-spec i { font-size: 0.68rem; color: var(--red); }
+.car-name {
+  font-family: 'Montserrat', sans-serif; font-size: 1.1rem; font-weight: 900;
+  color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
 
-.car-price-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-.car-price { font-family: 'Bebas Neue', 'Montserrat', sans-serif; font-size: 1.55rem; color: var(--white); letter-spacing: 0.03em; }
-.car-transmission { font-size: 0.73rem; color: rgba(255,255,255,0.35); display: flex; align-items: center; gap: 0.3rem; }
-.car-transmission i { color: var(--red); font-size: 0.68rem; }
+/* Tags de especificação */
+.car-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.car-tags span {
+  font-size: 0.64rem; font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 2rem; padding: 0.15rem 0.5rem;
+}
+
+/* ══════════════════════════════════════════
+   BLOCO DE PREÇO — fiel ao site referência
+   brand-ink:#0b0b0c | brand-red:#e10a0a | brand-surface:#121214
+   ══════════════════════════════════════════ */
+.car-price-block {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  padding: 1.1rem 1.1rem 1.1rem 1.3rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+}
+
+/* Barra vermelha vertical — esquerda, full height */
+.car-price-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #e10a0a, #ff3b3b, #e10a0a);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Glow vermelho difuso saindo da barra — canto inferior esquerdo */
+.car-price-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(225,10,10,0.18) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.car-price-content {
+  position: relative; z-index: 1;
+}
+
+/* "VALOR À VISTA" — vermelho como no original */
+.car-pv-label {
+  font-size: 0.625rem; font-weight: 600;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: rgba(225,10,10,0.9);
+  margin-bottom: 0.35rem;
+}
+
+/* Preço grande */
+.car-pv-value {
+  font-family: 'Oswald', 'Bebas Neue', 'Montserrat', sans-serif;
+  font-size: 2rem; font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.01em; line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+/* Badges empilhadas */
+.car-conditions { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.car-cond {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  background: rgba(18,18,20,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 2rem;
+  padding: 0.22rem 0.65rem;
+  width: fit-content;
+  transition: background 0.2s, border-color 0.2s;
+}
+.car-cond:hover {
+  background: rgba(18,18,20,0.9);
+  border-color: rgba(255,255,255,0.2);
+}
+
+/* Ponto verde com glow */
+.cond-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52,211,153,0.7);
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════
+   GRADE DE INFORMAÇÕES — fiel ao site referência
+   ══════════════════════════════════════════ */
+.car-info-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem;
+}
+
+/* Cada célula: ícone à esquerda + texto à direita */
+.car-info-cell {
+  background: rgba(18,18,20,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.car-info-cell:hover {
+  background: rgba(18,18,20,0.7);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.car-info-icon {
+  color: #e10a0a; font-size: 0.7rem;
+  margin-top: 0.1rem; flex-shrink: 0;
+}
+
+.car-info-text {
+  display: flex; flex-direction: column; gap: 0.1rem; min-width: 0;
+}
+
+.car-info-lbl {
+  font-size: 0.5rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(255,255,255,0.3);
+}
+
+.car-info-val {
+  font-size: 0.73rem; font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* CTAs */
+.car-ctas { display: flex; flex-direction: column; gap: 0.45rem; }
+.car-btn-wpp {
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  background: #25d366; color: var(--white);
+  padding: 0.72rem 1rem; border-radius: 0.5rem;
+  font-size: 0.83rem; font-weight: 700;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.car-btn-wpp i { font-size: 1rem; }
+.car-btn-wpp:hover { background: #1aad54; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,211,102,0.35); }
+.car-btn-estoque {
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.13);
+  color: rgba(255,255,255,0.55);
+  padding: 0.62rem 1rem; border-radius: 0.5rem;
+  font-size: 0.78rem; font-weight: 600;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.car-btn-estoque:hover { border-color: var(--red); color: var(--white); background: rgba(204,17,17,0.08); }
+
+.car-btn-detalhes {
+  display: flex; align-items: center; justify-content: center; gap: 0.45rem;
+  background: transparent;
+  border: 1.5px solid rgba(204,17,17,0.4);
+  color: rgba(255,255,255,0.75);
+  padding: 0.62rem 1rem; border-radius: 0.5rem;
+  font-size: 0.83rem; font-weight: 600;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.car-btn-detalhes i { font-size: 0.9rem; color: var(--red); transition: color 0.2s; }
+.car-btn-detalhes:hover {
+  border-color: var(--red); color: var(--white);
+  background: rgba(204,17,17,0.1);
+}
+.car-btn-detalhes:hover i { color: var(--white); }
+
+/* compat aliases (estoque.html não usa car-body novo) */
+.car-price-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 0.2rem; }
+.car-deal-badge {
+  font-size: 0.62rem; font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 2rem; padding: 0.22rem 0.6rem;
+}
 
 .btn-interesse {
   width: 100%; padding: 0.75rem; background: var(--wpp); color: var(--white);
@@ -1009,9 +1184,7 @@ ul { list-style: none; }
 .av-avatar {
   width: 44px; height: 44px; flex-shrink: 0;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.78rem; font-weight: 800;
-  color: var(--white); font-family: 'Montserrat', sans-serif;
+  object-fit: cover;
 }
 
 .av-card-meta { flex: 1; min-width: 0; }
@@ -1024,6 +1197,11 @@ ul { list-style: none; }
   display: flex; align-items: center; gap: 0.3rem;
 }
 .av-check { color: #4285f4; font-size: 0.68rem; flex-shrink: 0; }
+
+.av-reviewer-sub {
+  font-size: 0.7rem; color: rgba(255,255,255,0.35);
+  margin-top: 0.08rem;
+}
 
 .av-rating { display: flex; align-items: center; gap: 0.12rem; margin-top: 0.22rem; }
 .av-rating i { color: #f9ab00; font-size: 0.68rem; }
@@ -1059,6 +1237,8 @@ ul { list-style: none; }
 }
 .av-ver-google:hover { color: var(--white); }
 .av-ver-google .av-g-sm { width: 13px; height: 13px; vertical-align: middle; flex-shrink: 0; }
+
+.av-rev-controls { display: none; }
 
 /* ============================================================
    SERVIÇOS
@@ -1187,6 +1367,7 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   flex-wrap: wrap; gap: 0.5rem;
 }
 .footer-bottom p { font-size: 0.78rem; color: rgba(255,255,255,0.22); }
+.footer-bottom a { font-size: 0.65rem; }
 
 /* ============================================================
    FLOATING WHATSAPP
@@ -1278,6 +1459,10 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   /* Próxima seção — aproxima */
   #estoque { padding-top: 3rem; }
 
+  /* Destaque carousel — mobile otimizado */
+  .destaque-badge-wrap { margin-bottom: 1rem; }
+  .carousel-wrap { margin-top: 1rem; }
+
   .trust-bar   { gap: 0.5rem; padding: 0.7rem 1.25rem; }
   .trust-item  { font-size: 0.8rem; padding: 0 0.75rem; }
   .trust-sep   { display: none; }
@@ -1286,9 +1471,57 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   .servico-item:nth-child(even) { padding-left: 0; border-left: none; }
   .sobre-grid  { grid-template-columns: 1fr; gap: 2.5rem; }
   .sobre-layout     { grid-template-columns: 1fr; gap: 2.5rem; }
-  .av-grid          { grid-template-columns: 1fr; }
-  .av-header        { flex-direction: column; align-items: flex-start; }
-  .av-google-badge  { min-width: unset; width: 100%; }
+  .av-grid {
+    display: flex; flex-direction: row;
+    overflow-x: scroll; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    gap: 0.75rem;
+    margin: 0 -1.25rem; padding: 0 1.25rem 0.5rem;
+  }
+  .av-grid::-webkit-scrollbar { display: none; }
+  .av-grid .av-card {
+    width: 84vw; min-width: 84vw; max-width: 84vw; flex-shrink: 0;
+    scroll-snap-align: start;
+    padding: 0.75rem 0.85rem;
+    gap: 0.45rem;
+    overflow: hidden;
+  }
+  .av-grid .av-card-head { gap: 0.55rem; align-items: center; }
+  .av-grid .av-avatar { width: 32px; height: 32px; }
+  .av-grid .av-card-g { width: 16px; height: 16px; }
+  .av-grid .av-reviewer-name { font-size: 0.8rem; }
+  .av-grid .av-reviewer-sub { font-size: 0.6rem; margin-top: 0.04rem; }
+  .av-grid .av-rating { margin-top: 0.1rem; }
+  .av-grid .av-rating i { font-size: 0.6rem; }
+  .av-grid .av-card-text { font-size: 0.77rem; line-height: 1.55; }
+  .av-grid .av-card-foot { padding-top: 0.45rem; }
+  .av-grid .av-verified-tag { font-size: 0.58rem; }
+  .av-grid .av-ver-google { font-size: 0.62rem; }
+  .av-rev-controls {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.75rem; margin-top: 0.9rem;
+  }
+  .av-arrow {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.7); cursor: pointer; font-size: 0.7rem;
+    transition: background 0.2s; flex-shrink: 0;
+  }
+  .av-arrow:active { background: rgba(255,255,255,0.16); }
+  .av-rev-dots { display: flex; align-items: center; gap: 0.4rem; }
+  .av-rev-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,0.18); transition: background 0.25s, transform 0.25s;
+  }
+  .av-rev-dot-active { background: var(--red); transform: scale(1.25); }
+  #avaliacoes       { padding: 2.5rem 1.25rem; }
+  .av-header        { flex-direction: column; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; }
+  .av-title         { font-size: 1.6rem; }
+  .av-google-badge  { min-width: unset; width: 100%; padding: 0.6rem 0.85rem; }
+  .av-score-num     { font-size: 1.4rem; }
+  .av-badge-bottom  { font-size: 0.65rem; }
   .sobre-title      { text-align: left; }
   .sobre-desc       { text-align: left; }
   .sobre-ctas       { justify-content: flex-start; }
@@ -1318,6 +1551,57 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   .section-title { font-size: 1.85rem; }
 }
 
+/* ── Mobile card compact layout (hidden on desktop) ── */
+.car-mobile-info { display: none; }
+
+@media (max-width: 639px) {
+  /* Foto mais alta para destacar o veículo */
+  .car-gallery { aspect-ratio: 3/2; }
+
+  /* Setas de galeria sempre visíveis no mobile */
+  .gallery-nav { opacity: 0.8; }
+
+  .car-name, .car-tags, .car-price-block, .car-info-grid, .car-ctas { display: none !important; }
+  .car-body { padding: 0.75rem 0.9rem 0.9rem; gap: 0; }
+  .car-mobile-info {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .car-mi-left {
+    display: flex; flex-direction: column; gap: 0.12rem;
+    flex: 1; min-width: 0;
+  }
+  .car-mi-brand {
+    font-size: 0.58rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: rgba(255,255,255,0.38);
+  }
+  .car-mi-model {
+    font-size: 0.98rem; font-weight: 700;
+    color: var(--white); font-family: 'Inter', sans-serif;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .car-mi-specs {
+    font-size: 0.62rem; color: rgba(255,255,255,0.38);
+    margin-top: 0.15rem;
+  }
+  .car-mi-right {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 0.18rem;
+    flex-shrink: 0;
+  }
+  .car-mi-price {
+    font-size: 0.98rem; font-weight: 800;
+    color: var(--white); font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+  }
+  .car-mi-link {
+    font-size: 0.62rem; color: rgba(255,255,255,0.38);
+    display: flex; align-items: center; gap: 0.2rem;
+  }
+  .car-mi-link i { font-size: 0.52rem; }
+}
+
 /* ============================================================
    RESPONSIVE — SMALL MOBILE (≤ 480px)
 ============================================================ */
@@ -1330,4 +1614,5 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   .sobre-ctas .btn, .contato-ctas .btn { justify-content: center; }
   .whatsapp-float   { width: 52px; height: 52px; font-size: 1.5rem; bottom: 1.25rem; right: 1.25rem; }
   .hero-features    { gap: 1.25rem; }
+  .car-info-grid    { grid-template-columns: repeat(2, 1fr); }
 }

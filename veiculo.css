@@ -163,16 +163,24 @@ ul { list-style: none; }
 
 /* Thumbnails */
 .vp-thumbs {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: flex; flex-direction: row;
   gap: 0.5rem; margin-top: 0.6rem;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
 }
+.vp-thumbs::-webkit-scrollbar { display: none; }
 
 .vp-thumb {
-  aspect-ratio: 4/3; border-radius: 0.45rem;
+  flex: 0 0 88px; height: 66px;
+  border-radius: 0.45rem;
   overflow: hidden; cursor: pointer;
   border: 2px solid transparent;
   transition: border-color 0.2s, opacity 0.2s;
   opacity: 0.5; background: var(--black-3);
+  scroll-snap-align: start;
 }
 .vp-thumb:hover { opacity: 0.85; }
 .vp-thumb.active { border-color: var(--red); opacity: 1; }
@@ -197,37 +205,107 @@ ul { list-style: none; }
 
 .vp-version { font-size: 0.88rem; color: var(--silver-dim); }
 
-/* Price block */
+/* ── Price block premium ── */
 .vp-price-block {
-  background: rgba(255,255,255,0.035);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 0.85rem; padding: 1.1rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  padding: 1.1rem 1.1rem 1.1rem 1.3rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+}
+
+/* Barra vermelha — left, full height */
+.vp-price-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #e10a0a, #ff3b3b, #e10a0a);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Glow vermelho difuso — canto inferior esquerdo */
+.vp-price-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(225,10,10,0.22) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vp-price-content { position: relative; z-index: 1; }
+
+/* "VALOR À VISTA" — vermelho */
+.vp-price-label {
+  font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: rgba(225,10,10,0.9);
+  margin-bottom: 0.3rem;
 }
 
 .vp-price {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.8rem; font-weight: 400;
-  color: var(--white); letter-spacing: 0.04em; line-height: 1;
+  font-family: 'Inter', sans-serif;
+  font-size: 2.2rem; font-weight: 800;
+  color: var(--white); letter-spacing: 0.03em; line-height: 1;
+  margin-bottom: 0.75rem;
 }
 
-.vp-price-note {
-  font-size: 0.73rem; color: rgba(255,255,255,0.3);
-  margin-top: 0.2rem; font-weight: 500;
+/* Badges ACEITA TROCA + FINANCIAMENTO */
+.vp-price-badges { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.vp-price-badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  background: rgba(18,18,20,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 2rem;
+  padding: 0.22rem 0.65rem;
+  width: fit-content;
+  transition: background 0.2s, border-color 0.2s;
+}
+.vp-price-badge:hover {
+  background: rgba(18,18,20,0.9);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.vp-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52,211,153,0.7);
+  flex-shrink: 0;
 }
 
 /* Quick specs */
 .vp-quick-specs {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
 }
 
 .vp-quick-spec {
-  display: flex; align-items: center; gap: 0.5rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 0.5rem; padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem; padding: 0.65rem 0.75rem;
+  transition: border-color 0.2s;
 }
-.vp-quick-spec i { color: var(--red); font-size: 0.82rem; flex-shrink: 0; }
-.vp-quick-spec span { font-size: 0.8rem; color: rgba(255,255,255,0.6); font-weight: 500; }
+.vp-quick-spec:hover { border-color: rgba(204,17,17,0.2); }
+
+.vp-qs-top {
+  display: flex; align-items: center; gap: 0.35rem;
+}
+.vp-qs-top i { color: var(--red); font-size: 0.7rem; flex-shrink: 0; }
+.vp-qs-label {
+  font-size: 0.56rem; font-weight: 700;
+  color: rgba(255,255,255,0.28);
+  text-transform: uppercase; letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+.vp-qs-value {
+  font-size: 0.84rem; font-weight: 700;
+  color: var(--white); line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* CTA WhatsApp */
 .vp-cta-wpp {
@@ -256,6 +334,22 @@ ul { list-style: none; }
   transform: translateY(-2px);
 }
 
+/* Botão ver estoque */
+.vp-btn-estoque {
+  display: flex; align-items: center; justify-content: center; gap: 0.55rem;
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.65);
+  padding: 0.75rem 1.5rem; border-radius: 0.65rem;
+  font-size: 0.88rem; font-weight: 600;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.vp-btn-estoque:hover {
+  border-color: var(--red); color: var(--white);
+  background: rgba(204,17,17,0.08);
+}
+.vp-btn-estoque i { font-size: 0.9rem; }
+
 /* Trust mini badges */
 .vp-trust-mini { display: flex; flex-wrap: wrap; gap: 0.45rem; }
 .vp-trust-mini span {
@@ -282,7 +376,7 @@ ul { list-style: none; }
 
 /* ── Characteristics ── */
 .vp-chars-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
 }
 
 .vp-char-card {
@@ -374,7 +468,7 @@ ul { list-style: none; }
   pointer-events: none;
 }
 .vp-finance-body.open {
-  max-height: 1200px;
+  max-height: 2000px;
   opacity: 1;
   pointer-events: auto;
   padding-top: 1.5rem;
@@ -382,8 +476,26 @@ ul { list-style: none; }
 
 .vp-finance-sub {
   font-size: 0.9rem; color: rgba(255,255,255,0.38);
-  margin-top: -1rem; margin-bottom: 1.75rem; line-height: 1.6;
+  margin-top: -1rem; margin-bottom: 1.25rem; line-height: 1.6;
 }
+
+.vp-finance-notice {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  background: rgba(52,211,153,0.06);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 0.6rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.8rem; line-height: 1.5;
+  color: rgba(255,255,255,0.55);
+}
+.vp-finance-notice i {
+  color: #34d399;
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+.vp-finance-notice strong { color: rgba(255,255,255,0.8); font-weight: 600; }
 
 .vp-finance-form {
   background: rgba(255,255,255,0.03);
@@ -452,15 +564,15 @@ ul { list-style: none; }
 
 .vp-parcela-btn {
   padding: 0.58rem 1rem;
-  background: rgba(255,255,255,0.04);
-  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(204,0,0,0.07);
+  border: 1.5px solid rgba(204,0,0,0.35);
   border-radius: 0.5rem;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.65);
   font-family: 'Bebas Neue', sans-serif;
   font-size: 0.95rem; letter-spacing: 0.06em;
   cursor: pointer; transition: all 0.2s;
 }
-.vp-parcela-btn:hover { border-color: rgba(255,255,255,0.25); color: var(--white); }
+.vp-parcela-btn:hover { background: rgba(204,0,0,0.15); border-color: rgba(204,0,0,0.6); color: var(--white); }
 .vp-parcela-btn.active { background: var(--red); border-color: var(--red); color: var(--white); }
 
 /* CPF aviso segurança */
@@ -497,11 +609,11 @@ ul { list-style: none; }
 /* ── Trust section ── */
 .vp-trust-section {
   background: var(--black-2);
-  margin: 0 -1.5rem; padding: 2.5rem 1.5rem;
+  margin: 2.5rem -1.5rem 0; padding: 2.5rem 1.5rem;
 }
 
 .vp-trust-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
 }
 
 .vp-trust-card {
@@ -725,26 +837,42 @@ ul { list-style: none; }
   .vp-gallery { margin: 0 -1.5rem; }
   .vp-gallery-main { border-radius: 0; aspect-ratio: 4/3; cursor: default; }
   .vp-gal-nav { opacity: 1; width: 34px; height: 34px; font-size: 0.75rem; }
-  .vp-thumbs { margin: 0.5rem 1.5rem 0; grid-template-columns: repeat(4, 1fr); }
+  .vp-thumbs { margin: 0.5rem 1.5rem 0; }
+  .vp-thumb { flex: 0 0 72px; height: 54px; }
 
-  .vp-info { padding-top: 1.5rem; gap: 1.1rem; }
-  .vp-title { font-size: 1.55rem; }
-  .vp-price { font-size: 2.3rem; }
+  .vp-info { padding-top: 1.5rem; gap: 0.9rem; }
+  .vp-title { font-size: 1.45rem; }
+  .vp-price { font-size: 2rem; }
+
+  .vp-section { padding: 1.5rem 0; }
+  .vp-section-title { font-size: 1.05rem; margin-bottom: 1rem; }
 
   .vp-chars-grid { grid-template-columns: repeat(2, 1fr); }
+  .vp-trust-grid { grid-template-columns: 1fr; gap: 0.65rem; }
+  .vp-trust-section { padding: 1.5rem 1.5rem; }
+  .vp-trust-card { padding: 1rem; gap: 0.7rem; }
+  .vp-trust-heading { font-size: 0.83rem; }
+  .vp-trust-desc { font-size: 0.74rem; }
+
+  .vp-btn-estoque { width: 100%; justify-content: center; }
+
   .vp-optionals-grid { grid-template-columns: repeat(2, 1fr); }
   .vp-optionals-box { padding: 1.1rem 1.25rem; }
-  .vp-section-title { font-size: 1.1rem; }
 
   .vp-lb-prev { left: 0.4rem; }
   .vp-lb-next { right: 0.4rem; }
   .vp-lb-nav { width: 40px; height: 40px; }
 
   .vp-mobile-bar { display: flex; }
+  #vpCta1 { display: none; }
 }
 
 @media (max-width: 480px) {
   .vp-chars-grid { grid-template-columns: repeat(2, 1fr); }
   .vp-optionals-grid { grid-template-columns: repeat(2, 1fr); }
-  .vp-thumbs { grid-template-columns: repeat(3, 1fr); }
+  .vp-thumb { flex: 0 0 64px; height: 48px; }
+  .vp-finance-form { padding: 1rem; gap: 1rem; }
+  .vp-quick-specs { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+  .vp-quick-spec { padding: 0.5rem 0.65rem; }
+  .vp-qs-value { font-size: 0.78rem; }
 }

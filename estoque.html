@@ -50,21 +50,33 @@
 
     /* Trust bar inline */
     .estoque-trust-row {
-      display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem;
-      padding-bottom: 2.25rem;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      margin-bottom: 0;
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem;
+      margin-bottom: 1.5rem;
     }
 
     .estoque-trust-badge {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      font-size: 0.78rem; font-weight: 600;
-      color: rgba(255,255,255,0.5);
+      display: inline-flex; align-items: center; gap: 0.28rem;
+      font-size: 0.68rem; font-weight: 600;
+      color: rgba(255,255,255,0.48);
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 2rem; padding: 0.35rem 0.85rem;
+      border-radius: 2rem; padding: 0.22rem 0.6rem;
     }
-    .estoque-trust-badge i { color: var(--red); font-size: 0.75rem; }
+    .estoque-trust-badge i { color: var(--red); font-size: 0.62rem; }
+
+    /* Botão ver estoque */
+    .estoque-ver-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      background: var(--red); color: #fff;
+      font-size: 0.88rem; font-weight: 700;
+      padding: 0.7rem 1.6rem; border-radius: 0.6rem;
+      border: none; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.2s, transform 0.2s;
+      margin-bottom: 2.25rem;
+    }
+    .estoque-ver-btn:hover { background: #b80000; transform: translateY(-2px); }
+    .estoque-ver-btn i { font-size: 0.8rem; }
 
     /* Seção principal do grid */
     #estoque-main {
@@ -104,129 +116,250 @@
       .estoque-page-title { font-size: 2rem; }
       .estoque-page-subtitle { font-size: 0.88rem; }
       #estoque-main { padding: 2rem 1.25rem 4rem; }
+      .estoque-trust-badge { font-size: 0.62rem; padding: 0.18rem 0.48rem; gap: 0.22rem; }
+      .estoque-trust-badge i { font-size: 0.56rem; }
+      .estoque-trust-row { gap: 0.28rem; }
+      .estoque-ver-btn { font-size: 0.82rem; padding: 0.62rem 1.35rem; }
     }
 
-    /* ══ CARDS — Desktop (padrão, grade 3 col, dark) ══ */
+    /* ══ CARDS — Novo design ══ */
     #carsGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem; margin-top: 2.5rem;
+      gap: 1.25rem; margin-top: 2rem;
     }
 
     .car-list-card {
-      display: flex; flex-direction: column;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 1rem; overflow: hidden; cursor: pointer;
+      background: #111;
+      border-radius: 1rem; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
       opacity: 0; transform: translateY(20px);
-      transition: transform 0.28s, box-shadow 0.28s, border-color 0.28s, opacity 0.3s;
+      transition: transform 0.28s, box-shadow 0.28s, opacity 0.3s;
       transition-delay: var(--delay, 0s);
     }
     .car-list-card.visible { opacity: 1; transform: translateY(0); }
-    .car-list-card:hover {
-      transform: translateY(-7px) !important;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
-      border-color: rgba(204,17,17,0.35);
+    .car-list-card:hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(0,0,0,0.65); }
+
+    /* — Carrossel — */
+    .clc-carousel {
+      position: relative; aspect-ratio: 4/3;
+      overflow: hidden; background: #0a0a0a;
+    }
+    .clc-slides {
+      display: flex; height: 100%;
+      transition: transform 0.35s ease;
+      will-change: transform;
+    }
+    .clc-slide { min-width: 100%; height: 100%; }
+    .clc-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .clc-carousel-top {
+      position: absolute; top: 0.55rem; left: 0.55rem; right: 0.55rem;
+      display: flex; justify-content: space-between; align-items: center;
+      pointer-events: none;
+    }
+    .clc-carousel-top > * { pointer-events: auto; }
+
+    .clc-counter {
+      background: rgba(0,0,0,0.52); backdrop-filter: blur(6px);
+      color: #fff; font-size: 0.68rem; font-weight: 600;
+      padding: 0.18rem 0.48rem; border-radius: 0.28rem;
+      font-family: 'Inter', sans-serif; letter-spacing: 0.03em;
+    }
+    .clc-ampliar {
+      background: rgba(0,0,0,0.52); backdrop-filter: blur(6px);
+      color: #fff; font-size: 0.63rem; font-weight: 700;
+      padding: 0.2rem 0.55rem; border-radius: 0.28rem;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 0.28rem;
+      font-family: 'Inter', sans-serif; letter-spacing: 0.06em;
+      transition: background 0.2s;
+    }
+    .clc-ampliar:hover { background: rgba(0,0,0,0.82); }
+
+    .clc-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.45); backdrop-filter: blur(4px);
+      border: none; color: #fff;
+      width: 1.75rem; height: 1.75rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 0.6rem; transition: background 0.2s; z-index: 2;
+    }
+    .clc-nav:hover { background: rgba(0,0,0,0.78); }
+    .clc-prev { left: 0.45rem; }
+    .clc-next { right: 0.45rem; }
+
+    .clc-dots {
+      position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 0.28rem; z-index: 2; pointer-events: none;
+    }
+    .clc-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: rgba(255,255,255,0.32); transition: background 0.2s;
+    }
+    .clc-dot.active { background: #fff; }
+
+    /* — Corpo do card — */
+    .clc-body { padding: 0.95rem 1rem 1rem; }
+
+    .clc-model-row {
+      display: flex; align-items: center; gap: 0.45rem;
+      flex-wrap: wrap; margin-bottom: 0.6rem;
+    }
+    .clc-model {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem; font-weight: 800; color: #fff;
+      line-height: 1.2;
+    }
+    .clc-badge {
+      font-size: 0.58rem; font-weight: 700;
+      color: var(--red); letter-spacing: 0.07em;
+      border: 1px solid rgba(204,17,17,0.4);
+      border-radius: 0.25rem; padding: 0.1rem 0.38rem;
+      white-space: nowrap; text-transform: uppercase;
+      background: rgba(204,17,17,0.08);
+      line-height: 1.4;
     }
 
-    .clc-top { display: flex; flex-direction: column; }
-
-    .clc-thumb {
-      width: 100%; aspect-ratio: 16/9;
-      position: relative; overflow: hidden; background: #111; flex-shrink: 0;
+    .clc-tags-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.85rem; gap: 0.5rem;
     }
-    .clc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .clc-thumb .car-badge { position: absolute; top: 0.6rem; left: 0.6rem; }
+    .clc-tags { display: flex; flex-wrap: wrap; gap: 0.28rem; flex: 1; }
+    .clc-tag {
+      font-size: 0.68rem; color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 2rem; padding: 0.14rem 0.52rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .clc-arrow {
+      width: 1.5rem; height: 1.5rem; border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.4); font-size: 0.6rem; flex-shrink: 0;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .clc-arrow:hover { background: var(--red); color: #fff; border-color: var(--red); }
 
-    .clc-info { padding: 1.25rem 1.25rem 0; display: flex; flex-direction: column; }
-    .clc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.2rem; }
-    .clc-model { font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 800; color: var(--white); }
-    .clc-fuel-tag { display: none; }
-    .clc-version { font-size: 0.78rem; color: var(--silver-dim); margin-bottom: 1rem; }
-    .clc-specs { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
-    .clc-spec { font-size: 0.75rem; color: rgba(255,255,255,0.4); display: flex; align-items: center; gap: 0.28rem; }
-    .clc-spec i { color: var(--red); font-size: 0.68rem; }
-    .clc-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.55rem; color: var(--white); line-height: 1; letter-spacing: 0.03em; margin-bottom: 1rem; }
-    .clc-meta { display: none; }
+    .clc-price-block { margin-bottom: 0.65rem; }
+    .clc-price-label {
+      font-size: 0.62rem; font-weight: 700; color: var(--red);
+      letter-spacing: 0.1em; display: block; margin-bottom: 0.05rem;
+      font-family: 'Inter', sans-serif; text-transform: uppercase;
+    }
+    .clc-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.05rem; color: #fff; line-height: 1; letter-spacing: 0.02em;
+    }
 
-    .clc-actions { padding: 0 1.25rem 1.25rem; display: flex; flex-direction: column; }
-    .clc-btn-detail { display: none; }
+    .clc-badges { display: flex; flex-direction: column; gap: 0.2rem; margin-bottom: 0.8rem; }
+    .clc-badge-item {
+      display: flex; align-items: center; gap: 0.38rem;
+      font-size: 0.68rem; font-weight: 700; color: rgba(255,255,255,0.68);
+      font-family: 'Inter', sans-serif; letter-spacing: 0.05em;
+    }
+    .clc-dot-green {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #22c55e; flex-shrink: 0;
+      box-shadow: 0 0 5px rgba(34,197,94,0.55);
+    }
+
+    .clc-actions { display: flex; flex-direction: column; gap: 0.42rem; }
     .clc-btn-wpp {
-      width: 100%; padding: 0.75rem;
-      background: var(--wpp); border-radius: 0.5rem;
-      font-size: 0.85rem; font-weight: 600; color: var(--white);
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.68rem;
+      background: #25d366; border-radius: 0.5rem;
+      font-size: 0.82rem; font-weight: 600; color: #fff;
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
       transition: background 0.2s; font-family: 'Inter', sans-serif;
     }
-    .clc-btn-wpp:hover { background: var(--wpp-dark); }
+    .clc-btn-wpp:hover { background: #1da851; }
 
-    /* ══ CARDS — Mobile (lista compacta, paleta do site) ══ */
-    @media (max-width: 640px) {
-      #carsGrid { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.75rem; }
+    .clc-btn-detail {
+      width: 100%; padding: 0.6rem;
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.11); border-radius: 0.5rem;
+      font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.48);
+      display: flex; align-items: center; justify-content: center; gap: 0.36rem;
+      transition: border-color 0.2s, color 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .clc-btn-detail i { color: var(--red); }
+    .clc-btn-detail:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
+
+    /* Botão de canto — oculto no desktop */
+    .clc-corner-btn { display: none; }
+
+    @media (max-width: 1024px) {
+      #carsGrid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ══ MOBILE — layout horizontal compacto ══ */
+    @media (max-width: 560px) {
+      #carsGrid { grid-template-columns: 1fr; gap: 0.5rem; margin-top: 0.75rem; }
 
       .car-list-card {
-        flex-direction: column; border-radius: 0.875rem;
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.07);
-        box-shadow: none;
-      }
-      .car-list-card:hover { transform: translateY(-3px) !important; box-shadow: 0 8px 28px rgba(0,0,0,0.5); border-color: rgba(204,17,17,0.3); }
-
-      .clc-top { flex-direction: row; }
-
-      .clc-thumb {
-        width: 120px; height: 100px; flex-shrink: 0;
-        aspect-ratio: unset; border-radius: 0.875rem 0 0 0;
-      }
-      .clc-thumb .car-badge { top: 0.3rem; left: 0.3rem; font-size: 0.52rem; padding: 0.1rem 0.38rem; }
-
-      .clc-info { flex: 1; padding: 0.6rem 0.75rem; gap: 0.14rem; min-width: 0; display: flex; flex-direction: column; }
-
-      .clc-head { margin-bottom: 0; gap: 0.35rem; }
-      .clc-model { font-size: 0.88rem; font-weight: 800; color: var(--white); line-height: 1.2; }
-
-      .clc-fuel-tag {
-        display: inline-block;
-        font-size: 0.57rem; font-weight: 700; color: rgba(255,255,255,0.45);
-        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-        padding: 0.1rem 0.38rem; border-radius: 0.2rem;
-        white-space: nowrap; flex-shrink: 0; margin-top: 0.08rem;
-        font-family: 'Inter', sans-serif; letter-spacing: 0.04em;
+        display: flex; flex-direction: row;
+        border-radius: 0.75rem; min-height: 130px;
       }
 
-      .clc-version { font-size: 0.69rem; color: var(--silver-dim); margin-bottom: 0; }
+      /* Imagem 48% — maior e mais visível */
+      .clc-carousel {
+        width: 48%; min-width: 48%;
+        aspect-ratio: unset; align-self: stretch;
+        border-radius: 0;
+      }
+      .clc-slides { height: 100%; }
+      .clc-carousel-top, .clc-nav, .clc-dots { display: none; }
 
-      .clc-specs { gap: 0.2rem 0.5rem; margin-bottom: 0; }
-      .clc-spec { font-size: 0.65rem; color: rgba(255,255,255,0.38); }
-      .clc-spec i { color: var(--red); font-size: 0.6rem; }
+      /* Botão minimalista no canto da imagem */
+      .clc-corner-btn {
+        display: flex;
+        position: absolute; bottom: 0.4rem; right: 0.4rem;
+        width: 1.75rem; height: 1.75rem; border-radius: 50%;
+        background: rgba(0,0,0,0.48); backdrop-filter: blur(6px);
+        border: 1px solid rgba(255,255,255,0.18);
+        align-items: center; justify-content: center;
+        color: rgba(255,255,255,0.88); font-size: 0.58rem;
+        transition: background 0.18s, border-color 0.18s; z-index: 2;
+      }
+      .clc-corner-btn:hover { background: var(--red); border-color: var(--red); }
 
-      .clc-price {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 1.25rem; color: var(--white);
-        letter-spacing: 0.03em; margin-bottom: 0; line-height: 1.1;
+      /* Corpo à direita */
+      .clc-body {
+        flex: 1; min-width: 0;
+        padding: 0.65rem 0.75rem;
+        display: flex; flex-direction: column;
+        justify-content: center; gap: 0.3rem;
       }
 
-      .clc-meta { display: flex; flex-direction: column; gap: 0.04rem; }
-      .clc-meta-item { font-size: 0.6rem; color: rgba(255,255,255,0.28); display: flex; align-items: center; gap: 0.22rem; }
-      .clc-meta-item i { font-size: 0.55rem; color: rgba(255,255,255,0.2); }
+      .clc-model-row { margin-bottom: 0; }
+      .clc-model { font-size: 0.86rem; margin-bottom: 0; line-height: 1.2; }
 
-      .clc-actions {
-        flex-direction: row; gap: 0.45rem;
-        padding: 0.5rem 0.65rem 0.6rem;
-        border-top: 1px solid rgba(255,255,255,0.06);
+      .clc-tags-row { margin-bottom: 0; }
+      .clc-tag { font-size: 0.58rem; padding: 0.08rem 0.35rem; }
+      .clc-arrow { display: none; }
+
+      .clc-price-block { margin-bottom: 0; }
+      .clc-price-label { font-size: 0.52rem; letter-spacing: 0.08em; }
+      .clc-price { font-size: 1.28rem; }
+
+      .clc-badges { display: none; }
+      .clc-actions { display: none; }
+
+      /* Seta no canto inferior direito do bloco de infos */
+      .clc-body { position: relative; }
+      .clc-corner-btn {
+        display: flex;
+        position: absolute; bottom: 0.45rem; right: 0.5rem;
+        width: 1.75rem; height: 1.75rem; border-radius: 50%;
+        background: rgba(255,255,255,0.05); backdrop-filter: blur(4px);
+        border: 1px solid rgba(255,255,255,0.12);
+        align-items: center; justify-content: center;
+        color: rgba(255,255,255,0.45); font-size: 0.6rem;
+        transition: background 0.18s, border-color 0.18s, color 0.18s; z-index: 2;
       }
-      .clc-btn-detail {
-        display: block; flex: 1; padding: 0.52rem 0;
-        text-align: center;
-        border: 1.5px solid rgba(255,255,255,0.18); border-radius: 0.4rem;
-        font-size: 0.73rem; font-weight: 700; color: var(--white);
-        transition: background 0.2s, border-color 0.2s; font-family: 'Inter', sans-serif;
-      }
-      .clc-btn-detail:hover { background: var(--red); border-color: var(--red); }
-      .clc-btn-wpp {
-        flex: 1; padding: 0.52rem 0; width: auto;
-        border-radius: 0.4rem; font-size: 0.73rem; gap: 0.28rem;
-      }
+      .clc-corner-btn:hover { background: var(--red); border-color: var(--red); color: #fff; }
     }
   </style>
 </head>
@@ -300,6 +433,10 @@
         <span class="estoque-trust-badge"><i class="fa-regular fa-clock"></i> Proposta na hora</span>
         <span class="estoque-trust-badge"><i class="fa-solid fa-hand-holding-dollar"></i> Financiamento em 24h</span>
       </div>
+
+      <button class="estoque-ver-btn" id="btnVerEstoque" style="animation:fadeUp 0.6s ease 0.68s both">
+        Ver estoque <i class="fa-solid fa-arrow-down"></i>
+      </button>
 
     </div>
   </div>
@@ -388,7 +525,7 @@
     </div>
     <div class="footer-bottom container">
       <p>© 2025 Bravel Veículos — Todos os direitos reservados.</p>
-      <p>Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</p>
+      <a href="https://www.google.com/maps/search/?api=1&query=Av.+Amazonas,+45,+Primavera+do+Leste,+MT" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;opacity:0.7;transition:opacity 0.2s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT</a>
     </div>
   </footer>
 
@@ -432,46 +569,66 @@
       count.innerHTML = `<strong>${list.length}</strong> veículo${list.length > 1 ? 's' : ''} encontrado${list.length > 1 ? 's' : ''}`;
 
       grid.innerHTML = list.map((v, i) => {
-        const thumb = v.photos && v.photos.length ? v.photos[0] : null;
-        const thumbHtml = thumb
-          ? `<img src="${thumb}" alt="${v.model}" loading="lazy">`
-          : `<div style="background:${v.gradient};width:100%;height:100%;min-height:100px;display:flex;align-items:center;justify-content:center;font-size:3rem">${v.emoji}</div>`;
-        const fuelTag = `${v.transmission.slice(0,3)}/${v.fuel.slice(0,3)}`;
+        const photos = v.photos && v.photos.length ? v.photos : [];
+        const total  = photos.length;
+        const pad    = n => String(n).padStart(2, '0');
+
+        const slidesHtml = total
+          ? photos.map((p, pi) => `<div class="clc-slide"><img src="${p}" alt="${v.model}" loading="${pi === 0 ? 'eager' : 'lazy'}"></div>`).join('')
+          : `<div class="clc-slide" style="background:${v.gradient};display:flex;align-items:center;justify-content:center;font-size:3.5rem">${v.emoji}</div>`;
+
+        const navHtml = total > 1
+          ? `<button class="clc-nav clc-prev" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+             <button class="clc-nav clc-next" aria-label="Próxima"><i class="fa-solid fa-chevron-right"></i></button>
+             <div class="clc-dots">${photos.map((_, pi) => `<span class="clc-dot${pi === 0 ? ' active' : ''}"></span>`).join('')}</div>`
+          : '';
+
         return `
           <article class="car-list-card" data-type="${v.type}" data-price="${v.price}" data-id="${v.id}" style="--delay:${i * 0.05}s">
-            <div class="clc-top">
-              <div class="clc-thumb">
-                ${thumbHtml}
-                ${v.badge ? `<span class="car-badge">${v.badge}</span>` : ''}
+            <div class="clc-carousel" data-idx="0" data-total="${total}">
+              <div class="clc-slides">${slidesHtml}</div>
+              <div class="clc-carousel-top">
+                ${total > 1 ? `<span class="clc-counter">01 / ${pad(total)}</span>` : '<span></span>'}
+                <button class="clc-ampliar" data-id="${v.id}"><i class="fa-solid fa-expand"></i> AMPLIAR</button>
               </div>
-              <div class="clc-info">
-                <div class="clc-head">
-                  <h3 class="clc-model">${v.model}</h3>
-                  <span class="clc-fuel-tag">${fuelTag}</span>
-                </div>
-                <p class="clc-version">${v.version}</p>
-                <div class="clc-specs">
-                  <span class="clc-spec"><i class="fa-solid fa-calendar-days"></i> ${v.year}</span>
-                  <span class="clc-spec"><i class="fa-solid fa-gauge-high"></i> ${v.km}</span>
-                </div>
-                <div class="clc-price">${fmtPrice(v.price)}</div>
-                <div class="clc-meta">
-                  <span class="clc-meta-item"><i class="fa-solid fa-store"></i> Bravel Veículos</span>
-                  <span class="clc-meta-item"><i class="fa-solid fa-location-dot"></i> ${v.location}</span>
-                </div>
-              </div>
+              ${navHtml}
             </div>
-            <div class="clc-actions">
-              <a href="veiculo.html?id=${v.id}" class="clc-btn-detail">Ver detalhes</a>
-              <a href="https://wa.me/${BRAVEL_WPP}?text=${wppMsg(v)}" target="_blank" class="clc-btn-wpp">
-                <i class="fa-brands fa-whatsapp"></i> Whatsapp
-              </a>
+            <div class="clc-body">
+              <a href="veiculo.html?id=${v.id}" class="clc-corner-btn" title="Ver detalhes"><i class="fa-solid fa-chevron-right"></i></a>
+              <div class="clc-model-row">
+                <h3 class="clc-model">${v.model}</h3>
+              </div>
+              <div class="clc-tags-row">
+                <div class="clc-tags">
+                  <span class="clc-tag">${v.year}</span>
+                  <span class="clc-tag">${v.km}</span>
+                  <span class="clc-tag">${v.transmission}</span>
+                  <span class="clc-tag">${v.fuel}</span>
+                </div>
+                <a href="veiculo.html?id=${v.id}" class="clc-arrow" title="Ver detalhes"><i class="fa-solid fa-chevron-right"></i></a>
+              </div>
+              <div class="clc-price-block">
+                <span class="clc-price-label">Valor à vista</span>
+                <div class="clc-price">${fmtPrice(v.price)}</div>
+              </div>
+              <div class="clc-badges">
+                <span class="clc-badge-item"><span class="clc-dot-green"></span> ACEITA TROCA</span>
+                <span class="clc-badge-item"><span class="clc-dot-green"></span> FINANCIAMENTO</span>
+              </div>
+              <div class="clc-actions">
+                <a href="https://wa.me/${BRAVEL_WPP}?text=${wppMsg(v)}" target="_blank" class="clc-btn-wpp">
+                  <i class="fa-brands fa-whatsapp"></i> Chamar no WhatsApp
+                </a>
+                <a href="veiculo.html?id=${v.id}" class="clc-btn-detail">
+                  <i class="fa-solid fa-circle-info"></i> Mais informações
+                </a>
+              </div>
             </div>
           </article>
         `;
       }).join('');
 
-      setTimeout(observeCards, 30);
+      setTimeout(() => { observeCards(); initCardsCarousels(); }, 30);
     }
 
     // ─── Filtros ─────────────────────────────────────────────────
@@ -504,7 +661,7 @@
     });
 
     document.getElementById('carsGrid').addEventListener('click', e => {
-      if (e.target.closest('.clc-btn-detail, .clc-btn-wpp')) return;
+      if (e.target.closest('.clc-btn-detail, .clc-btn-wpp, .clc-nav, .clc-ampliar, .clc-arrow, .clc-corner-btn')) return;
       const card = e.target.closest('.car-list-card');
       if (card) window.location.href = `veiculo.html?id=${card.dataset.id}`;
     });
@@ -556,6 +713,53 @@
     menuDots.addEventListener('click', e => { e.stopPropagation(); mobileMenu.classList.toggle('open'); menuDots.classList.toggle('active'); });
     document.querySelectorAll('.mobile-link').forEach(l => l.addEventListener('click', () => { mobileMenu.classList.remove('open'); menuDots.classList.remove('active'); }));
     document.addEventListener('click', e => { if (!menuDots.contains(e.target) && !mobileMenu.contains(e.target)) { mobileMenu.classList.remove('open'); menuDots.classList.remove('active'); } });
+
+    // ─── Carrossel dos cards ──────────────────────────────────────
+    function initCardsCarousels() {
+      const pad = n => String(n).padStart(2, '0');
+
+      document.querySelectorAll('.clc-carousel').forEach(carousel => {
+        const total = parseInt(carousel.dataset.total) || 0;
+        if (total < 2) return;
+        const slides  = carousel.querySelector('.clc-slides');
+        const dots    = carousel.querySelectorAll('.clc-dot');
+        const counter = carousel.querySelector('.clc-counter');
+
+        function goTo(n) {
+          const idx = ((n % total) + total) % total;
+          carousel.dataset.idx = idx;
+          slides.style.transform = `translateX(-${idx * 100}%)`;
+          dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+          if (counter) counter.textContent = `${pad(idx + 1)} / ${pad(total)}`;
+        }
+
+        carousel.querySelector('.clc-prev')?.addEventListener('click', e => {
+          e.stopPropagation();
+          goTo(parseInt(carousel.dataset.idx || '0') - 1);
+        });
+        carousel.querySelector('.clc-next')?.addEventListener('click', e => {
+          e.stopPropagation();
+          goTo(parseInt(carousel.dataset.idx || '0') + 1);
+        });
+      });
+
+      document.querySelectorAll('.clc-ampliar').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id = parseInt(btn.dataset.id);
+          const vehicle = BRAVEL_VEHICLES.find(v => v.id === id);
+          if (vehicle?.photos?.length) {
+            const carousel = btn.closest('.clc-carousel');
+            openLightbox(vehicle.photos, parseInt(carousel?.dataset.idx || '0'));
+          }
+        });
+      });
+    }
+
+    // ─── Botão ver estoque ────────────────────────────────────────
+    document.getElementById('btnVerEstoque').addEventListener('click', () => {
+      document.getElementById('estoque-main').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 
     // ─── Init ────────────────────────────────────────────────────
     renderCars(BRAVEL_VEHICLES);
