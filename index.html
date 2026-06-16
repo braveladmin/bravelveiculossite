@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=20260616d">
+  <link rel="stylesheet" href="styles.css?v=20260616e">
 </head>
 <body>
 
@@ -793,7 +793,7 @@
         const perPage = getPerPage();
         const vw = viewport.offsetWidth;
         const cardW = perPage === 1
-          ? vw * 0.93
+          ? vw
           : (vw - GAP * (perPage - 1)) / perPage;
         track.querySelectorAll('.car-card').forEach(c => { c.style.width = cardW + 'px'; });
         return cardW;
