@@ -3,8 +3,8 @@ const BRAVEL_WPP = '556699135492';
 const fmtPrice = p => p.toLocaleString('pt-BR', { style:'currency', currency:'BRL', minimumFractionDigits:0 });
 
 // ─── Supabase — fonte do estoque (mesma base do painel admin) ──────────────
-const SUPABASE_URL      = 'https://wwntjnroxugolnscnuok.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_uo1UqDMkvwyq2H96RYH8yw_l-Yj2EJx';
+const SUPABASE_URL      = 'https://hukregsjrnvtkedywgih.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_H70Duzc6e3cUuz5IrBLwog_-jOyMpe2';
 
 const CATEGORY_TO_TYPE = {
   Hatch: 'hatch', Sedan: 'sedan', SUV: 'suv', Pickup: 'pickup', Van: 'minivan',
