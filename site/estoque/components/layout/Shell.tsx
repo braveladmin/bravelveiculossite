@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { AnimatePresence, motion } from "motion/react"
 import { LogOut, Plus } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
@@ -51,7 +52,10 @@ export function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#0a0a0a" }}>
-      <header
+      <motion.header
+        initial={{ y: -64, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
         className="fixed top-0 left-0 right-0 z-50 flex items-center gap-4 px-6"
         style={{ height: "64px", backgroundColor: "#181818", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
       >
@@ -77,12 +81,17 @@ export function Shell({ children }: { children: ReactNode }) {
               <Link
                 key={href}
                 href={href}
-                className="px-3.5 py-2 rounded-lg text-[13px] font-medium transition-colors"
-                style={{
-                  backgroundColor: active ? "#cc1111" : "transparent",
-                  color:           active ? "#fff"    : "#777777",
-                }}
+                className="relative px-3.5 py-2 rounded-lg text-[13px] font-medium transition-colors"
+                style={{ color: active ? "#fff" : "#777777" }}
               >
+                {active && (
+                  <motion.span
+                    layoutId="navActivePill"
+                    className="absolute inset-0 rounded-lg -z-10"
+                    style={{ backgroundColor: "#cc1111" }}
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
                 {label}
               </Link>
             )
@@ -122,10 +131,20 @@ export function Shell({ children }: { children: ReactNode }) {
         >
           <span className="text-[11px] font-black text-white select-none">{initials}</span>
         </div>
-      </header>
+      </motion.header>
 
       <main style={{ paddingTop: "64px" }}>
-        {children}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   )

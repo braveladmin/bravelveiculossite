@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { motion } from 'motion/react'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -46,9 +47,19 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center p-4"
       style={{ backgroundColor: BG }}
     >
-      <div className="w-full max-w-sm space-y-8">
+      <motion.div
+        className="w-full max-w-sm space-y-8"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
         {/* Logo */}
-        <div className="flex flex-col items-center gap-3">
+        <motion.div
+          className="flex flex-col items-center gap-3"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, delay: 0.05, ease: "easeOut" }}
+        >
           <Image src="/bravel-logo.png" alt="Bravel Veículos" width={56} height={56} className="w-14 h-14 rounded-2xl" priority />
           <div className="text-center">
             <p className="text-[22px] font-black text-white tracking-wider">BRAVEL</p>
@@ -56,7 +67,7 @@ export default function LoginPage() {
               Estoque
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Card */}
         <div
@@ -132,12 +143,20 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-10 rounded-xl text-[13px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="w-full h-10 rounded-xl text-[13px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
               style={{
                 background: 'linear-gradient(135deg, #cc1111 0%, #a80e0e 100%)',
                 boxShadow: '0 2px 12px rgba(204,17,17,0.35)',
               }}
             >
+              {loading && (
+                <motion.span
+                  className="w-3.5 h-3.5 rounded-full border-2 border-white/30"
+                  style={{ borderTopColor: "#fff" }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
+                />
+              )}
               {loading ? 'Entrando…' : 'Entrar'}
             </button>
           </form>
@@ -146,7 +165,7 @@ export default function LoginPage() {
         <p className="text-center text-[11px]" style={{ color: MUTED }}>
           Somente usuários cadastrados podem acessar
         </p>
-      </div>
+      </motion.div>
     </div>
   )
 }

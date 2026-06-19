@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { motion } from 'motion/react'
 import { Car, Plus, Search, X } from 'lucide-react'
 import { VehicleCard } from '@/components/vehicles/VehicleCard'
 import { CATEGORIES } from '@/lib/constants'
@@ -129,12 +130,17 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
               <button
                 key={tab.value}
                 onClick={() => setFilter(tab.value)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all whitespace-nowrap"
-                style={{
-                  backgroundColor: active ? ACCENT : "transparent",
-                  color: active ? "#fff" : MUTED,
-                }}
+                className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors whitespace-nowrap"
+                style={{ color: active ? "#fff" : MUTED }}
               >
+                {active && (
+                  <motion.span
+                    layoutId="estoqueFilterPill"
+                    className="absolute inset-0 rounded-lg -z-10"
+                    style={{ backgroundColor: ACCENT }}
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  />
+                )}
                 {tab.label}
                 <span
                   className="text-[11px] font-black tabular-nums"
@@ -199,11 +205,23 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
       {filtered.length === 0 ? (
         <EmptyState search={search} filter={filter} hasExtraFilters={hasExtraFilters} />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+        <motion.div
+          key={filter}
+          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"
+          initial="hidden"
+          animate="show"
+          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.035 } } }}
+        >
           {filtered.map((v) => (
-            <VehicleCard key={v.id} vehicle={v} onSold={handleSold} />
+            <motion.div
+              key={v.id}
+              variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+            >
+              <VehicleCard vehicle={v} onSold={handleSold} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   )
