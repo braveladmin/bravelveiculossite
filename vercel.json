@@ -11,7 +11,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/admin", "destination": "https://estoquebravel-master.vercel.app/admin" },
-    { "source": "/admin/:path*", "destination": "https://estoquebravel-master.vercel.app/admin/:path*" }
+    { "source": "/admin", "destination": "https://estoquebravel-master-beryl.vercel.app/admin" },
+    { "source": "/admin/:path*", "destination": "https://estoquebravel-master-beryl.vercel.app/admin/:path*" }
   ]
 }
