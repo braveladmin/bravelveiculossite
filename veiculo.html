@@ -51,8 +51,8 @@
               <i class="fa-solid fa-chevron-right"></i>
             </button>
             <div class="vp-gal-counter" id="vpGalCounter"></div>
-            <button class="vp-gal-ampliar" id="vpGalAmpliar">
-              <i class="fa-solid fa-expand"></i> AMPLIAR
+            <button class="vp-gal-ampliar" id="vpGalAmpliar" aria-label="Ampliar foto">
+              <i class="fa-solid fa-expand"></i>
             </button>
           </div>
           <div class="vp-thumbs" id="vpThumbs"></div>
@@ -60,15 +60,12 @@
 
         <!-- Info -->
         <div class="vp-info" style="animation:slideRight 0.6s ease 0.2s both">
-          <div style="animation:fadeUp 0.5s ease 0.3s both">
+          <div class="vp-title-block" style="animation:fadeUp 0.5s ease 0.3s both">
             <span class="vp-type-label" id="vpTypeLabel"></span>
             <h1 class="vp-title" id="vpTitle"></h1>
-            <p class="vp-version" id="vpVersion"></p>
           </div>
 
-          <div class="vp-quick-specs" id="vpQuickSpecs" style="animation:fadeUp 0.5s ease 0.42s both"></div>
-
-          <div class="vp-price-block" style="animation:fadeUp 0.5s ease 0.52s both">
+          <div class="vp-price-block" style="animation:fadeUp 0.5s ease 0.42s both">
             <div class="vp-price-bar"></div>
             <div class="vp-price-glow"></div>
             <div class="vp-price-content">
@@ -80,6 +77,8 @@
               </div>
             </div>
           </div>
+
+          <div class="vp-quick-specs" id="vpQuickSpecs" style="animation:fadeUp 0.5s ease 0.52s both"></div>
 
           <a href="#" class="vp-cta-wpp" id="vpCta1" style="animation:fadeUp 0.5s ease 0.62s both">
             <i class="fa-brands fa-whatsapp"></i>
@@ -267,7 +266,7 @@
 
       <!-- RELACIONADOS -->
       <section class="vp-section anim-up" id="vpRelatedSection">
-        <h2 class="vp-section-title">Você também pode gostar</h2>
+        <h2 class="vp-section-title" id="vpRelatedTitle">Você também pode gostar</h2>
         <div class="vp-related-carousel">
           <div class="vp-related-stage">
             <div class="vp-related-viewport" id="vpRelatedViewport">
@@ -292,7 +291,7 @@
     <div class="vp-mobile-bar-price" id="vpMobilePrice"></div>
     <a href="#" class="vp-mobile-bar-btn" id="vpMobileBtn">
       <i class="fa-brands fa-whatsapp"></i>
-      Tenho interesse nesse veículo
+      Tenho interesse
     </a>
   </div>
 
@@ -312,9 +311,12 @@
 
   <script src="vehicles.js"></script>
   <script>
+  (async () => {
+    await BRAVEL_VEHICLES_READY;
+
     // ─── Lê parâmetro da URL ──────────────────────────────────────
     const params = new URLSearchParams(window.location.search);
-    const vid = parseInt(params.get('id') ?? '0', 10);
+    const vid = params.get('id') ?? '';
     const v = BRAVEL_VEHICLES.find(x => x.id === vid);
 
     if (!v) {
@@ -322,12 +324,10 @@
         '<div style="text-align:center;padding:6rem 1.5rem;color:rgba(255,255,255,0.4)">' +
         '<p style="font-size:1.1rem">Veículo não encontrado.</p><br>' +
         '<a href="estoque.html" style="color:#cc1111;font-weight:700">← Voltar ao estoque</a></div>';
-      throw new Error('Veículo não encontrado');
+      return;
     }
 
     // ─── Helpers ─────────────────────────────────────────────────
-    const typeLabels = { suv:'SUV', sedan:'Sedan', hatch:'Hatchback', pickup:'Pick-up', moto:'Moto' };
-
     const wppLink = () => {
       const msg = `Olá, tenho interesse no ${v.model} ${v.version} ${v.year} anunciado por ${fmtPrice(v.price)}. Gostaria de mais informações.`;
       return `https://wa.me/${BRAVEL_WPP}?text=${encodeURIComponent(msg)}`;
@@ -339,9 +339,8 @@
       `${v.model} ${v.version} ${v.year}, ${v.km}, câmbio ${v.transmission}. ${fmtPrice(v.price)} na Bravel Veículos — Primavera do Leste MT.`;
 
     // ─── Informações básicas ──────────────────────────────────────
-    document.getElementById('vpTypeLabel').textContent = typeLabels[v.type] || v.type;
-    document.getElementById('vpTitle').textContent = v.model;
-    document.getElementById('vpVersion').textContent = v.version;
+    document.getElementById('vpTypeLabel').textContent = `${v.brand.toUpperCase()} • ${v.year}`;
+    document.getElementById('vpTitle').textContent = v.version;
     document.getElementById('vpEmoji').textContent = v.emoji;
     document.getElementById('vpPrice').textContent = fmtPrice(v.price);
     document.getElementById('vpMobilePrice').textContent = fmtPrice(v.price);
@@ -435,7 +434,7 @@
 
     // ─── Quick specs ──────────────────────────────────────────────
     const qsItems = [
-      { icon: 'fa-tag',           label: 'VERSÃO',      val: v.version },
+      { icon: 'fa-tag',           label: 'MODELO',      val: v.modelOnly },
       { icon: 'fa-bolt',          label: 'MOTOR',        val: v.motor || '—' },
       { icon: 'fa-calendar-days', label: 'ANO',          val: v.year },
       { icon: 'fa-gauge-high',    label: 'KM',           val: v.km },
@@ -471,10 +470,22 @@
       `Atendemos em Primavera do Leste - MT. Entre em contato para agendar uma visita ou receber mais fotos.`;
 
     // ─── Relacionados ─────────────────────────────────────────────
-    const others = BRAVEL_VEHICLES.filter(x => x.id !== v.id);
-    const sameType = others.filter(x => x.type === v.type || x.brand === v.brand);
-    const rest = others.filter(x => !sameType.includes(x));
-    const related = [...sameType, ...rest].slice(0, 6);
+    const TYPE_LABEL = { hatch:'Hatch', suv:'SUV', pickup:'Picape', sedan:'Sedã', minivan:'Minivan', esportivo:'Esportivo', moto:'Moto' };
+
+    const others    = BRAVEL_VEHICLES.filter(x => x.id !== v.id);
+    const sameType  = others.filter(x => x.type === v.type);
+    const sameBrand = others.filter(x => x.type !== v.type && x.brand === v.brand);
+    const rest      = others.filter(x => x.type !== v.type && x.brand !== v.brand);
+    const related   = [...sameType, ...sameBrand, ...rest].slice(0, 6);
+
+    // título dinâmico
+    const titleEl = document.getElementById('vpRelatedTitle');
+    if (sameType.length) {
+      const lbl = TYPE_LABEL[v.type] || v.type;
+      titleEl.innerHTML = `Outros <span style="color:var(--red)">${lbl}s</span> no estoque`;
+    } else {
+      titleEl.textContent = 'Confira também';
+    }
 
     if (!related.length) {
       document.getElementById('vpRelatedSection').style.display = 'none';
@@ -484,11 +495,15 @@
         const thumb = r.photos?.[0]
           ? `<img src="${r.photos[0]}" alt="${r.model}" loading="lazy" onerror="this.style.display='none'">`
           : '';
+        const badge = TYPE_LABEL[r.type]
+          ? `<span class="vp-rel-type-badge">${TYPE_LABEL[r.type]}</span>`
+          : '';
         rg.innerHTML += `
           <a href="veiculo.html?id=${r.id}" class="vp-related-card">
             <div class="vp-related-img" style="background:${r.gradient}">
               <div class="vp-related-fallback">${r.emoji}</div>
               ${thumb}
+              ${badge}
             </div>
             <div class="vp-related-body">
               <div class="vp-related-model">${r.model}</div>
@@ -774,6 +789,7 @@
     }, { threshold: 0.1 });
 
     document.querySelectorAll('.anim-up').forEach(el => animObserver.observe(el));
+  })();
   </script>
 </body>
 </html>

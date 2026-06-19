@@ -28,7 +28,10 @@ marketing/
 │   ├── google-ads-<YYYY-MM-DD>/  CSVs prontos pra importar
 │   └── relatorios/               relatórios semanais
 │
-└── avaliacoes-google/           histórico do /responder-avaliacoes (opcional)
+├── avaliacoes-google/           histórico do /responder-avaliacoes (opcional)
+│
+└── veiculos-instagram/           histórico do /postar-veiculo
+    └── historico.json            registro de cada post (carro, legenda, link, data)
 ```
 
 ## Como funciona
@@ -38,6 +41,8 @@ marketing/
 - **`/anuncio-google`** → cria pasta em `campanhas/google-ads-<data>/` com CSVs
 - **`/relatorio-ads`** → cria arquivo em `campanhas/relatorios/<data>-relatorio.md`
 - **`/responder-avaliacoes`** → opcionalmente salva histórico em `avaliacoes-google/`
+- **`/postar-veiculo`** → busca o carro no estoque, gera a prévia, e após sua confirmação
+  publica no Instagram e registra em `veiculos-instagram/historico.json`
 
 ## Versionamento
 

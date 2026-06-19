@@ -1,0 +1,152 @@
+"use client"
+
+import { useState } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+
+const BG      = "#0a0a0a"
+const SURFACE = "#181818"
+const SURF2   = "#111111"
+const BORDER  = "rgba(255,255,255,0.08)"
+const ACCENT  = "#cc1111"
+const TEXT    = "#ffffff"
+const MUTED   = "#777777"
+const DANGER  = "#a80e0e"
+
+export default function LoginPage() {
+  const router  = useRouter()
+  const [email,    setEmail]    = useState('')
+  const [password, setPassword] = useState('')
+  const [showPw,   setShowPw]   = useState(false)
+  const [loading,  setLoading]  = useState(false)
+  const [error,    setError]    = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const supabase = createClient()
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (authError) {
+      setError('E-mail ou senha incorretos.')
+      setLoading(false)
+      return
+    }
+
+    router.push('/estoque')
+    router.refresh()
+  }
+
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ backgroundColor: BG }}
+    >
+      <div className="w-full max-w-sm space-y-8">
+        {/* Logo */}
+        <div className="flex flex-col items-center gap-3">
+          <Image src="/bravel-logo.png" alt="Bravel Veículos" width={56} height={56} className="w-14 h-14 rounded-2xl" priority />
+          <div className="text-center">
+            <p className="text-[22px] font-black text-white tracking-wider">BRAVEL</p>
+            <p className="text-[12px] font-semibold tracking-[0.2em] uppercase" style={{ color: ACCENT }}>
+              Estoque
+            </p>
+          </div>
+        </div>
+
+        {/* Card */}
+        <div
+          className="rounded-2xl p-7 space-y-5"
+          style={{
+            backgroundColor: SURFACE,
+            border: `1px solid ${BORDER}`,
+            boxShadow: '0 24px 48px rgba(0,0,0,0.4)',
+          }}
+        >
+          <div>
+            <h1 className="text-[18px] font-black" style={{ color: TEXT }}>Entrar</h1>
+            <p className="text-[13px] mt-0.5" style={{ color: MUTED }}>Acesso restrito a colaboradores</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: MUTED }}>
+                E-mail
+              </label>
+              <div className="relative flex items-center">
+                <Mail className="absolute left-3 w-4 h-4 pointer-events-none" style={{ color: MUTED }} />
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full h-10 pl-9 pr-3 rounded-[10px] text-[13px] outline-none border transition-colors"
+                  style={{ backgroundColor: SURF2, borderColor: BORDER, color: TEXT, caretColor: ACCENT }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = ACCENT)}
+                  onBlur={(e)  => (e.currentTarget.style.borderColor = BORDER)}
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold tracking-[0.12em] uppercase" style={{ color: MUTED }}>
+                Senha
+              </label>
+              <div className="relative flex items-center">
+                <Lock className="absolute left-3 w-4 h-4 pointer-events-none" style={{ color: MUTED }} />
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-10 pl-9 pr-10 rounded-[10px] text-[13px] outline-none border transition-colors"
+                  style={{ backgroundColor: SURF2, borderColor: BORDER, color: TEXT, caretColor: ACCENT }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = ACCENT)}
+                  onBlur={(e)  => (e.currentTarget.style.borderColor = BORDER)}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-3"
+                  style={{ color: MUTED }}
+                >
+                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-[12px] font-medium" style={{ color: DANGER }}>{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-10 rounded-xl text-[13px] font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+              style={{
+                background: 'linear-gradient(135deg, #cc1111 0%, #a80e0e 100%)',
+                boxShadow: '0 2px 12px rgba(204,17,17,0.35)',
+              }}
+            >
+              {loading ? 'Entrando…' : 'Entrar'}
+            </button>
+          </form>
+        </div>
+
+        <p className="text-center text-[11px]" style={{ color: MUTED }}>
+          Somente usuários cadastrados podem acessar
+        </p>
+      </div>
+    </div>
+  )
+}

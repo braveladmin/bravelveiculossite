@@ -144,6 +144,14 @@
       font-size: 0.82rem; color: rgba(255,255,255,0.55); line-height: 1.55;
     }
     .sv-address-card strong { color: rgba(255,255,255,0.8); font-weight: 600; }
+    a.sv-address-card { text-decoration: none; transition: border-color 0.2s, background 0.2s; }
+    a.sv-address-card:hover { border-color: rgba(204,17,17,0.35); background: rgba(204,17,17,0.05); }
+    .sv-maps-hint {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      margin-top: 0.35rem; font-size: 0.72rem; font-weight: 600;
+      color: var(--red);
+    }
+    .sv-maps-hint i { font-size: 0.62rem; }
 
     /* ── Aviso de privacidade ── */
     .sv-notice {
@@ -175,6 +183,115 @@
     .sv-submit:active { transform: scale(0.98); }
     .sv-submit i { font-size: 1.2rem; }
 
+    /* ── Acordeão ── */
+    .sv-accordion {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.9rem;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+      background: rgba(255,255,255,0.02);
+    }
+    .sv-accordion-head {
+      width: 100%; display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.15rem;
+      background: none; border: none; cursor: pointer;
+      transition: background 0.2s;
+      user-select: none; text-align: left;
+    }
+    .sv-accordion-head:hover { background: rgba(255,255,255,0.04); }
+    .sv-accordion-title {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.82rem; font-weight: 700;
+      color: rgba(255,255,255,0.75); letter-spacing: 0.02em;
+    }
+    .sv-accordion-title .ai { color: var(--red); font-size: 0.85rem; }
+    .sv-accordion-chevron {
+      color: rgba(255,255,255,0.25); font-size: 0.72rem;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+    .sv-accordion.open .sv-accordion-chevron { transform: rotate(180deg); }
+    .sv-accordion-body {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.38s ease;
+    }
+    .sv-accordion.open .sv-accordion-body { max-height: 1200px; }
+    .sv-accordion-content { padding: 0 1.15rem 1.25rem; }
+
+    /* ── Avaliação online ── */
+    .sv-online-intro {
+      font-size: 0.83rem; color: rgba(255,255,255,0.45);
+      line-height: 1.65; margin-bottom: 1.25rem;
+    }
+    .sv-checklist-group { margin-bottom: 1.1rem; }
+    .sv-checklist-label {
+      font-size: 0.7rem; font-weight: 800;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .sv-checklist {
+      display: flex; flex-direction: column; gap: 0.45rem;
+      padding-left: 0;
+    }
+    .sv-checklist li {
+      display: flex; align-items: flex-start; gap: 0.55rem;
+      font-size: 0.82rem; color: rgba(255,255,255,0.55);
+      line-height: 1.45;
+    }
+    .sv-checklist li::before {
+      content: '';
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--red); flex-shrink: 0; margin-top: 0.42em;
+    }
+    .sv-online-tip {
+      background: rgba(204,17,17,0.07);
+      border: 1px solid rgba(204,17,17,0.2);
+      border-radius: 0.65rem; padding: 0.75rem 0.9rem;
+      font-size: 0.78rem; color: rgba(255,255,255,0.45);
+      line-height: 1.55; margin: 1rem 0 1.25rem;
+      display: flex; gap: 0.55rem; align-items: flex-start;
+    }
+    .sv-online-tip i { color: var(--red); flex-shrink: 0; margin-top: 0.12rem; }
+    .sv-wpp-online-btn {
+      display: flex; align-items: center; justify-content: center; gap: 0.55rem;
+      width: 100%; padding: 0.85rem;
+      background: rgba(37,211,102,0.1);
+      border: 1.5px solid rgba(37,211,102,0.35);
+      border-radius: 0.75rem;
+      color: #25d366; font-family: 'Montserrat', sans-serif;
+      font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .sv-wpp-online-btn:hover { background: rgba(37,211,102,0.18); border-color: rgba(37,211,102,0.6); }
+    .sv-wpp-online-btn i { font-size: 1.1rem; }
+
+    /* ── Animações de entrada ── */
+    @keyframes svFadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes svFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .sv-label    { animation: svFadeUp 0.55s ease both; animation-delay: 0.05s; }
+    .sv-title    { animation: svFadeUp 0.6s ease both;  animation-delay: 0.18s; }
+    .sv-sub      { animation: svFadeUp 0.6s ease both;  animation-delay: 0.32s; }
+    .sv-trust-row { animation: svFadeUp 0.55s ease both; animation-delay: 0.45s; }
+
+    .sv-accordion:nth-child(1) { animation: svFadeUp 0.55s ease both; animation-delay: 0.55s; }
+    .sv-accordion:nth-child(2) { animation: svFadeUp 0.55s ease both; animation-delay: 0.68s; }
+    .sv-accordion:nth-child(3) { animation: svFadeUp 0.55s ease both; animation-delay: 0.81s; }
+    .sv-accordion:nth-child(4) { animation: svFadeUp 0.55s ease both; animation-delay: 0.94s; }
+    .sv-notice   { animation: svFadeIn 0.5s ease both;  animation-delay: 1.05s; }
+    .sv-submit   { animation: svFadeUp 0.5s ease both;  animation-delay: 1.12s; }
+
     /* ── Responsivo ── */
     @media (max-width: 560px) {
       .sv-grid { grid-template-columns: 1fr; }
@@ -195,7 +312,7 @@
       <a href="index.html" class="vp-logo">
         <img src="site/bravel-logo.png" alt="Bravel Veículos" class="vp-logo-img">
       </a>
-      <a href="https://wa.me/556696400156" target="_blank" class="vp-wpp-btn">
+      <a href="https://wa.me/556699135492" target="_blank" class="vp-wpp-btn">
         <i class="fa-brands fa-whatsapp"></i>
         <span>WhatsApp</span>
       </a>
@@ -219,142 +336,192 @@
     <div class="sv-container">
 
       <!-- DADOS DO VEÍCULO -->
-      <div class="sv-block">
-        <p class="sv-section-title"><i class="fa-solid fa-car"></i> &nbsp;Dados do veículo</p>
-        <div class="sv-grid">
-
-          <div class="sv-field">
-            <label>Marca</label>
-            <input type="text" id="svMarca" placeholder="Ex: Honda, Toyota, VW..." autocomplete="off">
+      <div class="sv-accordion open">
+        <button class="sv-accordion-head" type="button">
+          <span class="sv-accordion-title"><i class="fa-solid fa-car ai"></i> Dados do veículo</span>
+          <i class="fa-solid fa-chevron-down sv-accordion-chevron"></i>
+        </button>
+        <div class="sv-accordion-body">
+          <div class="sv-accordion-content">
+            <div class="sv-grid">
+              <div class="sv-field">
+                <label>Marca</label>
+                <input type="text" id="svMarca" placeholder="Ex: Honda, Toyota, VW..." autocomplete="off">
+              </div>
+              <div class="sv-field">
+                <label>Modelo</label>
+                <input type="text" id="svModelo" placeholder="Ex: Civic, Corolla, Gol..." autocomplete="off">
+              </div>
+              <div class="sv-field">
+                <label>Ano</label>
+                <input type="text" id="svAno" placeholder="Ex: 2021/2022" inputmode="numeric" autocomplete="off">
+              </div>
+              <div class="sv-field">
+                <label>KM rodados</label>
+                <input type="text" id="svKm" placeholder="Ex: 45.000" inputmode="numeric" autocomplete="off">
+              </div>
+              <div class="sv-field">
+                <label>Combustível</label>
+                <select id="svCombustivel">
+                  <option value="" disabled selected>Selecione</option>
+                  <option>Flex (Gasolina/Etanol)</option>
+                  <option>Gasolina</option>
+                  <option>Diesel</option>
+                  <option>Elétrico</option>
+                  <option>Híbrido</option>
+                  <option>GNV</option>
+                </select>
+              </div>
+              <div class="sv-field">
+                <label>Câmbio</label>
+                <select id="svCambio">
+                  <option value="" disabled selected>Selecione</option>
+                  <option>Automático</option>
+                  <option>Manual</option>
+                  <option>CVT</option>
+                  <option>Automatizado</option>
+                </select>
+              </div>
+              <div class="sv-field">
+                <label>Cor</label>
+                <input type="text" id="svCor" placeholder="Ex: Prata, Preto, Branco..." autocomplete="off">
+              </div>
+              <div class="sv-field">
+                <label>Estado de conservação</label>
+                <select id="svConservacao">
+                  <option value="" disabled selected>Selecione</option>
+                  <option>Excelente — sem marcas</option>
+                  <option>Bom — pequenos detalhes</option>
+                  <option>Regular — precisa de reparos</option>
+                </select>
+              </div>
+              <div class="sv-field sv-field-full">
+                <label>Observações adicionais (opcional)</label>
+                <textarea id="svObs" placeholder="Ex: revisado, com manual, segunda chave, acessórios..."></textarea>
+              </div>
+            </div>
           </div>
-
-          <div class="sv-field">
-            <label>Modelo</label>
-            <input type="text" id="svModelo" placeholder="Ex: Civic, Corolla, Gol..." autocomplete="off">
-          </div>
-
-          <div class="sv-field">
-            <label>Ano</label>
-            <input type="text" id="svAno" placeholder="Ex: 2021/2022" inputmode="numeric" autocomplete="off">
-          </div>
-
-          <div class="sv-field">
-            <label>KM rodados</label>
-            <input type="text" id="svKm" placeholder="Ex: 45.000" inputmode="numeric" autocomplete="off">
-          </div>
-
-          <div class="sv-field">
-            <label>Combustível</label>
-            <select id="svCombustivel">
-              <option value="" disabled selected>Selecione</option>
-              <option>Flex (Gasolina/Etanol)</option>
-              <option>Gasolina</option>
-              <option>Diesel</option>
-              <option>Elétrico</option>
-              <option>Híbrido</option>
-              <option>GNV</option>
-            </select>
-          </div>
-
-          <div class="sv-field">
-            <label>Câmbio</label>
-            <select id="svCambio">
-              <option value="" disabled selected>Selecione</option>
-              <option>Automático</option>
-              <option>Manual</option>
-              <option>CVT</option>
-              <option>Automatizado</option>
-            </select>
-          </div>
-
-          <div class="sv-field">
-            <label>Cor</label>
-            <input type="text" id="svCor" placeholder="Ex: Prata, Preto, Branco..." autocomplete="off">
-          </div>
-
-          <div class="sv-field">
-            <label>Estado de conservação</label>
-            <select id="svConservacao">
-              <option value="" disabled selected>Selecione</option>
-              <option>Excelente — sem marcas</option>
-              <option>Bom — pequenos detalhes</option>
-              <option>Regular — precisa de reparos</option>
-            </select>
-          </div>
-
-          <div class="sv-field sv-field-full">
-            <label>Observações adicionais (opcional)</label>
-            <textarea id="svObs" placeholder="Ex: revisado, com manual, segunda chave, acessórios..."></textarea>
-          </div>
-
         </div>
       </div>
 
       <!-- DADOS DE CONTATO -->
-      <div class="sv-block">
-        <p class="sv-section-title"><i class="fa-solid fa-user"></i> &nbsp;Seus dados</p>
-        <div class="sv-grid">
-
-          <div class="sv-field sv-field-full">
-            <label>Nome completo</label>
-            <input type="text" id="svNome" placeholder="Seu nome" autocomplete="off">
+      <div class="sv-accordion open">
+        <button class="sv-accordion-head" type="button">
+          <span class="sv-accordion-title"><i class="fa-solid fa-user ai"></i> Seus dados</span>
+          <i class="fa-solid fa-chevron-down sv-accordion-chevron"></i>
+        </button>
+        <div class="sv-accordion-body">
+          <div class="sv-accordion-content">
+            <div class="sv-grid">
+              <div class="sv-field sv-field-full">
+                <label>Nome completo</label>
+                <input type="text" id="svNome" placeholder="Seu nome" autocomplete="off">
+              </div>
+              <div class="sv-field sv-field-full">
+                <label>Telefone / WhatsApp</label>
+                <input type="tel" id="svTelefone" placeholder="(66) 9 9999-9999" inputmode="tel" autocomplete="off">
+              </div>
+            </div>
           </div>
-
-          <div class="sv-field sv-field-full">
-            <label>Telefone / WhatsApp</label>
-            <input type="tel" id="svTelefone" placeholder="(66) 9 9999-9999" inputmode="tel" autocomplete="off">
-          </div>
-
         </div>
       </div>
 
-      <!-- AGENDAMENTO -->
-      <div class="sv-block">
-        <p class="sv-section-title"><i class="fa-solid fa-calendar-check"></i> &nbsp;Agendar avaliação presencial</p>
+      <!-- AVALIAÇÃO ONLINE -->
+      <div class="sv-accordion open">
+        <button class="sv-accordion-head" type="button">
+          <span class="sv-accordion-title"><i class="fa-solid fa-camera ai"></i> Avaliação online por fotos e vídeos</span>
+          <i class="fa-solid fa-chevron-down sv-accordion-chevron"></i>
+        </button>
+        <div class="sv-accordion-body">
+          <div class="sv-accordion-content">
+            <p class="sv-online-intro">Não consegue vir pessoalmente? Envie fotos e vídeos detalhados do seu veículo pelo WhatsApp. Nossa equipe analisa e retorna com uma proposta em até 24h.</p>
 
-        <div class="sv-address-card">
-          <i class="fa-solid fa-map-location-dot"></i>
-          <p>
-            <strong>Bravel Veículos</strong><br>
-            Av. Amazonas, 45 — Primavera II<br>
-            Primavera do Leste — MT
-          </p>
-        </div>
+            <div class="sv-checklist-group">
+              <p class="sv-checklist-label"><i class="fa-solid fa-camera"></i> Fotos obrigatórias</p>
+              <ul class="sv-checklist">
+                <li>Frente do veículo (em local bem iluminado)</li>
+                <li>Traseira completa</li>
+                <li>Lateral direita e lateral esquerda</li>
+                <li>Teto e para-brisa</li>
+                <li>Interior — painel completo ligado</li>
+                <li>Bancos dianteiros e traseiros</li>
+                <li>Porta-malas aberto</li>
+                <li>Hodômetro mostrando a quilometragem atual</li>
+              </ul>
+            </div>
 
-        <div class="sv-grid">
+            <div class="sv-checklist-group">
+              <p class="sv-checklist-label"><i class="fa-solid fa-video"></i> Vídeos recomendados</p>
+              <ul class="sv-checklist">
+                <li>Motor ligando e rodando por 30 segundos</li>
+                <li>Painel com carro ligado — verifique se há luzes de alerta acesas</li>
+                <li>Volta completa filmando o exterior do veículo</li>
+                <li>Interior — mostre bancos, teto e acabamentos</li>
+              </ul>
+            </div>
 
-          <div class="sv-field">
-            <label>Data preferida</label>
-            <input type="date" id="svData">
+            <div class="sv-online-tip">
+              <i class="fa-solid fa-lightbulb"></i>
+              <span>Registre qualquer amassado, risco ou avaria existente — isso garante uma avaliação mais precisa e evita surpresas na visita presencial.</span>
+            </div>
+
+            <a href="https://wa.me/556699135492?text=Olá!%20Gostaria%20de%20fazer%20uma%20avaliação%20online%20do%20meu%20veículo.%20Vou%20enviar%20as%20fotos%20e%20vídeos%20agora." target="_blank" class="sv-wpp-online-btn">
+              <i class="fa-brands fa-whatsapp"></i> Enviar fotos e vídeos pelo WhatsApp
+            </a>
           </div>
+        </div>
+      </div>
 
-          <div class="sv-field">
-            <label>Período</label>
-            <div class="sv-period-btns" id="svPeriodoBtns">
-              <button type="button" class="sv-period-btn active" data-val="Manhã (8h–12h)">☀️ Manhã</button>
-              <button type="button" class="sv-period-btn" data-val="Tarde (13h–18h)">🌤 Tarde</button>
+      <!-- AGENDAMENTO PRESENCIAL -->
+      <div class="sv-accordion open">
+        <button class="sv-accordion-head" type="button">
+          <span class="sv-accordion-title"><i class="fa-solid fa-calendar-check ai"></i> Agendar avaliação presencial</span>
+          <i class="fa-solid fa-chevron-down sv-accordion-chevron"></i>
+        </button>
+        <div class="sv-accordion-body">
+          <div class="sv-accordion-content">
+            <a href="https://www.google.com/maps/search/?api=1&query=Av.+Amazonas,+45,+Primavera+II,+Primavera+do+Leste,+MT" target="_blank" class="sv-address-card">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <p>
+                <strong>Bravel Veículos</strong><br>
+                Av. Amazonas, 45 — Primavera II<br>
+                Primavera do Leste — MT
+                <span class="sv-maps-hint"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir no Maps</span>
+              </p>
+            </a>
+            <div class="sv-grid">
+              <div class="sv-field">
+                <label>Data preferida</label>
+                <input type="date" id="svData">
+              </div>
+              <div class="sv-field">
+                <label>Período</label>
+                <div class="sv-period-btns" id="svPeriodoBtns">
+                  <button type="button" class="sv-period-btn active" data-val="Manhã (8h–12h)">☀️ Manhã</button>
+                  <button type="button" class="sv-period-btn" data-val="Tarde (13h–18h)">🌤 Tarde</button>
+                </div>
+              </div>
             </div>
           </div>
-
         </div>
       </div>
 
       <!-- AVISO + BOTÃO -->
-      <div class="sv-notice">
+      <div class="sv-notice" style="margin-top:1.25rem">
         <i class="fa-solid fa-lock"></i>
         <span>Seus dados são enviados <strong>somente para a loja</strong> via WhatsApp. Não armazenamos nenhuma informação.</span>
       </div>
 
       <button type="button" class="sv-submit" id="svSubmit">
         <i class="fa-brands fa-whatsapp"></i>
-        Enviar e agendar avaliação
+        Enviar e agendar avaliação presencial
       </button>
 
     </div>
   </main>
 
   <script>
-    const BRAVEL_WPP = '556696400156';
+    const BRAVEL_WPP = '556699135492';
 
     // ── Máscara de telefone ──
     const telEl = document.getElementById('svTelefone');
@@ -435,6 +602,13 @@
         `Aguardo o contato!`;
 
       window.open(`https://wa.me/${BRAVEL_WPP}?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+
+    // ── Acordeão ──
+    document.querySelectorAll('.sv-accordion-head').forEach(head => {
+      head.addEventListener('click', () => {
+        head.closest('.sv-accordion').classList.toggle('open');
+      });
     });
   </script>
 </body>

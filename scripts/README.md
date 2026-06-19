@@ -14,6 +14,8 @@ Conforme você for ativando skills, isso aqui vai sendo populado. Lista do que c
 | `/carrossel` (render PNG) | `render.js` (gerado por carrossel, fica na pasta do conteúdo) | Playwright tira screenshot 1080x1350 de cada slide |
 | `/aprovar-post` | `postar-instagram.js` | Publica carrossel no Instagram via Meta Graph API |
 | `/aprovar-post` | `postar-facebook.js` | Publica carrossel no Facebook via Meta Graph API |
+| `/postar-veiculo` | `buscar-veiculo.js` | Busca um carro no estoque (Supabase) pelo nome/marca/modelo |
+| `/postar-veiculo` | `postar-instagram-veiculo.js` | Publica foto única ou carrossel de um veículo no Instagram |
 | `/anuncio-google` | (nenhum — gera CSV direto) | — |
 | `/relatorio-ads` | (lê CSV exportado das plataformas) | — |
 
@@ -26,10 +28,12 @@ A maioria dos scripts depende de:
 **.env** na raiz do projeto com as chaves de API:
 ```bash
 OPENAI_API_KEY=sk-...               # pra gerar-imagem.js
-META_PAGE_ACCESS_TOKEN=...          # pra postar-instagram.js + postar-facebook.js
+META_PAGE_ACCESS_TOKEN=...          # pra postar-instagram.js + postar-facebook.js + postar-instagram-veiculo.js
 META_PAGE_ID=...
 META_IG_USER_ID=...
 SITE_URL=https://seudominio.com.br
+SUPABASE_URL=...                    # pra buscar-veiculo.js (mesmo projeto do painel ADM)
+SUPABASE_ANON_KEY=...
 ```
 
 **Playwright** (pra renderizar HTML em PNG):

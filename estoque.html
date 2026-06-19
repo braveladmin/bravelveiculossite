@@ -383,7 +383,7 @@
       </ul>
 
       <div class="nav-right">
-        <a href="https://wa.me/556696400156?text=Olá!%20Vi%20o%20site%20da%20Bravel%20Veículos%20e%20gostaria%20de%20mais%20informações." target="_blank" class="btn btn-whatsapp-nav">
+        <a href="https://wa.me/556699135492?text=Olá!%20Vi%20o%20site%20da%20Bravel%20Veículos%20e%20gostaria%20de%20mais%20informações." target="_blank" class="btn btn-whatsapp-nav">
           <i class="fa-brands fa-whatsapp"></i> WhatsApp
         </a>
         <button class="menu-dots" id="menuDots" aria-label="Menu">
@@ -399,7 +399,7 @@
         <li><a href="index.html#servicos" class="mobile-link">Serviços</a></li>
         <li><a href="index.html#contato" class="mobile-link">Contato</a></li>
         <li>
-          <a href="https://wa.me/556696400156" target="_blank" class="mobile-whatsapp">
+          <a href="https://wa.me/556699135492" target="_blank" class="mobile-whatsapp">
             <i class="fa-brands fa-whatsapp"></i> Falar no WhatsApp
           </a>
         </li>
@@ -500,7 +500,7 @@
           <a href="https://www.instagram.com/bravelveiculos/" target="_blank" class="social-btn" aria-label="Instagram">
             <i class="fa-brands fa-instagram"></i>
           </a>
-          <a href="https://wa.me/556696400156" target="_blank" class="social-btn" aria-label="WhatsApp">
+          <a href="https://wa.me/556699135492" target="_blank" class="social-btn" aria-label="WhatsApp">
             <i class="fa-brands fa-whatsapp"></i>
           </a>
         </div>
@@ -540,7 +540,7 @@
   </div>
 
   <!-- WhatsApp flutuante -->
-  <a href="https://wa.me/556696400156?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20mais%20informações." target="_blank" class="whatsapp-float" aria-label="Chamar no WhatsApp">
+  <a href="https://wa.me/556699135492?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20mais%20informações." target="_blank" class="whatsapp-float" aria-label="Chamar no WhatsApp">
     <i class="fa-brands fa-whatsapp"></i>
   </a>
 
@@ -549,6 +549,9 @@
   ============================================================ -->
   <script src="vehicles.js"></script>
   <script>
+  (async () => {
+    await BRAVEL_VEHICLES_READY;
+
     // ─── Helpers ─────────────────────────────────────────────────
     const wppMsg = v => encodeURIComponent(
       `Olá! Vi no site da Bravel Veículos e tenho interesse no ${v.model} ${v.year} por ${fmtPrice(v.price)}. Ainda está disponível?`
@@ -747,7 +750,7 @@
       document.querySelectorAll('.clc-ampliar').forEach(btn => {
         btn.addEventListener('click', e => {
           e.stopPropagation();
-          const id = parseInt(btn.dataset.id);
+          const id = btn.dataset.id;
           const vehicle = BRAVEL_VEHICLES.find(v => v.id === id);
           if (vehicle?.photos?.length) {
             const carousel = btn.closest('.clc-carousel');
@@ -764,6 +767,7 @@
 
     // ─── Init ────────────────────────────────────────────────────
     renderCars(BRAVEL_VEHICLES);
+  })();
   </script>
 </body>
 </html>

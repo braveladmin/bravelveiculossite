@@ -17,6 +17,11 @@ Thumbs.db
 # Dependências
 node_modules/
 
+# Variáveis de ambiente (NUNCA versionar)
+.env
+.env.local
+.env*.local
+
 # Arquivos temporários
 *.log
 *.tmp
@@ -25,3 +30,6 @@ node_modules/
 dados/*
 !dados/README.md
 .vercel
+
+# Payload temporário do /postar-veiculo (regenerado a cada execução)
+marketing/veiculos-instagram/.tmp-*.json
