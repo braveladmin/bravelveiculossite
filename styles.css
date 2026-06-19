@@ -279,7 +279,7 @@ ul { list-style: none; }
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: 50% 38%;
+  object-position: 50% 30%;
   opacity: 0.75;
   filter: brightness(0.78) saturate(1.05);
   user-select: none;
@@ -1421,7 +1421,7 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   /* Hero — mobile equilibrado */
   #hero { align-items: flex-start; min-height: auto; }
 
-  .hero-bg-logo-img { opacity: 0.5; object-position: 50% 32%; }
+  .hero-bg-logo-img { opacity: 0.3; object-position: 70% 22%; }
 
   .hero-bg-glow {
     background:
