@@ -279,7 +279,7 @@ ul { list-style: none; }
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: 50% 30%;
+  object-position: 50% 38%;
   opacity: 0.75;
   filter: brightness(0.78) saturate(1.05);
   user-select: none;
@@ -441,6 +441,15 @@ ul { list-style: none; }
   transition: all 0.2s; animation: bounce 2.2s ease-in-out infinite;
 }
 .hero-scroll-indicator:hover { border-color: var(--red); color: var(--red); }
+
+/* Telas largas porém baixas (notebook com janela curta) — a foto de fundo
+   fica zoom demais e o título compete com a placa. Reduz só nesse caso. */
+@media (min-width: 1025px) and (max-height: 820px) {
+  .hero-title    { font-size: 3.1rem; margin-bottom: 1rem; }
+  .hero-subtitle { margin-bottom: 1.4rem; }
+  .hero-features { margin-bottom: 1.6rem; }
+  .hero-bg-logo-img { opacity: 0.55; object-position: 50% 30%; }
+}
 
 /* ============================================================
    TRUST BAR (antigo stats)
@@ -1252,6 +1261,9 @@ ul { list-style: none; }
 
 .av-rev-controls { display: none; }
 
+.av-cta { display: flex; justify-content: center; margin-top: 2.5rem; }
+.av-cta .btn img.av-g-sm { width: 16px; height: 16px; }
+
 /* ============================================================
    SERVIÇOS
 ============================================================ */
@@ -1421,7 +1433,7 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   /* Hero — mobile equilibrado */
   #hero { align-items: flex-start; min-height: auto; }
 
-  .hero-bg-logo-img { opacity: 0.3; object-position: 70% 22%; }
+  .hero-bg-logo-img { opacity: 0.5; object-position: 50% 32%; }
 
   .hero-bg-glow {
     background:

@@ -23,12 +23,20 @@ type Props = {
   userInfo: UserInfo | null
 }
 
-export function EstoqueClient({ vehicles }: Props) {
+export function EstoqueClient({ vehicles: initialVehicles }: Props) {
+  const [vehicles, setVehicles] = useState(initialVehicles)
   const [search,   setSearch]   = useState("")
   const [filter,   setFilter]   = useState<FilterTab>("disponivel")
   const [category, setCategory] = useState("")
   const [priceMin, setPriceMin] = useState("")
   const [priceMax, setPriceMax] = useState("")
+
+  function handleSold(id: string) {
+    setVehicles((vs) => vs.map((v) =>
+      v.id === id ? { ...v, status: "vendido", soldAt: new Date().toISOString() } : v
+    ))
+    setFilter("vendido")
+  }
 
   const counts = useMemo(() => ({
     disponivel: vehicles.filter((v) => v.status === "disponivel").length,
@@ -193,7 +201,7 @@ export function EstoqueClient({ vehicles }: Props) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
           {filtered.map((v) => (
-            <VehicleCard key={v.id} vehicle={v} />
+            <VehicleCard key={v.id} vehicle={v} onSold={handleSold} />
           ))}
         </div>
       )}

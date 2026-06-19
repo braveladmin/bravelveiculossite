@@ -1,10 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { Chip } from "@heroui/react"
-import { Star } from "lucide-react"
+import { CheckCircle2, Star } from "lucide-react"
 import { formatCurrency, formatKm } from "@/lib/format"
 import { STATUS_CFG } from "@/lib/constants"
+import { ConfirmModal } from "@/components/ui/ConfirmModal"
+import { markAsSold } from "@/lib/actions/vehicles"
 import type { Vehicle } from "@/lib/types"
 
 const CARD    = "#181818"
@@ -30,16 +33,35 @@ function formatCompact(v: number): string {
 
 type Props = {
   vehicle: Vehicle
+  onSold?: (id: string) => void
 }
 
-export function VehicleCard({ vehicle }: Props) {
+export function VehicleCard({ vehicle, onSold }: Props) {
   const sc       = STATUS_CFG[vehicle.status] ?? STATUS_CFG.disponivel
   const coverUrl = vehicle.images?.[0] ?? vehicle.imageUrl ?? PLACEHOLDER_IMAGE
   const days     = daysInStock(vehicle.acquiredAt ?? vehicle.createdAt)
   const isSold   = vehicle.status === "vendido"
   const isPrep   = vehicle.status === "em_preparacao"
 
+  const [showConfirmSold, setShowConfirmSold] = useState(false)
+  const [saving,          setSaving]          = useState(false)
+
+  function openConfirmSold(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowConfirmSold(true)
+  }
+
+  async function handleConfirmSold() {
+    setSaving(true)
+    await markAsSold(vehicle.id)
+    setSaving(false)
+    setShowConfirmSold(false)
+    onSold?.(vehicle.id)
+  }
+
   return (
+    <>
     <Link
       href={`/estoque/${vehicle.id}`}
       className={`group block rounded-xl overflow-hidden transition-all duration-200 ${isSold || isPrep ? "opacity-60" : ""}`}
@@ -153,13 +175,33 @@ export function VehicleCard({ vehicle }: Props) {
           </p>
         </div>
 
-        <p
-          className="text-center text-[11px] font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ color: ACCENT }}
-        >
-          Ver detalhes →
-        </p>
+        <div className="flex items-center justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {!isSold && (
+            <button
+              type="button"
+              onClick={openConfirmSold}
+              className="inline-flex items-center gap-1 text-[10.5px] font-semibold px-2 py-1 rounded-lg transition-colors hover:bg-white/10"
+              style={{ color: TEXT2 }}
+            >
+              <CheckCircle2 className="w-3 h-3" />
+              Marcar como vendido
+            </button>
+          )}
+          <p className="text-[11px] font-semibold ml-auto" style={{ color: ACCENT }}>
+            Ver detalhes →
+          </p>
+        </div>
       </div>
     </Link>
+
+    <ConfirmModal
+      open={showConfirmSold}
+      onClose={() => setShowConfirmSold(false)}
+      onConfirm={handleConfirmSold}
+      title="Marcar como vendido"
+      description={`Confirma que "${vehicle.name}" foi vendido? Ele vai pra seção de vendidos do estoque.`}
+      confirmLabel={saving ? "Salvando..." : "Marcar como vendido"}
+    />
+    </>
   )
 }
