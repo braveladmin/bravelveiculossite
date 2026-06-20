@@ -1,5 +1,5 @@
 import type { Vehicle } from "@/lib/types"
-import { STORE_NAME, STORE_CITY, STORE_WHATSAPP, SELLERS } from "@/lib/constants"
+import { STORE_NAME, STORE_ADDRESS, STORE_WHATSAPP, SELLERS } from "@/lib/constants"
 
 const FALLBACK_OPTIONALS = "diversos itens de conforto, segurança e tecnologia"
 const MAX_HASHTAGS = 10
@@ -67,7 +67,7 @@ export function gerarLegenda(vehicle: Vehicle): string {
   if (vehicle.price) blocos.push(`💰 ${formatPrecoSemCentavos(vehicle.price)}`)
 
   const contatos = [
-    `📍 ${STORE_NAME} — ${STORE_CITY}`,
+    `📍 ${STORE_ADDRESS}`,
     `📞 ${STORE_WHATSAPP} — ${STORE_NAME}`,
     ...SELLERS.map((s) => `📞 ${s.phone} — ${s.name}`),
   ].join("\n")

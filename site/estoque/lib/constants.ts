@@ -26,6 +26,7 @@ export const MEDIA_STATUS_CFG = {
 // Dados fixos da loja, usados nos previews e legendas geradas
 export const STORE_NAME     = 'Bravel Veículos'
 export const STORE_CITY     = 'Primavera do Leste, MT'
+export const STORE_ADDRESS  = 'Av. Amazonas, 45 — Primavera II, Primavera do Leste - MT'
 export const STORE_WHATSAPP = '(66) 9913-5492'
 
 // Vendedores — contato sempre incluído no final das legendas geradas
