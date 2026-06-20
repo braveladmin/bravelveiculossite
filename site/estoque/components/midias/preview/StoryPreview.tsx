@@ -1,7 +1,6 @@
 "use client"
 
 import Image from "next/image"
-import { MessageCircle } from "lucide-react"
 import { formatPrecoSemCentavos } from "@/lib/midias/legenda"
 import { STORE_NAME, STORE_CITY } from "@/lib/constants"
 import type { Vehicle } from "@/lib/types"
@@ -22,7 +21,7 @@ export function StoryPreview({ vehicle }: Props) {
       <img src={cover} alt={vehicle.name} onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
 
       {/* Logo da loja */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-start justify-between" style={{ padding: "5% 6% 0" }}>
+      <div className="absolute bottom-0 right-0 z-10" style={{ padding: "0 6% 5% 0" }}>
         <Image
           src="/bravel-logo.png"
           alt="Bravel Veículos"
@@ -49,18 +48,10 @@ export function StoryPreview({ vehicle }: Props) {
 
         {vehicle.price > 0 && (
           <div className="mt-4 pt-3" style={{ borderTop: "2px solid #cc1111" }}>
-            <p className="preview-commercial text-white/50 text-[10px] font-bold uppercase tracking-[0.2em]">A partir de</p>
+            <p className="preview-commercial text-white/50 text-[10px] font-bold uppercase tracking-[0.2em]">Valor a vista</p>
             <p className="preview-display text-white text-[40px] leading-none mt-0.5">{formatPrecoSemCentavos(vehicle.price)}</p>
           </div>
         )}
-
-        <div
-          className="preview-commercial flex items-center justify-center gap-2 mt-4 px-4 py-3 rounded-lg"
-          style={{ backgroundColor: "#cc1111" }}
-        >
-          <MessageCircle className="w-4 h-4 text-white" />
-          <span className="text-white text-[14px] font-extrabold uppercase tracking-wide">Chama no WhatsApp</span>
-        </div>
 
         <div className="flex items-center justify-center gap-1.5 mt-3">
           <span className="preview-commercial text-white/60 text-[11px] font-semibold">{STORE_NAME}</span>
