@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { formatPrecoSemCentavos } from "@/lib/midias/legenda"
-import { STORE_NAME, STORE_CITY } from "@/lib/constants"
+import { STORE_NAME } from "@/lib/constants"
 import type { Vehicle } from "@/lib/types"
 
 const PLACEHOLDER_IMAGE =
@@ -36,27 +36,25 @@ export function StoryPreview({ vehicle }: Props) {
         className="safe-area flex flex-col justify-end"
         style={{ background: "linear-gradient(to top, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.75) 30%, rgba(10,10,10,0.15) 60%, transparent 80%)" }}
       >
-        <p className="preview-commercial text-[#cc1111] text-[11px] font-bold uppercase tracking-[0.18em]">
+        <p className="preview-commercial text-[#cc1111] text-[9px] font-bold uppercase tracking-[0.16em]">
           {[vehicle.brand, vehicle.model].filter(Boolean).join(" · ")}
         </p>
-        <h2 className="preview-display text-white text-[42px] leading-[0.95] mt-1">
+        <h2 className="preview-display text-white text-[30px] leading-[0.95] mt-1">
           {vehicle.name || `${vehicle.brand} ${vehicle.model}`}
         </h2>
         {anoLinha && (
-          <p className="preview-commercial text-white/60 text-[13px] font-medium mt-1">{anoLinha}</p>
+          <p className="preview-commercial text-white/60 text-[11px] font-medium mt-1">{anoLinha}</p>
         )}
 
         {vehicle.price > 0 && (
-          <div className="mt-4 pt-3" style={{ borderTop: "2px solid #cc1111" }}>
-            <p className="preview-commercial text-white/50 text-[10px] font-bold uppercase tracking-[0.2em]">Valor a vista</p>
-            <p className="preview-display text-white text-[40px] leading-none mt-0.5">{formatPrecoSemCentavos(vehicle.price)}</p>
+          <div className="mt-3 pt-2.5" style={{ borderTop: "2px solid #cc1111" }}>
+            <p className="preview-commercial text-white/50 text-[9px] font-bold uppercase tracking-[0.18em]">Valor a vista</p>
+            <p className="preview-display text-white text-[28px] leading-none mt-0.5">{formatPrecoSemCentavos(vehicle.price)}</p>
           </div>
         )}
 
-        <div className="flex items-center justify-center gap-1.5 mt-3">
+        <div className="flex items-center justify-center mt-3">
           <span className="preview-commercial text-white/60 text-[11px] font-semibold">{STORE_NAME}</span>
-          <span className="text-white/30 text-[11px]">·</span>
-          <span className="preview-commercial text-white/40 text-[11px]">{STORE_CITY}</span>
         </div>
       </div>
     </div>
