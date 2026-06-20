@@ -132,7 +132,8 @@ DROP VIEW IF EXISTS public_vehicles;
 CREATE VIEW public_vehicles AS
 SELECT
   id, name, brand, model, year, year_model, km, color, category,
-  transmission, fuel, motor, optionals, images, price, created_at
+  transmission, fuel, motor, optionals, images, price, created_at,
+  is_premium
 FROM vehicles
 WHERE status = 'disponivel' AND archived_at IS NULL;
 

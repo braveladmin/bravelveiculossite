@@ -7,7 +7,7 @@ import { CheckCircle2, Star } from "lucide-react"
 import { formatCurrency, formatKm } from "@/lib/format"
 import { STATUS_CFG } from "@/lib/constants"
 import { ConfirmModal } from "@/components/ui/ConfirmModal"
-import { markAsSold } from "@/lib/actions/vehicles"
+import { markAsSold, updateVehicleAction } from "@/lib/actions/vehicles"
 import type { Vehicle } from "@/lib/types"
 
 const CARD    = "#181818"
@@ -34,9 +34,10 @@ function formatCompact(v: number): string {
 type Props = {
   vehicle: Vehicle
   onSold?: (id: string) => void
+  onFeatureToggle?: (id: string, isPremium: boolean) => void
 }
 
-export function VehicleCard({ vehicle, onSold }: Props) {
+export function VehicleCard({ vehicle, onSold, onFeatureToggle }: Props) {
   const sc       = STATUS_CFG[vehicle.status] ?? STATUS_CFG.disponivel
   const coverUrl = vehicle.images?.[0] ?? vehicle.imageUrl ?? PLACEHOLDER_IMAGE
   const days     = daysInStock(vehicle.acquiredAt ?? vehicle.createdAt)
@@ -45,6 +46,7 @@ export function VehicleCard({ vehicle, onSold }: Props) {
 
   const [showConfirmSold, setShowConfirmSold] = useState(false)
   const [saving,          setSaving]          = useState(false)
+  const [togglingFeature, setTogglingFeature] = useState(false)
 
   function openConfirmSold(e: React.MouseEvent) {
     e.preventDefault()
@@ -58,6 +60,17 @@ export function VehicleCard({ vehicle, onSold }: Props) {
     setSaving(false)
     setShowConfirmSold(false)
     onSold?.(vehicle.id)
+  }
+
+  async function handleToggleFeatured(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (togglingFeature) return
+    const next = !vehicle.isPremium
+    setTogglingFeature(true)
+    await updateVehicleAction(vehicle.id, { isPremium: next })
+    setTogglingFeature(false)
+    onFeatureToggle?.(vehicle.id, next)
   }
 
   return (
@@ -176,6 +189,16 @@ export function VehicleCard({ vehicle, onSold }: Props) {
         </div>
 
         <div className="flex items-center justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={handleToggleFeatured}
+            disabled={togglingFeature}
+            title={vehicle.isPremium ? "Remover destaque do site" : "Destacar no site"}
+            className="inline-flex items-center justify-center w-6 h-6 rounded-lg transition-colors hover:bg-white/10 shrink-0"
+            style={{ color: vehicle.isPremium ? YELLOW : TEXT2 }}
+          >
+            <Star className="w-3.5 h-3.5" fill={vehicle.isPremium ? YELLOW : "none"} />
+          </button>
           {!isSold && (
             <button
               type="button"

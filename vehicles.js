@@ -51,6 +51,7 @@ function rowToSiteVehicle(row) {
     optionals: row.optionals || [],
     description: null,
     badge: isNew ? 'Novo no estoque' : null,
+    isPremium: !!row.is_premium,
   };
 }
 

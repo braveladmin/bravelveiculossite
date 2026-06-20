@@ -39,6 +39,10 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
     setFilter("vendido")
   }
 
+  function handleFeatureToggle(id: string, isPremium: boolean) {
+    setVehicles((vs) => vs.map((v) => (v.id === id ? { ...v, isPremium } : v)))
+  }
+
   const counts = useMemo(() => ({
     disponivel: vehicles.filter((v) => v.status === "disponivel").length,
     vendido:    vehicles.filter((v) => v.status === "vendido").length,
@@ -218,7 +222,7 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
               variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
               transition={{ duration: 0.22, ease: "easeOut" }}
             >
-              <VehicleCard vehicle={v} onSold={handleSold} />
+              <VehicleCard vehicle={v} onSold={handleSold} onFeatureToggle={handleFeatureToggle} />
             </motion.div>
           ))}
         </motion.div>

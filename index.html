@@ -869,7 +869,8 @@
     }
 
     // ─── Init ────────────────────────────────────────────────────────────────
-    renderCars(BRAVEL_VEHICLES);
+    const destaqueVehicles = BRAVEL_VEHICLES.filter(v => v.isPremium);
+    renderCars(destaqueVehicles.length ? destaqueVehicles : BRAVEL_VEHICLES);
     initCarousel();
     observeCards();
   })();
