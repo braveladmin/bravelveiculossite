@@ -13,6 +13,8 @@ const PLACEHOLDER_IMAGE =
 
 const FALLBACK_OPTIONALS_LIST = ["Conforto", "Segurança", "Tecnologia"]
 
+const PHOTO_OVERLAY_GRADIENT = "linear-gradient(to top, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.85) 45%, rgba(10,10,10,0.3) 75%, transparent 100%)"
+
 function Logo() {
   return (
     <div className="absolute top-0 left-0 z-10" style={{ padding: "6%" }}>
@@ -28,11 +30,23 @@ function Logo() {
   )
 }
 
-function SlideCounter({ n }: { n: number }) {
+function SlideCounter({ n, total }: { n: number; total: number }) {
   return (
     <p className="preview-commercial text-[#cc1111] text-[9px] font-bold uppercase tracking-[0.2em] mb-2.5">
-      Slide {n} / 5
+      Slide {n} / {total}
     </p>
+  )
+}
+
+function PhotoSlide({ src, children }: { src: string; children: ReactNode }) {
+  return (
+    <>
+      <img src={src} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
+      <Logo />
+      <div className="safe-area flex flex-col justify-end" style={{ background: PHOTO_OVERLAY_GRADIENT }}>
+        {children}
+      </div>
+    </>
   )
 }
 
@@ -43,46 +57,39 @@ type Props = {
 export function CarouselPreview({ vehicle }: Props) {
   const [index, setIndex] = useState(0)
 
-  const cover = vehicle.images?.[0] ?? vehicle.imageUrl ?? PLACEHOLDER_IMAGE
+  const fotos = vehicle.images?.length ? vehicle.images : []
+  const cover = fotos[0] ?? vehicle.imageUrl ?? PLACEHOLDER_IMAGE
   const anoLinha = vehicle.yearModel ? `${vehicle.year}/${vehicle.yearModel}` : vehicle.year ? `${vehicle.year}` : ""
 
-  // Slide 4 — fotos adicionais; reaproveita a capa se não houver fotos suficientes
-  const extraPhotos = (vehicle.images?.length ?? 0) > 1 ? vehicle.images.slice(1, 3) : [cover]
-
   const opcionaisList = vehicle.optionals?.length ? vehicle.optionals.slice(0, 6) : FALLBACK_OPTIONALS_LIST
+
+  // Total: capa + info + opcionais + uma por foto enviada + CTA final
+  const total = 3 + fotos.length + 1
 
   const slides: { bg?: string; content: ReactNode }[] = [
     // Slide 1 — Capa
     {
       content: (
-        <>
-          <img src={cover} alt={vehicle.name} onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
-          <Logo />
-          <div
-            className="safe-area flex flex-col justify-end"
-            style={{ background: "linear-gradient(to top, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.7) 35%, transparent 75%)" }}
-          >
-            <p className="preview-commercial text-[#cc1111] text-[10px] font-bold uppercase tracking-[0.16em]">
-              {[vehicle.brand, vehicle.model].filter(Boolean).join(" · ")}
+        <PhotoSlide src={cover}>
+          <p className="preview-commercial text-[#cc1111] text-[10px] font-bold uppercase tracking-[0.16em]">
+            {[vehicle.brand, vehicle.model].filter(Boolean).join(" · ")}
+          </p>
+          <h2 className="preview-display text-white text-[30px] leading-[0.95] mt-1">
+            {vehicle.name || `${vehicle.brand} ${vehicle.model}`}
+          </h2>
+          {vehicle.price > 0 && (
+            <p className="preview-display text-white text-[26px] leading-none mt-2.5 pt-2" style={{ borderTop: "2px solid #cc1111" }}>
+              {formatPrecoSemCentavos(vehicle.price)}
             </p>
-            <h2 className="preview-display text-white text-[30px] leading-[0.95] mt-1">
-              {vehicle.name || `${vehicle.brand} ${vehicle.model}`}
-            </h2>
-            {vehicle.price > 0 && (
-              <p className="preview-display text-white text-[26px] leading-none mt-2.5 pt-2" style={{ borderTop: "2px solid #cc1111" }}>
-                {formatPrecoSemCentavos(vehicle.price)}
-              </p>
-            )}
-          </div>
-        </>
+          )}
+        </PhotoSlide>
       ),
     },
-    // Slide 2 — Informações principais
+    // Slide 2 — Informações principais (sobre foto)
     {
-      bg: "#141414",
       content: (
-        <div className="safe-area flex flex-col justify-center">
-          <SlideCounter n={2} />
+        <PhotoSlide src={fotos[1] ?? cover}>
+          <SlideCounter n={2} total={total} />
           <h3 className="preview-commercial text-white text-[18px] font-extrabold mb-4">Informações principais</h3>
           <div className="space-y-3">
             {anoLinha && <InfoRow label="Ano/Modelo" value={anoLinha} />}
@@ -91,15 +98,14 @@ export function CarouselPreview({ vehicle }: Props) {
             {vehicle.fuel && <InfoRow label="Combustível" value={vehicle.fuel} />}
             {vehicle.color && <InfoRow label="Cor" value={vehicle.color} />}
           </div>
-        </div>
+        </PhotoSlide>
       ),
     },
-    // Slide 3 — Opcionais/diferenciais
+    // Slide 3 — Opcionais/diferenciais (sobre foto)
     {
-      bg: "#141414",
       content: (
-        <div className="safe-area flex flex-col justify-center">
-          <SlideCounter n={3} />
+        <PhotoSlide src={fotos[2] ?? cover}>
+          <SlideCounter n={3} total={total} />
           <h3 className="preview-commercial text-white text-[18px] font-extrabold mb-4">Equipado pra valer</h3>
           <div className="flex flex-wrap gap-2">
             {opcionaisList.map((opt) => (
@@ -112,25 +118,21 @@ export function CarouselPreview({ vehicle }: Props) {
               </span>
             ))}
           </div>
-        </div>
+        </PhotoSlide>
       ),
     },
-    // Slide 4 — Fotos adicionais
-    {
+    // Slides 4..N — todas as fotos enviadas do veículo
+    ...fotos.map((foto, i) => ({
       content: (
-        <>
-          <img src={extraPhotos[0]} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
-          <Logo />
-          <div className="safe-area flex flex-col justify-end" style={{ background: "linear-gradient(to top, rgba(10,10,10,0.85) 0%, transparent 55%)" }}>
-            <SlideCounter n={4} />
-            <p className="preview-commercial text-white text-[15px] font-bold">Mais detalhes desse carro</p>
-          </div>
-        </>
+        <PhotoSlide key={foto} src={foto}>
+          <SlideCounter n={4 + i} total={total} />
+          <p className="preview-commercial text-white text-[15px] font-bold">Mais um ângulo desse carro</p>
+        </PhotoSlide>
       ),
-    },
-    // Slide 5 — CTA
+    })),
+    // Slide final — CTA
     {
-      bg: "#cc1111",
+      bg: "#0a0a0a",
       content: (
         <div className="safe-area flex flex-col items-center justify-center text-center">
           <Image
@@ -141,21 +143,22 @@ export function CarouselPreview({ vehicle }: Props) {
             className="w-12 h-12 rounded-xl mb-4"
             style={{ filter: "drop-shadow(0 2px 10px rgba(0,0,0,0.3))" }}
           />
-          <p className="preview-commercial text-white text-[19px] font-extrabold leading-tight">Vem conferir esse carro!</p>
-          <p className="preview-commercial text-white/80 text-[11px] font-semibold mt-4">{STORE_NAME}</p>
+          <p className="preview-commercial text-white text-[19px] font-extrabold leading-tight">
+            Vem fazer um test-drive e conhecer esse carro de pertinho!
+          </p>
+          <p className="preview-commercial text-white/70 text-[12px] font-medium mt-3">Entra em contato e agenda o seu</p>
+          <p className="preview-commercial text-white/80 text-[11px] font-semibold mt-5">{STORE_NAME}</p>
           <p className="preview-commercial text-white/60 text-[11px] mt-0.5">{STORE_CITY}</p>
         </div>
       ),
     },
   ]
 
-  const total = slides.length
-
   function prev() {
-    setIndex((i) => (i - 1 + total) % total)
+    setIndex((i) => (i - 1 + slides.length) % slides.length)
   }
   function next() {
-    setIndex((i) => (i + 1) % total)
+    setIndex((i) => (i + 1) % slides.length)
   }
 
   return (
@@ -183,7 +186,7 @@ export function CarouselPreview({ vehicle }: Props) {
         <ChevronRight className="w-4 h-4" />
       </button>
 
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 flex-wrap justify-center" style={{ maxWidth: "85%" }}>
         {slides.map((_, i) => (
           <button
             key={i}

@@ -28,7 +28,7 @@ const FORMATOS: { type: MediaType; label: string; description: string; icon: typ
   {
     type: "carousel",
     label: "Carrossel",
-    description: `${CAROUSEL_DIMENSIONS.slideCount} slides pro feed`,
+    description: "Carrossel com as fotos que você escolher",
     icon: GalleryHorizontal,
     dims: `${CAROUSEL_DIMENSIONS.width}×${CAROUSEL_DIMENSIONS.height} · ${CAROUSEL_DIMENSIONS.aspectRatio}`,
   },

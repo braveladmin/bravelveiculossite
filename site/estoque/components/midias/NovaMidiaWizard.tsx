@@ -8,6 +8,7 @@ import { Button } from "@heroui/react"
 import { SelecionarVeiculo } from "@/components/midias/steps/SelecionarVeiculo"
 import { VeiculoResumoCard } from "@/components/midias/VeiculoResumoCard"
 import { EscolherFormato } from "@/components/midias/steps/EscolherFormato"
+import { SelecionarFotos, MAX_FOTOS_CARROSSEL } from "@/components/midias/steps/SelecionarFotos"
 import { Legenda } from "@/components/midias/steps/Legenda"
 import { PreviewFinal } from "@/components/midias/steps/PreviewFinal"
 import { getDimensionsForType } from "@/lib/midias/dimensoes"
@@ -33,13 +34,19 @@ type Props = {
 export function NovaMidiaWizard({ vehicles }: Props) {
   const router = useRouter()
 
-  const [step,      setStep]      = useState(0)
-  const [vehicle,   setVehicle]   = useState<Vehicle | null>(null)
-  const [mediaType, setMediaType] = useState<MediaType | null>(null)
-  const [caption,   setCaption]   = useState("")
-  const [hashtags,  setHashtags]  = useState<string[]>([])
-  const [saving,    setSaving]    = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
+  const [step,           setStep]           = useState(0)
+  const [vehicle,        setVehicle]        = useState<Vehicle | null>(null)
+  const [mediaType,      setMediaType]      = useState<MediaType | null>(null)
+  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([])
+  const [caption,        setCaption]        = useState("")
+  const [hashtags,       setHashtags]       = useState<string[]>([])
+  const [saving,         setSaving]         = useState(false)
+  const [error,          setError]          = useState<string | null>(null)
+
+  function handleSelectVehicle(v: Vehicle) {
+    setVehicle(v)
+    setSelectedPhotos((v.images ?? []).slice(0, MAX_FOTOS_CARROSSEL))
+  }
 
   function handleGerarMidia() {
     if (!vehicle) return
@@ -48,12 +55,18 @@ export function NovaMidiaWizard({ vehicles }: Props) {
     setStep(3)
   }
 
+  const previewVehicle: Vehicle | null =
+    vehicle && mediaType === "carousel" ? { ...vehicle, images: selectedPhotos } : vehicle
+
   async function handleSave() {
     if (!vehicle || !mediaType) return
     setSaving(true)
     setError(null)
 
-    const dimensions = getDimensionsForType(mediaType)
+    const baseDimensions = getDimensionsForType(mediaType)
+    const dimensions = mediaType === "carousel"
+      ? { ...baseDimensions, slideCount: selectedPhotos.length + 4 }
+      : baseDimensions
     const result = await createGeneratedMedia({
       vehicleId: vehicle.id,
       vehicleModel: vehicle.model || vehicle.name,
@@ -123,7 +136,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
 
         {step === 0 && (
           <div className="space-y-5">
-            <SelecionarVeiculo vehicles={vehicles} selectedId={vehicle?.id ?? null} onSelect={setVehicle} />
+            <SelecionarVeiculo vehicles={vehicles} selectedId={vehicle?.id ?? null} onSelect={handleSelectVehicle} />
             {vehicle && <VeiculoResumoCard vehicle={vehicle} />}
             <div className="flex justify-end pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
               <Button variant="primary" size="sm" className="font-semibold" isDisabled={!vehicle} onPress={() => setStep(1)}>
@@ -147,6 +160,13 @@ export function NovaMidiaWizard({ vehicles }: Props) {
 
         {step === 2 && vehicle && mediaType && (
           <div className="space-y-5">
+            {mediaType === "carousel" && (
+              <SelecionarFotos
+                images={vehicle.images ?? []}
+                selected={selectedPhotos}
+                onChange={setSelectedPhotos}
+              />
+            )}
             <div className="flex items-start gap-3 rounded-xl p-4" style={{ backgroundColor: SURF2, border: `1px solid ${BORDER}` }}>
               <Sparkles className="w-5 h-5 shrink-0" style={{ color: ACCENT }} />
               <div>
@@ -160,7 +180,15 @@ export function NovaMidiaWizard({ vehicles }: Props) {
             </div>
             <div className="flex justify-between pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
               <Button variant="outline" size="sm" className="font-semibold" onPress={() => setStep(1)}>Voltar</Button>
-              <Button variant="primary" size="sm" className="font-semibold" onPress={handleGerarMidia}>Gerar mídia</Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="font-semibold"
+                isDisabled={mediaType === "carousel" && (vehicle.images?.length ?? 0) > 0 && selectedPhotos.length === 0}
+                onPress={handleGerarMidia}
+              >
+                Gerar mídia
+              </Button>
             </div>
           </div>
         )}
@@ -175,9 +203,9 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           </div>
         )}
 
-        {step === 4 && vehicle && mediaType && (
+        {step === 4 && previewVehicle && mediaType && (
           <PreviewFinal
-            vehicle={vehicle}
+            vehicle={previewVehicle}
             mediaType={mediaType}
             caption={caption}
             hashtags={hashtags}
