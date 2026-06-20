@@ -268,7 +268,7 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
                       className="text-[9px] font-bold px-2 py-0.5 rounded flex items-center gap-1"
                       style={{ backgroundColor: "rgba(255,174,31,0.15)", color: YELLOW }}
                     >
-                      <Star className="w-2.5 h-2.5" />PREMIUM
+                      <Star className="w-2.5 h-2.5" />Destaque
                     </span>
                   )}
                 </div>

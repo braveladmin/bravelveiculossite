@@ -121,7 +121,7 @@ export function VehicleCard({ vehicle, onSold, onFeatureToggle }: Props) {
             style={{ backgroundColor: "rgba(255,174,31,0.25)", color: YELLOW, backdropFilter: "blur(4px)", border: "1px solid rgba(255,174,31,0.4)" }}
           >
             <Star className="w-2.5 h-2.5" />
-            PREMIUM
+            Destaque
           </span>
         )}
 

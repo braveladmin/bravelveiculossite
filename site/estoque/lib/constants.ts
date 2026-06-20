@@ -27,3 +27,9 @@ export const MEDIA_STATUS_CFG = {
 export const STORE_NAME     = 'Bravel Veículos'
 export const STORE_CITY     = 'Primavera do Leste, MT'
 export const STORE_WHATSAPP = '(66) 9913-5492'
+
+// Vendedores — contato sempre incluído no final das legendas geradas
+export const SELLERS = [
+  { name: 'Elso Baraldi Jr', phone: '(66) 99640-1560' },
+  { name: 'José Longhi',     phone: '(65) 99644-5954' },
+] as const

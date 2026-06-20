@@ -68,13 +68,6 @@ export function PostPreview({ vehicle }: Props) {
             <p className="preview-display text-white text-[30px] leading-none">{formatPrecoSemCentavos(vehicle.price)}</p>
           </div>
         )}
-
-        <p
-          className="preview-commercial text-white text-[11px] font-extrabold uppercase tracking-wide text-center mt-3 px-3 py-2 rounded-md"
-          style={{ backgroundColor: "#cc1111" }}
-        >
-          Chama no WhatsApp
-        </p>
       </div>
     </div>
   )

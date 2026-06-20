@@ -1,8 +1,9 @@
 import type { Vehicle } from "@/lib/types"
-import { STORE_NAME, STORE_CITY, STORE_WHATSAPP } from "@/lib/constants"
+import { STORE_NAME, STORE_CITY, STORE_WHATSAPP, SELLERS } from "@/lib/constants"
 
 const FALLBACK_OPTIONALS = "diversos itens de conforto, segurança e tecnologia"
 const MAX_HASHTAGS = 10
+const MAX_OPTIONALS_LEGENDA = 8
 
 function slugify(s: string): string {
   return s
@@ -51,26 +52,25 @@ export function gerarLegenda(vehicle: Vehicle): string {
 
   const blocos: string[] = []
 
-  blocos.push(`🚨 ${titulo.toUpperCase()} 🚨`)
+  blocos.push(titulo.toUpperCase())
 
-  const specLines: string[] = []
-  const motorCambio = [vehicle.motor, vehicle.transmission].filter(Boolean).join(" • ")
-  if (motorCambio) specLines.push(`🔧 ${motorCambio}`)
-  if (vehicle.km) specLines.push(`📍 ${new Intl.NumberFormat("pt-BR").format(vehicle.km)} km`)
-  if (vehicle.fuel) specLines.push(`⛽ ${vehicle.fuel}`)
-  if (vehicle.color) specLines.push(`🎨 ${vehicle.color}`)
-  if (specLines.length) blocos.push(specLines.join("\n"))
+  const specLine = [vehicle.motor, vehicle.transmission, vehicle.fuel, vehicle.color].filter(Boolean).join(" • ")
+  if (specLine) blocos.push(specLine)
 
-  let opcionais = FALLBACK_OPTIONALS
-  if (vehicle.optionals?.length) {
-    const primeiros = vehicle.optionals.slice(0, 6).join(", ")
-    opcionais = vehicle.optionals.length > 6 ? `${primeiros} e mais` : primeiros
-  }
-  blocos.push(`✨ Vem com: ${opcionais}.`)
+  if (vehicle.km) blocos.push(`📍 ${new Intl.NumberFormat("pt-BR").format(vehicle.km)} km`)
+
+  const opcionais = vehicle.optionals?.length
+    ? vehicle.optionals.slice(0, MAX_OPTIONALS_LEGENDA)
+    : [FALLBACK_OPTIONALS]
+  blocos.push(opcionais.map((item) => `✅ ${item}`).join("\n"))
 
   if (vehicle.price) blocos.push(`💰 ${formatPrecoSemCentavos(vehicle.price)}`)
 
-  blocos.push(`📲 Chama agora no WhatsApp e agenda sua visita: ${STORE_WHATSAPP}\n📍 ${STORE_NAME} — ${STORE_CITY}`)
+  const contatos = [
+    `📞 ${STORE_WHATSAPP} — ${STORE_NAME} (${STORE_CITY})`,
+    ...SELLERS.map((s) => `📞 ${s.phone} — ${s.name}`),
+  ].join("\n")
+  blocos.push(contatos)
 
   const hashtags = gerarHashtags(vehicle)
   if (hashtags.length) blocos.push(hashtags.join(" "))
