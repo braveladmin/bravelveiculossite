@@ -34,34 +34,38 @@ export function PreviewFinal({ vehicle, mediaType, caption, hashtags, onChangeCa
       </div>
 
       <div className="flex-1 space-y-4">
-        <div>
-          <label className="block text-[10px] font-bold tracking-[0.12em] uppercase mb-1.5" style={{ color: MUTED }}>
-            Legenda final — editável
-          </label>
-          <textarea
-            value={caption}
-            onChange={(e) => onChangeCaption(e.target.value)}
-            rows={12}
-            style={{
-              backgroundColor: SURF2, border: `1px solid ${BORDER}`, color: TEXT,
-              borderRadius: "10px", padding: "14px", fontSize: "13px", outline: "none",
-              width: "100%", resize: "vertical", lineHeight: "1.6",
-            }}
-          />
-        </div>
+        {mediaType !== "story" && (
+          <>
+            <div>
+              <label className="block text-[10px] font-bold tracking-[0.12em] uppercase mb-1.5" style={{ color: MUTED }}>
+                Legenda final — editável
+              </label>
+              <textarea
+                value={caption}
+                onChange={(e) => onChangeCaption(e.target.value)}
+                rows={12}
+                style={{
+                  backgroundColor: SURF2, border: `1px solid ${BORDER}`, color: TEXT,
+                  borderRadius: "10px", padding: "14px", fontSize: "13px", outline: "none",
+                  width: "100%", resize: "vertical", lineHeight: "1.6",
+                }}
+              />
+            </div>
 
-        {hashtags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {hashtags.map((tag) => (
-              <span
-                key={tag}
-                className="text-[11px] font-medium px-2.5 py-1 rounded-full"
-                style={{ backgroundColor: "rgba(204,17,17,0.1)", color: ACCENT, border: "1px solid rgba(204,17,17,0.2)" }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+            {hashtags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {hashtags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[11px] font-medium px-2.5 py-1 rounded-full"
+                    style={{ backgroundColor: "rgba(204,17,17,0.1)", color: ACCENT, border: "1px solid rgba(204,17,17,0.2)" }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {error && (

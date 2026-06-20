@@ -25,8 +25,6 @@ const ACCENT  = "#cc1111"
 const TEXT    = "#ffffff"
 const MUTED   = "#777777"
 
-const STEP_LABELS = ["Selecionar carro", "Escolher formato", "Gerar mídia", "Gerar legenda", "Preview e salvar"]
-
 type Props = {
   vehicles: Vehicle[]
 }
@@ -43,6 +41,11 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   const [saving,         setSaving]         = useState(false)
   const [error,          setError]          = useState<string | null>(null)
 
+  const skipLegenda = mediaType === "story"
+  const STEP_LABELS = skipLegenda
+    ? ["Selecionar carro", "Escolher formato", "Gerar mídia", "Preview e salvar"]
+    : ["Selecionar carro", "Escolher formato", "Gerar mídia", "Gerar legenda", "Preview e salvar"]
+
   function handleSelectVehicle(v: Vehicle) {
     setVehicle(v)
     setSelectedPhotos((v.images ?? []).slice(0, MAX_FOTOS_CARROSSEL))
@@ -50,8 +53,13 @@ export function NovaMidiaWizard({ vehicles }: Props) {
 
   function handleGerarMidia() {
     if (!vehicle) return
-    setCaption(gerarLegenda(vehicle))
-    setHashtags(gerarHashtags(vehicle))
+    if (skipLegenda) {
+      setCaption("")
+      setHashtags([])
+    } else {
+      setCaption(gerarLegenda(vehicle))
+      setHashtags(gerarHashtags(vehicle))
+    }
     setStep(3)
   }
 
@@ -174,7 +182,9 @@ export function NovaMidiaWizard({ vehicles }: Props) {
                   Gerar {MEDIA_TYPE_CFG[mediaType].label.toLowerCase()} pra {vehicle.brand} {vehicle.name}
                 </p>
                 <p className="text-[12px] mt-1" style={{ color: MUTED }}>
-                  Vou montar o preview e a legenda automaticamente com os dados desse veículo. Você pode editar tudo antes de salvar.
+                  {skipLegenda
+                    ? "Vou montar o preview automaticamente com os dados desse veículo. Story não usa legenda."
+                    : "Vou montar o preview e a legenda automaticamente com os dados desse veículo. Você pode editar tudo antes de salvar."}
                 </p>
               </div>
             </div>
@@ -193,7 +203,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           </div>
         )}
 
-        {step === 3 && (
+        {step === 3 && !skipLegenda && (
           <div className="space-y-5">
             <Legenda caption={caption} hashtags={hashtags} onChange={setCaption} />
             <div className="flex justify-between pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
@@ -203,7 +213,21 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           </div>
         )}
 
-        {step === 4 && previewVehicle && mediaType && (
+        {step === 3 && skipLegenda && previewVehicle && mediaType && (
+          <PreviewFinal
+            vehicle={previewVehicle}
+            mediaType={mediaType}
+            caption={caption}
+            hashtags={hashtags}
+            onChangeCaption={setCaption}
+            onBack={() => setStep(2)}
+            onSave={handleSave}
+            saving={saving}
+            error={error}
+          />
+        )}
+
+        {step === 4 && !skipLegenda && previewVehicle && mediaType && (
           <PreviewFinal
             vehicle={previewVehicle}
             mediaType={mediaType}
