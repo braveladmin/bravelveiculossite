@@ -30,14 +30,6 @@ function Logo() {
   )
 }
 
-function SlideCounter({ n, total }: { n: number; total: number }) {
-  return (
-    <p className="preview-commercial text-[#cc1111] text-[9px] font-bold uppercase tracking-[0.2em] mb-2.5">
-      Slide {n} / {total}
-    </p>
-  )
-}
-
 function PhotoSlide({ src, children }: { src: string; children: ReactNode }) {
   return (
     <>
@@ -46,6 +38,15 @@ function PhotoSlide({ src, children }: { src: string; children: ReactNode }) {
       <div className="safe-area flex flex-col justify-end" style={{ background: PHOTO_OVERLAY_GRADIENT }}>
         {children}
       </div>
+    </>
+  )
+}
+
+function PlainPhotoSlide({ src }: { src: string }) {
+  return (
+    <>
+      <img src={src} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
+      <Logo />
     </>
   )
 }
@@ -62,9 +63,6 @@ export function CarouselPreview({ vehicle }: Props) {
   const anoLinha = vehicle.yearModel ? `${vehicle.year}/${vehicle.yearModel}` : vehicle.year ? `${vehicle.year}` : ""
 
   const opcionaisList = vehicle.optionals?.length ? vehicle.optionals.slice(0, 6) : FALLBACK_OPTIONALS_LIST
-
-  // Total: capa + info + opcionais + uma por foto enviada + CTA final
-  const total = 3 + fotos.length + 1
 
   const slides: { bg?: string; content: ReactNode }[] = [
     // Slide 1 — Capa
@@ -89,7 +87,6 @@ export function CarouselPreview({ vehicle }: Props) {
     {
       content: (
         <PhotoSlide src={fotos[1] ?? cover}>
-          <SlideCounter n={2} total={total} />
           <h3 className="preview-commercial text-white text-[18px] font-extrabold mb-4">Informações principais</h3>
           <div className="space-y-3">
             {anoLinha && <InfoRow label="Ano/Modelo" value={anoLinha} />}
@@ -105,7 +102,6 @@ export function CarouselPreview({ vehicle }: Props) {
     {
       content: (
         <PhotoSlide src={fotos[2] ?? cover}>
-          <SlideCounter n={3} total={total} />
           <h3 className="preview-commercial text-white text-[18px] font-extrabold mb-4">Equipado pra valer</h3>
           <div className="flex flex-wrap gap-2">
             {opcionaisList.map((opt) => (
@@ -121,14 +117,9 @@ export function CarouselPreview({ vehicle }: Props) {
         </PhotoSlide>
       ),
     },
-    // Slides 4..N — todas as fotos enviadas do veículo
-    ...fotos.map((foto, i) => ({
-      content: (
-        <PhotoSlide key={foto} src={foto}>
-          <SlideCounter n={4 + i} total={total} />
-          <p className="preview-commercial text-white text-[15px] font-bold">Mais um ângulo desse carro</p>
-        </PhotoSlide>
-      ),
+    // Slides 4..N — todas as fotos enviadas do veículo, sem overlay
+    ...fotos.map((foto) => ({
+      content: <PlainPhotoSlide key={foto} src={foto} />,
     })),
     // Slide final — CTA
     {
