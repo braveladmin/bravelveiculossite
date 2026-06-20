@@ -26,7 +26,7 @@ export function PostPreview({ vehicle }: Props) {
     <div className="media-preview post">
       <img src={cover} alt={vehicle.name} onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
 
-      <div className="absolute top-0 left-0 right-0 z-10" style={{ padding: "5% 6% 0" }}>
+      <div className="absolute bottom-0 right-0 z-10" style={{ padding: "0 6% 5% 0" }}>
         <Image
           src="/bravel-logo.png"
           alt="Bravel Veículos"

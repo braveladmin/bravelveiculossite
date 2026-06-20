@@ -67,7 +67,8 @@ export function gerarLegenda(vehicle: Vehicle): string {
   if (vehicle.price) blocos.push(`💰 ${formatPrecoSemCentavos(vehicle.price)}`)
 
   const contatos = [
-    `📞 ${STORE_WHATSAPP} — ${STORE_NAME} (${STORE_CITY})`,
+    `📍 ${STORE_NAME} — ${STORE_CITY}`,
+    `📞 ${STORE_WHATSAPP} — ${STORE_NAME}`,
     ...SELLERS.map((s) => `📞 ${s.phone} — ${s.name}`),
   ].join("\n")
   blocos.push(contatos)
