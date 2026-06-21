@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { formatKm } from "@/lib/format"
 import { formatPrecoSemCentavos } from "@/lib/midias/legenda"
+import { PhotoBackdrop } from "@/components/midias/preview/PhotoBackdrop"
 import type { Vehicle } from "@/lib/types"
 
 const PLACEHOLDER_IMAGE =
@@ -24,7 +25,7 @@ export function PostPreview({ vehicle }: Props) {
 
   return (
     <div className="media-preview post">
-      <img src={cover} alt={vehicle.name} onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
+      <PhotoBackdrop src={cover} alt={vehicle.name} />
 
       <div className="absolute bottom-0 right-0 z-10" style={{ padding: "0 6% 5% 0" }}>
         <Image

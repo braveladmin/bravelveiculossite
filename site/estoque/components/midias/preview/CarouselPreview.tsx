@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { formatKm } from "@/lib/format"
 import { formatPrecoSemCentavos } from "@/lib/midias/legenda"
 import { STORE_NAME, STORE_CITY } from "@/lib/constants"
+import { PhotoBackdrop } from "@/components/midias/preview/PhotoBackdrop"
 import type { Vehicle } from "@/lib/types"
 
 const PLACEHOLDER_IMAGE =
@@ -33,7 +34,7 @@ function Logo() {
 function PhotoSlide({ src, children }: { src: string; children: ReactNode }) {
   return (
     <>
-      <img src={src} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
+      <PhotoBackdrop src={src} />
       <Logo />
       <div className="safe-area flex flex-col justify-end" style={{ background: PHOTO_OVERLAY_GRADIENT }}>
         {children}
@@ -45,7 +46,7 @@ function PhotoSlide({ src, children }: { src: string; children: ReactNode }) {
 function PlainPhotoSlide({ src }: { src: string }) {
   return (
     <>
-      <img src={src} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
+      <PhotoBackdrop src={src} />
       <Logo />
     </>
   )

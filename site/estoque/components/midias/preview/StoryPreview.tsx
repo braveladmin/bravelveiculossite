@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { formatPrecoSemCentavos } from "@/lib/midias/legenda"
 import { STORE_NAME } from "@/lib/constants"
+import { PhotoBackdrop } from "@/components/midias/preview/PhotoBackdrop"
 import type { Vehicle } from "@/lib/types"
 
 const PLACEHOLDER_IMAGE =
@@ -18,7 +19,7 @@ export function StoryPreview({ vehicle }: Props) {
 
   return (
     <div className="media-preview story">
-      <img src={cover} alt={vehicle.name} onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }} />
+      <PhotoBackdrop src={cover} alt={vehicle.name} />
 
       {/* Logo da loja */}
       <div className="absolute bottom-0 right-0 z-10" style={{ padding: "0 6% 5% 0" }}>
