@@ -26,8 +26,13 @@ type Props = {
   media: GeneratedMediaWithRelations[]
 }
 
-export function MidiasClient({ media }: Props) {
+export function MidiasClient({ media: initialMedia }: Props) {
+  const [media,  setMedia]  = useState(initialMedia)
   const [filter, setFilter] = useState<FilterTab>("todos")
+
+  function handleDeleted(id: string) {
+    setMedia((ms) => ms.filter((m) => m.id !== id))
+  }
 
   const counts = useMemo(() => ({
     todos:    media.length,
@@ -94,7 +99,7 @@ export function MidiasClient({ media }: Props) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
           {filtered.map((m) => (
-            <MediaCard key={m.id} media={m} />
+            <MediaCard key={m.id} media={m} onDeleted={handleDeleted} />
           ))}
         </div>
       )}

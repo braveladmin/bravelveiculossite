@@ -1,7 +1,7 @@
 "use client"
 
-import { Clapperboard, GalleryHorizontal, Image as ImageIcon } from "lucide-react"
-import { STORY_DIMENSIONS, POST_DIMENSIONS, CAROUSEL_DIMENSIONS } from "@/lib/midias/dimensoes"
+import { Clapperboard, GalleryHorizontal } from "lucide-react"
+import { STORY_DIMENSIONS, CAROUSEL_DIMENSIONS } from "@/lib/midias/dimensoes"
 import type { MediaType } from "@/lib/types"
 
 const SURF2  = "#111111"
@@ -19,13 +19,6 @@ const FORMATOS: { type: MediaType; label: string; description: string; icon: typ
     dims: `${STORY_DIMENSIONS.width}×${STORY_DIMENSIONS.height} · ${STORY_DIMENSIONS.aspectRatio}`,
   },
   {
-    type: "post",
-    label: "Post",
-    description: "Post único pro feed",
-    icon: ImageIcon,
-    dims: `${POST_DIMENSIONS.width}×${POST_DIMENSIONS.height} · ${POST_DIMENSIONS.aspectRatio}`,
-  },
-  {
     type: "carousel",
     label: "Carrossel",
     description: "Carrossel com as fotos que você escolher",
@@ -41,7 +34,7 @@ type Props = {
 
 export function EscolherFormato({ selected, onSelect }: Props) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {FORMATOS.map((f) => {
         const Icon = f.icon
         const active = selected === f.type
