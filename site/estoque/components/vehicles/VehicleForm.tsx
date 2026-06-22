@@ -4,11 +4,11 @@ import { useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@heroui/react";
-import { GripVertical, ImagePlus, Loader2, Plus, Star, Trash2, X } from "lucide-react";
+import { ChevronDown, GripVertical, ImagePlus, Loader2, Plus, Star, Trash2, X } from "lucide-react";
 import type { Vehicle, VehicleStatus } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrencyInput, maskCurrencyInput, parseCurrencyInput } from "@/lib/format";
-import { CATEGORIES } from "@/lib/constants";
+import { BRANDS, CATEGORIES } from "@/lib/constants";
 
 const SURF2   = "#111111";
 const BORDER  = "rgba(255,255,255,0.08)";
@@ -73,6 +73,71 @@ function DInput({
       />
       {error  && <span className="text-[11px]" style={{ color: DANGER }}>{error}</span>}
       {!error && hint && <span className="text-[11px]" style={{ color: MUTED }}>{hint}</span>}
+    </div>
+  );
+}
+
+function DCombobox({
+  label, value, onChange, options, error, placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  options: string[]
+  error?: string
+  placeholder?: string
+}) {
+  const [open, setOpen] = useState(false);
+  const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const filtered = value.trim()
+    ? options.filter((o) => o.toLowerCase().includes(value.trim().toLowerCase()))
+    : options;
+
+  function selectOption(opt: string) {
+    if (blurTimeout.current) clearTimeout(blurTimeout.current);
+    onChange(opt);
+    setOpen(false);
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className={labelCls} style={{ color: MUTED }}>{label}</span>
+      <div className="relative">
+        <input
+          className={inputBaseCls}
+          style={{ backgroundColor: SURF2, borderColor: error ? DANGER : BORDER, color: TEXT, caretColor: ACCENT, paddingRight: "32px" }}
+          value={value}
+          placeholder={placeholder}
+          autoComplete="off"
+          onChange={(e) => { onChange(e.target.value); setOpen(true); }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = ACCENT; setOpen(true); }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = error ? DANGER : BORDER;
+            blurTimeout.current = setTimeout(() => setOpen(false), 120);
+          }}
+        />
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: MUTED }} />
+        {open && filtered.length > 0 && (
+          <div
+            className="absolute left-0 right-0 top-full mt-1 rounded-[10px] border overflow-y-auto z-20"
+            style={{ backgroundColor: SURF2, borderColor: BORDER, maxHeight: "220px", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }}
+          >
+            {filtered.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => selectOption(opt)}
+                className="w-full text-left px-3 py-2 text-[13px] transition-colors hover:bg-white/10"
+                style={{ color: TEXT }}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {error && <span className="text-[11px]" style={{ color: DANGER }}>{error}</span>}
     </div>
   );
 }
@@ -463,8 +528,8 @@ export function VehicleForm({
           value={form.name} onChange={(e) => setF("name", e.target.value)} error={errors.name} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <DInput label="Marca" placeholder="Ex: Chevrolet"
-            value={form.brand} onChange={(e) => setF("brand", e.target.value)} error={errors.brand} />
+          <DCombobox label="Marca" placeholder="Ex: Chevrolet" options={BRANDS}
+            value={form.brand} onChange={(v) => setF("brand", v)} error={errors.brand} />
           <DInput label="Modelo" placeholder="Ex: Tracker"
             value={form.model} onChange={(e) => setF("model", e.target.value)} error={errors.model} />
         </div>

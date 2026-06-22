@@ -2,6 +2,14 @@ export type UserRole = 'SUPER_ADMIN' | 'INVENTORY_MANAGER' | 'VENDEDOR'
 
 export const CATEGORIES = ['Hatch', 'Sedan', 'SUV', 'Pickup', 'Van', 'Conversível', 'Coupé', 'Moto', 'Elétrico', 'Outro']
 
+export const BRANDS = [
+  'Audi', 'BMW', 'BYD', 'Caoa Chery', 'Chevrolet', 'Chrysler', 'Citroën', 'Dodge',
+  'Fiat', 'Ford', 'GWM', 'Harley-Davidson', 'Honda', 'Hyundai', 'JAC', 'Jaguar',
+  'Jeep', 'Kawasaki', 'Kia', 'Land Rover', 'Lexus', 'Mercedes-Benz', 'Mini',
+  'Mitsubishi', 'Nissan', 'Peugeot', 'Porsche', 'RAM', 'Renault', 'Royal Enfield',
+  'Subaru', 'Suzuki', 'Toyota', 'Triumph', 'Troller', 'Volkswagen', 'Volvo', 'Yamaha',
+]
+
 export const STATUS_CFG = {
   disponivel: { label: 'Disponível', chipColor: 'success' as const },
   reservado:  { label: 'Reservado',  chipColor: 'warning' as const },
