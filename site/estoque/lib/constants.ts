@@ -3,10 +3,9 @@ export type UserRole = 'SUPER_ADMIN' | 'INVENTORY_MANAGER' | 'VENDEDOR'
 export const CATEGORIES = ['Hatch', 'Sedan', 'SUV', 'Pickup', 'Van', 'Conversível', 'Coupé', 'Moto', 'Elétrico', 'Outro']
 
 export const STATUS_CFG = {
-  disponivel:    { label: 'Disponível',  chipColor: 'success' as const },
-  reservado:     { label: 'Reservado',   chipColor: 'warning' as const },
-  vendido:       { label: 'Vendido',     chipColor: 'default' as const },
-  em_preparacao: { label: 'Em preparo',  chipColor: 'default' as const },
+  disponivel: { label: 'Disponível', chipColor: 'success' as const },
+  reservado:  { label: 'Reservado',  chipColor: 'warning' as const },
+  vendido:    { label: 'Vendido',    chipColor: 'default' as const },
 } as const
 
 // ── Central de Mídias ───────────────────────────────────────────────────────

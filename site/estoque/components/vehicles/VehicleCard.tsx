@@ -43,7 +43,6 @@ export function VehicleCard({ vehicle, onSold, onRestore, onFeatureToggle }: Pro
   const coverUrl = vehicle.images?.[0] ?? vehicle.imageUrl ?? PLACEHOLDER_IMAGE
   const days     = daysInStock(vehicle.acquiredAt ?? vehicle.createdAt)
   const isSold   = vehicle.status === "vendido"
-  const isPrep   = vehicle.status === "em_preparacao"
 
   const [showConfirmSold,    setShowConfirmSold]    = useState(false)
   const [showConfirmRestore, setShowConfirmRestore] = useState(false)
@@ -93,10 +92,10 @@ export function VehicleCard({ vehicle, onSold, onRestore, onFeatureToggle }: Pro
     <>
     <Link
       href={`/estoque/${vehicle.id}`}
-      className={`group block rounded-xl overflow-hidden transition-all duration-200 ${isSold || isPrep ? "opacity-60" : ""}`}
+      className={`group block rounded-xl overflow-hidden transition-all duration-200 ${isSold ? "opacity-60" : ""}`}
       style={{ backgroundColor: CARD, border: `1px solid ${BORDER}` }}
       onMouseEnter={(e) => {
-        if (isSold || isPrep) return
+        if (isSold) return
         const el = e.currentTarget as HTMLElement
         el.style.transform   = "translateY(-4px)"
         el.style.borderColor = ACCENT
@@ -204,7 +203,7 @@ export function VehicleCard({ vehicle, onSold, onRestore, onFeatureToggle }: Pro
           </p>
         </div>
 
-        <div className="flex items-center justify-between gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className={`flex items-center justify-between gap-2 transition-opacity ${isSold ? "" : "opacity-0 group-hover:opacity-100"}`}>
           <button
             type="button"
             onClick={handleToggleFeatured}

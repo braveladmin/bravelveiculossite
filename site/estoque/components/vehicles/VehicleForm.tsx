@@ -493,7 +493,6 @@ export function VehicleForm({
           <DSelect label="Status" value={form.status} onChange={(e) => setF("status", e.target.value as VehicleStatus)}>
             <option value="disponivel">Disponível</option>
             <option value="reservado">Reservado</option>
-            <option value="em_preparacao">Em preparação</option>
             <option value="vendido">Vendido</option>
           </DSelect>
         </div>

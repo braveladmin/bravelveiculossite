@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   image_url    text,
   price        numeric     NOT NULL,
   status       text        NOT NULL DEFAULT 'disponivel'
-                 CHECK (status IN ('disponivel', 'vendido', 'reservado', 'em_preparacao')),
+                 CHECK (status IN ('disponivel', 'vendido', 'reservado')),
   created_at   timestamptz NOT NULL DEFAULT now(),
   acquired_at  date,
   sold_at      timestamptz,

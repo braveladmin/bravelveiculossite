@@ -1,4 +1,4 @@
-export type VehicleStatus = "disponivel" | "vendido" | "reservado" | "em_preparacao"
+export type VehicleStatus = "disponivel" | "vendido" | "reservado"
 
 export type Vehicle = {
   id: string
