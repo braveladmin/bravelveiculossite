@@ -4,7 +4,7 @@ import { useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@heroui/react";
-import { ChevronDown, GripVertical, ImagePlus, Loader2, Plus, Star, Trash2, X } from "lucide-react";
+import { ChevronDown, GripVertical, ImagePlus, Loader2, Plus, Sparkles, Star, Trash2, X } from "lucide-react";
 import type { Vehicle, VehicleStatus } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrencyInput, maskCurrencyInput, parseCurrencyInput } from "@/lib/format";
@@ -393,26 +393,37 @@ function OptionalsSelector({ selected, onChange }: { selected: string[]; onChang
   );
 }
 
-// ── Premium toggle ────────────────────────────────────────────────────────────
+// ── Toggle row (premium / selo de novidade) ────────────────────────────────────
 
-function PremiumToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+function ToggleRow({
+  value, onChange, icon, label, description, activeColor, activeBg, activeBorder,
+}: {
+  value: boolean
+  onChange: (v: boolean) => void
+  icon: ReactNode
+  label: string
+  description: string
+  activeColor: string
+  activeBg: string
+  activeBorder: string
+}) {
   return (
     <div
       className="flex items-center justify-between rounded-xl px-4 py-3"
-      style={{ backgroundColor: value ? "rgba(255,174,31,0.08)" : SURF2, border: `1px solid ${value ? "rgba(255,174,31,0.3)" : BORDER}` }}
+      style={{ backgroundColor: value ? activeBg : SURF2, border: `1px solid ${value ? activeBorder : BORDER}` }}
     >
       <div>
-        <p className="text-[13px] font-semibold" style={{ color: value ? YELLOW : TEXT }}>
-          <Star className="inline w-4 h-4 mr-1.5" />
-          Carro premium
+        <p className="text-[13px] font-semibold flex items-center" style={{ color: value ? activeColor : TEXT }}>
+          {icon}
+          {label}
         </p>
-        <p className="text-[11px] mt-0.5" style={{ color: MUTED }}>Destaque especial no estoque</p>
+        <p className="text-[11px] mt-0.5" style={{ color: MUTED }}>{description}</p>
       </div>
       <button
         type="button"
         onClick={() => onChange(!value)}
         className="relative rounded-full transition-colors shrink-0"
-        style={{ width: "44px", height: "24px", backgroundColor: value ? YELLOW : BORDER }}
+        style={{ width: "44px", height: "24px", backgroundColor: value ? activeColor : BORDER }}
       >
         <span
           className="absolute rounded-full transition-all"
@@ -459,6 +470,7 @@ export function VehicleForm({
   );
   const [optionals, setOptionals] = useState<string[]>(defaultValues?.optionals ?? []);
   const [isPremium, setIsPremium] = useState(defaultValues?.isPremium ?? false);
+  const [isNew,     setIsNew]     = useState(defaultValues?.isNew ?? false);
   const [errors,    setErrors]    = useState<Record<string, string>>({});
 
   function setF(key: keyof typeof form, value: string) {
@@ -501,6 +513,7 @@ export function VehicleForm({
       motor:        form.motor.trim(),
       optionals,
       isPremium,
+      isNew,
       images,
       imageUrl:     cover,
       price:        parseCurrencyInput(form.price),
@@ -583,7 +596,18 @@ export function VehicleForm({
           <OptionalsSelector selected={optionals} onChange={setOptionals} />
         </div>
 
-        <PremiumToggle value={isPremium} onChange={setIsPremium} />
+        <ToggleRow
+          value={isPremium} onChange={setIsPremium}
+          icon={<Star className="inline w-4 h-4 mr-1.5" />}
+          label="Carro premium" description="Destaque especial no estoque"
+          activeColor={YELLOW} activeBg="rgba(255,174,31,0.08)" activeBorder="rgba(255,174,31,0.3)"
+        />
+        <ToggleRow
+          value={isNew} onChange={setIsNew}
+          icon={<Sparkles className="inline w-4 h-4 mr-1.5" />}
+          label='Selo "Novidade no estoque"' description="Mostra a tag no topo das artes de Story geradas pra esse carro"
+          activeColor={ACCENT} activeBg="rgba(204,17,17,0.08)" activeBorder="rgba(204,17,17,0.3)"
+        />
       </section>
 
       {/* Preço */}

@@ -26,6 +26,7 @@ function rowToVehicle(row: Record<string, unknown>): Vehicle {
     motor:        (row.motor        as string) ?? '',
     optionals:    (row.optionals    as string[]) ?? [],
     isPremium:    (row.is_premium   as boolean) ?? false,
+    isNew:        (row.is_new       as boolean) ?? false,
     images:       (row.images       as string[]) ?? [],
     imageUrl:     (row.image_url    as string) ?? '',
     price:        Number(row.price),
@@ -135,6 +136,7 @@ export async function createVehicle(
       motor:        input.motor,
       optionals:    input.optionals,
       is_premium:   input.isPremium,
+      is_new:       input.isNew,
       images:       input.images,
       image_url:    input.imageUrl,
       price:        input.price,
@@ -176,6 +178,7 @@ export async function updateVehicleAction(
   if (input.motor        !== undefined) patch.motor        = input.motor
   if (input.optionals    !== undefined) patch.optionals    = input.optionals
   if (input.isPremium    !== undefined) patch.is_premium   = input.isPremium
+  if (input.isNew        !== undefined) patch.is_new       = input.isNew
   if (input.images       !== undefined) patch.images       = input.images
   if (input.imageUrl     !== undefined) patch.image_url    = input.imageUrl
   if (input.price        !== undefined) patch.price        = input.price

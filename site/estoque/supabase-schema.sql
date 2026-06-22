@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
   motor        text,
   optionals    text[]      DEFAULT '{}',
   is_premium   boolean     NOT NULL DEFAULT false,
+  is_new       boolean     NOT NULL DEFAULT false,
   images       text[]      DEFAULT '{}',
   image_url    text,
   price        numeric     NOT NULL,
@@ -138,6 +139,12 @@ FROM vehicles
 WHERE status = 'disponivel' AND archived_at IS NULL;
 
 GRANT SELECT ON public_vehicles TO anon;
+
+-- ============================================================
+-- Migração: campo is_new (selo "Novidade no estoque" nas artes de Story)
+-- Rode isso se a tabela vehicles já existia antes desse campo ser criado.
+-- ============================================================
+ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS is_new boolean NOT NULL DEFAULT false;
 
 -- ============================================================
 -- Para promover um usuário já cadastrado a SUPER_ADMIN:

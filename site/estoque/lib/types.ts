@@ -16,6 +16,7 @@ export type Vehicle = {
   motor: string
   optionals: string[]
   isPremium: boolean
+  isNew: boolean
   images: string[]
   imageUrl: string
   price: number
