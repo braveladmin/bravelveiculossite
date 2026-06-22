@@ -22,7 +22,7 @@ export function StoryPreview({ vehicle }: Props) {
       <PhotoBackdrop src={cover} alt={vehicle.name} />
 
       {/* Aviso de novidade no estoque */}
-      <div className="absolute top-0 left-0 z-10" style={{ padding: "6%" }}>
+      <div className="absolute top-0 left-0 z-10" style={{ padding: "16% 6% 0" }}>
         <span
           className="preview-commercial inline-block text-white text-[11px] font-extrabold uppercase tracking-[0.14em]"
           style={{ backgroundColor: "#cc1111", borderRadius: "4px", padding: "7px 14px", boxShadow: "0 2px 10px rgba(0,0,0,0.4)" }}
