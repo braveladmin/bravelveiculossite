@@ -3,11 +3,11 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Chip } from "@heroui/react"
-import { CheckCircle2, Star } from "lucide-react"
+import { CheckCircle2, RotateCcw, Star } from "lucide-react"
 import { formatCurrency, formatKm } from "@/lib/format"
 import { STATUS_CFG } from "@/lib/constants"
 import { ConfirmModal } from "@/components/ui/ConfirmModal"
-import { markAsSold, updateVehicleAction } from "@/lib/actions/vehicles"
+import { markAsSold, markAsAvailable, updateVehicleAction } from "@/lib/actions/vehicles"
 import type { Vehicle } from "@/lib/types"
 
 const CARD    = "#181818"
@@ -34,24 +34,32 @@ function formatCompact(v: number): string {
 type Props = {
   vehicle: Vehicle
   onSold?: (id: string) => void
+  onRestore?: (id: string) => void
   onFeatureToggle?: (id: string, isPremium: boolean) => void
 }
 
-export function VehicleCard({ vehicle, onSold, onFeatureToggle }: Props) {
+export function VehicleCard({ vehicle, onSold, onRestore, onFeatureToggle }: Props) {
   const sc       = STATUS_CFG[vehicle.status] ?? STATUS_CFG.disponivel
   const coverUrl = vehicle.images?.[0] ?? vehicle.imageUrl ?? PLACEHOLDER_IMAGE
   const days     = daysInStock(vehicle.acquiredAt ?? vehicle.createdAt)
   const isSold   = vehicle.status === "vendido"
   const isPrep   = vehicle.status === "em_preparacao"
 
-  const [showConfirmSold, setShowConfirmSold] = useState(false)
-  const [saving,          setSaving]          = useState(false)
-  const [togglingFeature, setTogglingFeature] = useState(false)
+  const [showConfirmSold,    setShowConfirmSold]    = useState(false)
+  const [showConfirmRestore, setShowConfirmRestore] = useState(false)
+  const [saving,             setSaving]             = useState(false)
+  const [togglingFeature,    setTogglingFeature]    = useState(false)
 
   function openConfirmSold(e: React.MouseEvent) {
     e.preventDefault()
     e.stopPropagation()
     setShowConfirmSold(true)
+  }
+
+  function openConfirmRestore(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowConfirmRestore(true)
   }
 
   async function handleConfirmSold() {
@@ -60,6 +68,14 @@ export function VehicleCard({ vehicle, onSold, onFeatureToggle }: Props) {
     setSaving(false)
     setShowConfirmSold(false)
     onSold?.(vehicle.id)
+  }
+
+  async function handleConfirmRestore() {
+    setSaving(true)
+    await markAsAvailable(vehicle.id)
+    setSaving(false)
+    setShowConfirmRestore(false)
+    onRestore?.(vehicle.id)
   }
 
   async function handleToggleFeatured(e: React.MouseEvent) {
@@ -210,6 +226,17 @@ export function VehicleCard({ vehicle, onSold, onFeatureToggle }: Props) {
               Marcar como vendido
             </button>
           )}
+          {isSold && (
+            <button
+              type="button"
+              onClick={openConfirmRestore}
+              className="inline-flex items-center gap-1 text-[10.5px] font-semibold px-2 py-1 rounded-lg transition-colors hover:bg-white/10"
+              style={{ color: TEXT2 }}
+            >
+              <RotateCcw className="w-3 h-3" />
+              Voltar ao estoque
+            </button>
+          )}
           <p className="text-[11px] font-semibold ml-auto" style={{ color: ACCENT }}>
             Ver detalhes →
           </p>
@@ -224,6 +251,14 @@ export function VehicleCard({ vehicle, onSold, onFeatureToggle }: Props) {
       title="Marcar como vendido"
       description={`Confirma que "${vehicle.name}" foi vendido? Ele vai pra seção de vendidos do estoque.`}
       confirmLabel={saving ? "Salvando..." : "Marcar como vendido"}
+    />
+    <ConfirmModal
+      open={showConfirmRestore}
+      onClose={() => setShowConfirmRestore(false)}
+      onConfirm={handleConfirmRestore}
+      title="Voltar ao estoque"
+      description={`Confirma que "${vehicle.name}" volta a ficar disponível no estoque?`}
+      confirmLabel={saving ? "Salvando..." : "Voltar ao estoque"}
     />
     </>
   )

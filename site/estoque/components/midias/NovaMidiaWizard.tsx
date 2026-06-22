@@ -36,7 +36,6 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   const [vehicle,          setVehicle]          = useState<Vehicle | null>(null)
   const [mediaType,        setMediaType]        = useState<MediaType | null>(null)
   const [selectedPhotos,   setSelectedPhotos]   = useState<string[]>([])
-  const [carrosselSemEdicao, setCarrosselSemEdicao] = useState(false)
   const [caption,          setCaption]          = useState("")
   const [hashtags,         setHashtags]         = useState<string[]>([])
   const [saving,           setSaving]           = useState(false)
@@ -90,9 +89,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           price: vehicle.price ? formatPrecoSemCentavos(vehicle.price) : "",
           mileage: vehicle.km ? formatKm(vehicle.km) : "",
         },
-        layout: mediaType === "carousel" && carrosselSemEdicao
-          ? "instagram-carousel-raw-v1"
-          : `instagram-${mediaType}-v1`,
+        layout: `instagram-${mediaType}-v1`,
       },
       caption,
       hashtags,
@@ -172,35 +169,11 @@ export function NovaMidiaWizard({ vehicles }: Props) {
         {step === 2 && vehicle && mediaType && (
           <div className="space-y-5">
             {mediaType === "carousel" && (
-              <>
-                <SelecionarFotos
-                  images={vehicle.images ?? []}
-                  selected={selectedPhotos}
-                  onChange={setSelectedPhotos}
-                />
-                <button
-                  type="button"
-                  onClick={() => setCarrosselSemEdicao((v) => !v)}
-                  className="flex items-start gap-3 w-full text-left rounded-xl p-4 transition-colors"
-                  style={{ backgroundColor: SURF2, border: `1px solid ${carrosselSemEdicao ? ACCENT : BORDER}` }}
-                >
-                  <div
-                    className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5"
-                    style={{
-                      backgroundColor: carrosselSemEdicao ? ACCENT : "transparent",
-                      border: `1px solid ${carrosselSemEdicao ? ACCENT : "rgba(255,255,255,0.3)"}`,
-                    }}
-                  >
-                    {carrosselSemEdicao && <Check className="w-3.5 h-3.5 text-white" />}
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-bold" style={{ color: TEXT }}>Gerar carrossel sem edição</p>
-                    <p className="text-[12px] mt-0.5" style={{ color: MUTED }}>
-                      Publica só as fotos selecionadas, sem texto ou design por cima — só a legenda.
-                    </p>
-                  </div>
-                </button>
-              </>
+              <SelecionarFotos
+                images={vehicle.images ?? []}
+                selected={selectedPhotos}
+                onChange={setSelectedPhotos}
+              />
             )}
             <div className="flex items-start gap-3 rounded-xl p-4" style={{ backgroundColor: SURF2, border: `1px solid ${BORDER}` }}>
               <Sparkles className="w-5 h-5 shrink-0" style={{ color: ACCENT }} />
@@ -244,7 +217,6 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           <PreviewFinal
             vehicle={previewVehicle}
             mediaType={mediaType}
-            carouselRaw={carrosselSemEdicao}
             caption={caption}
             hashtags={hashtags}
             onChangeCaption={setCaption}
@@ -259,7 +231,6 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           <PreviewFinal
             vehicle={previewVehicle}
             mediaType={mediaType}
-            carouselRaw={carrosselSemEdicao}
             caption={caption}
             hashtags={hashtags}
             onChangeCaption={setCaption}

@@ -39,6 +39,13 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
     setFilter("vendido")
   }
 
+  function handleRestore(id: string) {
+    setVehicles((vs) => vs.map((v) =>
+      v.id === id ? { ...v, status: "disponivel", soldAt: undefined } : v
+    ))
+    setFilter("disponivel")
+  }
+
   function handleFeatureToggle(id: string, isPremium: boolean) {
     setVehicles((vs) => vs.map((v) => (v.id === id ? { ...v, isPremium } : v)))
   }
@@ -222,7 +229,7 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
               variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
               transition={{ duration: 0.22, ease: "easeOut" }}
             >
-              <VehicleCard vehicle={v} onSold={handleSold} onFeatureToggle={handleFeatureToggle} />
+              <VehicleCard vehicle={v} onSold={handleSold} onRestore={handleRestore} onFeatureToggle={handleFeatureToggle} />
             </motion.div>
           ))}
         </motion.div>

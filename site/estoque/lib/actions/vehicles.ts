@@ -213,6 +213,22 @@ export async function markAsSold(id: string): Promise<{ error: string | null }> 
   return { error: null }
 }
 
+export async function markAsAvailable(id: string): Promise<{ error: string | null }> {
+  const supabase = await createClient()
+  const userInfo = await getUserInfo()
+  if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
+
+  const { error } = await supabase
+    .from('vehicles')
+    .update({ status: 'disponivel', sold_at: null })
+    .eq('id', id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/estoque')
+  revalidatePath(`/estoque/${id}`)
+  return { error: null }
+}
+
 export async function archiveVehicle(id: string): Promise<{ error: string | null }> {
   const supabase = await createClient()
   const userInfo = await getUserInfo()

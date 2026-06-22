@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, BadgeCheck, CheckCircle2, ChevronLeft, ChevronRight,
-  Pencil, Star, Trash2,
+  Pencil, RotateCcw, Star, Trash2,
 } from 'lucide-react'
 import { Button, Chip } from '@heroui/react'
 import { formatCurrency, formatCurrencyInput, formatKm, maskCurrencyInput, parseCurrencyInput } from '@/lib/format'
-import { updateVehicleAction, markAsSold, archiveVehicle } from '@/lib/actions/vehicles'
+import { updateVehicleAction, markAsSold, markAsAvailable, archiveVehicle } from '@/lib/actions/vehicles'
 import { STATUS_CFG } from '@/lib/constants'
 import { Modal, ConfirmModal } from '@/components/ui/ConfirmModal'
 import type { Vehicle } from '@/lib/types'
@@ -173,9 +173,10 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
   const [vehicle,           setVehicle]           = useState<Vehicle>(initialVehicle)
   const [toast,             setToast]             = useState<string | null>(null)
   const [showEditPrice,     setShowEditPrice]     = useState(false)
-  const [showConfirmArchive, setShowConfirmArchive] = useState(false)
-  const [showConfirmSold,   setShowConfirmSold]   = useState(false)
-  const [saving,            setSaving]            = useState(false)
+  const [showConfirmArchive,  setShowConfirmArchive]  = useState(false)
+  const [showConfirmSold,    setShowConfirmSold]    = useState(false)
+  const [showConfirmRestore, setShowConfirmRestore] = useState(false)
+  const [saving,             setSaving]             = useState(false)
 
   function showToast(msg: string) {
     setToast(msg)
@@ -200,6 +201,15 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
     setShowConfirmSold(false)
     setSaving(false)
     showToast("Veículo marcado como vendido")
+  }
+
+  async function handleRestore() {
+    setSaving(true)
+    await markAsAvailable(vehicle.id)
+    setVehicle((v) => ({ ...v, status: "disponivel", soldAt: undefined }))
+    setShowConfirmRestore(false)
+    setSaving(false)
+    showToast("Veículo voltou ao estoque")
   }
 
   async function handleArchive() {
@@ -352,6 +362,18 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
                     Marcar como vendido
                   </Button>
                 )}
+                {isSold && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onPress={() => setShowConfirmRestore(true)}
+                    className="font-semibold bg-[#ffae1f]! hover:bg-[#e69a14]!"
+                    isPending={saving}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Voltar ao estoque
+                  </Button>
+                )}
                 <Button variant="danger-soft" size="sm" onPress={() => setShowConfirmArchive(true)} className="font-semibold">
                   <Trash2 className="w-4 h-4" />
                   Arquivar
@@ -373,6 +395,14 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
         title="Marcar como vendido"
         description={`Tem certeza que deseja marcar "${vehicle.brand} ${vehicle.name}" como vendido?`}
         confirmLabel="Sim, marcar vendido"
+      />
+      <ConfirmModal
+        open={showConfirmRestore}
+        onClose={() => setShowConfirmRestore(false)}
+        onConfirm={handleRestore}
+        title="Voltar ao estoque"
+        description={`Tem certeza que deseja voltar "${vehicle.brand} ${vehicle.name}" ao estoque disponível?`}
+        confirmLabel="Sim, voltar ao estoque"
       />
       <ConfirmModal
         open={showConfirmArchive}
