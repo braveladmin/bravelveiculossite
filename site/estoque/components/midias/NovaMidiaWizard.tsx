@@ -14,6 +14,7 @@ import { PreviewFinal } from "@/components/midias/steps/PreviewFinal"
 import { getDimensionsForType } from "@/lib/midias/dimensoes"
 import { gerarLegenda, gerarHashtags, formatPrecoSemCentavos } from "@/lib/midias/legenda"
 import { createGeneratedMedia } from "@/lib/actions/media"
+import { updateVehicleAction } from "@/lib/actions/vehicles"
 import { formatKm } from "@/lib/format"
 import { MEDIA_TYPE_CFG } from "@/lib/constants"
 import type { MediaType, Vehicle } from "@/lib/types"
@@ -41,6 +42,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   const [saving,           setSaving]           = useState(false)
   const [saved,            setSaved]            = useState(false)
   const [error,            setError]            = useState<string | null>(null)
+  const [updatingNewBadge, setUpdatingNewBadge] = useState(false)
 
   const skipLegenda = mediaType === "story"
   const STEP_LABELS = skipLegenda
@@ -66,6 +68,14 @@ export function NovaMidiaWizard({ vehicles }: Props) {
 
   const previewVehicle: Vehicle | null =
     vehicle && mediaType === "carousel" ? { ...vehicle, images: selectedPhotos } : vehicle
+
+  async function handleToggleNewBadge(value: boolean) {
+    if (!vehicle) return
+    setVehicle((v) => v && { ...v, isNew: value })
+    setUpdatingNewBadge(true)
+    await updateVehicleAction(vehicle.id, { isNew: value })
+    setUpdatingNewBadge(false)
+  }
 
   async function handleSave() {
     if (!vehicle || !mediaType) return
@@ -224,6 +234,8 @@ export function NovaMidiaWizard({ vehicles }: Props) {
             onBack={() => setStep(2)}
             onSave={handleSave}
             onDone={() => router.push("/midias")}
+            onToggleNewBadge={handleToggleNewBadge}
+            updatingNewBadge={updatingNewBadge}
             saving={saving}
             saved={saved}
             error={error}
@@ -240,6 +252,8 @@ export function NovaMidiaWizard({ vehicles }: Props) {
             onBack={() => setStep(3)}
             onSave={handleSave}
             onDone={() => router.push("/midias")}
+            onToggleNewBadge={handleToggleNewBadge}
+            updatingNewBadge={updatingNewBadge}
             saving={saving}
             saved={saved}
             error={error}

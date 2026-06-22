@@ -9,6 +9,7 @@ import type { Vehicle, VehicleStatus } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { formatCurrencyInput, maskCurrencyInput, parseCurrencyInput } from "@/lib/format";
 import { BRANDS, CATEGORIES } from "@/lib/constants";
+import { Switch } from "@/components/ui/Switch";
 
 const SURF2   = "#111111";
 const BORDER  = "rgba(255,255,255,0.08)";
@@ -419,17 +420,7 @@ function ToggleRow({
         </p>
         <p className="text-[11px] mt-0.5" style={{ color: MUTED }}>{description}</p>
       </div>
-      <button
-        type="button"
-        onClick={() => onChange(!value)}
-        className="relative rounded-full transition-colors shrink-0"
-        style={{ width: "44px", height: "24px", backgroundColor: value ? activeColor : BORDER }}
-      >
-        <span
-          className="absolute rounded-full transition-all"
-          style={{ width: "18px", height: "18px", backgroundColor: "#fff", left: value ? "23px" : "3px", top: "3px" }}
-        />
-      </button>
+      <Switch value={value} onChange={onChange} activeColor={activeColor} />
     </div>
   );
 }

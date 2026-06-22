@@ -3,10 +3,11 @@
 import { useRef, useState } from "react"
 import { toPng } from "html-to-image"
 import { Button } from "@heroui/react"
-import { CheckCircle2, Download, Loader2 } from "lucide-react"
+import { CheckCircle2, Download, Loader2, Sparkles } from "lucide-react"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
 import { PostPreview } from "@/components/midias/preview/PostPreview"
 import { CarouselPreview } from "@/components/midias/preview/CarouselPreview"
+import { Switch } from "@/components/ui/Switch"
 import type { MediaType, Vehicle } from "@/lib/types"
 
 const SURF2  = "#111111"
@@ -25,13 +26,16 @@ type Props = {
   onBack: () => void
   onSave: () => void
   onDone: () => void
+  onToggleNewBadge: (value: boolean) => void
+  updatingNewBadge: boolean
   saving: boolean
   saved: boolean
   error: string | null
 }
 
 export function PreviewFinal({
-  vehicle, mediaType, caption, hashtags, onChangeCaption, onBack, onSave, onDone, saving, saved, error,
+  vehicle, mediaType, caption, hashtags, onChangeCaption, onBack, onSave, onDone,
+  onToggleNewBadge, updatingNewBadge, saving, saved, error,
 }: Props) {
   const previewWrapRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
@@ -97,6 +101,22 @@ export function PreviewFinal({
               </div>
             )}
           </>
+        )}
+
+        {mediaType === "story" && !saved && (
+          <div
+            className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
+            style={{ backgroundColor: vehicle.isNew ? "rgba(204,17,17,0.08)" : SURF2, border: `1px solid ${vehicle.isNew ? "rgba(204,17,17,0.3)" : BORDER}` }}
+          >
+            <div>
+              <p className="text-[13px] font-semibold flex items-center" style={{ color: vehicle.isNew ? ACCENT : TEXT }}>
+                <Sparkles className="inline w-4 h-4 mr-1.5" />
+                Selo &quot;Novidade no estoque&quot;
+              </p>
+              <p className="text-[11px] mt-0.5" style={{ color: MUTED }}>Mostra a tag no topo da arte do Story</p>
+            </div>
+            <Switch value={vehicle.isNew} onChange={onToggleNewBadge} activeColor={ACCENT} disabled={updatingNewBadge} />
+          </div>
         )}
 
         {error && (
