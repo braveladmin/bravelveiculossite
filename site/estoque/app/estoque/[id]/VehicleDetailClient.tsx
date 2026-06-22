@@ -173,7 +173,8 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
   const [vehicle,           setVehicle]           = useState<Vehicle>(initialVehicle)
   const [toast,             setToast]             = useState<string | null>(null)
   const [showEditPrice,     setShowEditPrice]     = useState(false)
-  const [showConfirmArchive,  setShowConfirmArchive]  = useState(false)
+  const [showConfirmArchive,      setShowConfirmArchive]      = useState(false)
+  const [showConfirmArchiveFinal, setShowConfirmArchiveFinal] = useState(false)
   const [showConfirmSold,    setShowConfirmSold]    = useState(false)
   const [showConfirmRestore, setShowConfirmRestore] = useState(false)
   const [saving,             setSaving]             = useState(false)
@@ -216,6 +217,11 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
     setSaving(true)
     await archiveVehicle(vehicle.id)
     router.push('/estoque')
+  }
+
+  function handleConfirmArchiveStep1() {
+    setShowConfirmArchive(false)
+    setShowConfirmArchiveFinal(true)
   }
 
   const sc        = STATUS_CFG[vehicle.status] ?? STATUS_CFG.disponivel
@@ -376,7 +382,7 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
                 )}
                 <Button variant="danger-soft" size="sm" onPress={() => setShowConfirmArchive(true)} className="font-semibold">
                   <Trash2 className="w-4 h-4" />
-                  Arquivar
+                  Apagar carro
                 </Button>
               </div>
             )}
@@ -407,10 +413,19 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
       <ConfirmModal
         open={showConfirmArchive}
         onClose={() => setShowConfirmArchive(false)}
+        onConfirm={handleConfirmArchiveStep1}
+        title="Apagar carro do estoque"
+        description={`Tem certeza que deseja apagar "${vehicle.brand} ${vehicle.name}" do estoque? Ele some imediatamente do estoque ativo e do site.`}
+        confirmLabel="Sim, apagar"
+        danger
+      />
+      <ConfirmModal
+        open={showConfirmArchiveFinal}
+        onClose={() => setShowConfirmArchiveFinal(false)}
         onConfirm={handleArchive}
-        title="Arquivar veículo"
-        description={`O veículo "${vehicle.brand} ${vehicle.name}" será arquivado e removido do estoque ativo. Esta ação pode ser desfeita no banco de dados.`}
-        confirmLabel="Sim, arquivar"
+        title="Confirmar de novo"
+        description={`Essa é a última confirmação: "${vehicle.brand} ${vehicle.name}" vai ser apagado do estoque agora. Não tem desfazer por aqui.`}
+        confirmLabel={saving ? "Apagando…" : "Sim, apagar definitivamente"}
         danger
       />
     </div>
