@@ -1,6 +1,9 @@
 "use client"
 
+import { useRef, useState } from "react"
+import { toPng } from "html-to-image"
 import { Button } from "@heroui/react"
+import { CheckCircle2, Download, Loader2 } from "lucide-react"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
 import { PostPreview } from "@/components/midias/preview/PostPreview"
 import { CarouselPreview } from "@/components/midias/preview/CarouselPreview"
@@ -11,6 +14,7 @@ const BORDER = "rgba(255,255,255,0.08)"
 const ACCENT = "#cc1111"
 const TEXT   = "#ffffff"
 const MUTED  = "#777777"
+const SUCCESS = "#25d366"
 
 type Props = {
   vehicle: Vehicle
@@ -20,14 +24,41 @@ type Props = {
   onChangeCaption: (caption: string) => void
   onBack: () => void
   onSave: () => void
+  onDone: () => void
   saving: boolean
+  saved: boolean
   error: string | null
 }
 
-export function PreviewFinal({ vehicle, mediaType, caption, hashtags, onChangeCaption, onBack, onSave, saving, error }: Props) {
+export function PreviewFinal({
+  vehicle, mediaType, caption, hashtags, onChangeCaption, onBack, onSave, onDone, saving, saved, error,
+}: Props) {
+  const previewWrapRef = useRef<HTMLDivElement>(null)
+  const [downloading, setDownloading] = useState(false)
+  const [downloadErr, setDownloadErr] = useState<string | null>(null)
+
+  async function handleDownload() {
+    const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
+    if (!node) return
+
+    setDownloading(true)
+    setDownloadErr(null)
+    try {
+      const dataUrl = await toPng(node, { pixelRatio: 3, cacheBust: true })
+      const link = document.createElement("a")
+      const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      link.download = `${mediaType}-${slug}.png`
+      link.href = dataUrl
+      link.click()
+    } catch {
+      setDownloadErr("Não consegui gerar a imagem. Tenta de novo.")
+    }
+    setDownloading(false)
+  }
+
   return (
     <div className="flex flex-col lg:flex-row gap-6">
-      <div className="lg:w-[420px] shrink-0">
+      <div className="lg:w-[420px] shrink-0" ref={previewWrapRef}>
         {mediaType === "story" && <StoryPreview vehicle={vehicle} />}
         {mediaType === "post" && <PostPreview vehicle={vehicle} />}
         {mediaType === "carousel" && <CarouselPreview vehicle={vehicle} />}
@@ -72,13 +103,39 @@ export function PreviewFinal({ vehicle, mediaType, caption, hashtags, onChangeCa
           <p className="text-[13px]" style={{ color: "#ff6b6b" }}>{error}</p>
         )}
 
+        {saved && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-[13px] font-semibold" style={{ backgroundColor: "rgba(37,211,102,0.1)", border: "1px solid rgba(37,211,102,0.3)", color: SUCCESS }}>
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            Mídia salva. {mediaType === "carousel" ? "Baixe cada slide pra postar (navegue pelas setas do preview)." : "Baixe a imagem pra postar."}
+          </div>
+        )}
+
+        {downloadErr && (
+          <p className="text-[13px]" style={{ color: "#ff6b6b" }}>{downloadErr}</p>
+        )}
+
         <div className="flex gap-2 justify-end pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
-          <Button type="button" variant="outline" size="sm" onPress={onBack} className="font-semibold" isDisabled={saving}>
-            Voltar
-          </Button>
-          <Button type="button" variant="primary" size="sm" onPress={onSave} className="font-semibold" isPending={saving}>
-            Salvar mídia
-          </Button>
+          {!saved && (
+            <>
+              <Button type="button" variant="outline" size="sm" onPress={onBack} className="font-semibold" isDisabled={saving}>
+                Voltar
+              </Button>
+              <Button type="button" variant="primary" size="sm" onPress={onSave} className="font-semibold" isPending={saving}>
+                Salvar mídia
+              </Button>
+            </>
+          )}
+          {saved && (
+            <>
+              <Button type="button" variant="outline" size="sm" className="font-semibold" onPress={handleDownload} isDisabled={downloading}>
+                {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                Baixar imagem
+              </Button>
+              <Button type="button" variant="primary" size="sm" className="font-semibold" onPress={onDone}>
+                Ir pra Central de Mídias
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

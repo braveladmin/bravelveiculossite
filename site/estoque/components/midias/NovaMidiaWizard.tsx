@@ -39,6 +39,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   const [caption,          setCaption]          = useState("")
   const [hashtags,         setHashtags]         = useState<string[]>([])
   const [saving,           setSaving]           = useState(false)
+  const [saved,            setSaved]            = useState(false)
   const [error,            setError]            = useState<string | null>(null)
 
   const skipLegenda = mediaType === "story"
@@ -102,7 +103,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
       return
     }
 
-    router.push("/midias")
+    setSaved(true)
   }
 
   return (
@@ -222,7 +223,9 @@ export function NovaMidiaWizard({ vehicles }: Props) {
             onChangeCaption={setCaption}
             onBack={() => setStep(2)}
             onSave={handleSave}
+            onDone={() => router.push("/midias")}
             saving={saving}
+            saved={saved}
             error={error}
           />
         )}
@@ -236,7 +239,9 @@ export function NovaMidiaWizard({ vehicles }: Props) {
             onChangeCaption={setCaption}
             onBack={() => setStep(3)}
             onSave={handleSave}
+            onDone={() => router.push("/midias")}
             saving={saving}
+            saved={saved}
             error={error}
           />
         )}
