@@ -15,6 +15,7 @@ const MUTED  = "#777777"
 type Props = {
   vehicle: Vehicle
   mediaType: MediaType
+  carouselRaw?: boolean
   caption: string
   hashtags: string[]
   onChangeCaption: (caption: string) => void
@@ -24,13 +25,13 @@ type Props = {
   error: string | null
 }
 
-export function PreviewFinal({ vehicle, mediaType, caption, hashtags, onChangeCaption, onBack, onSave, saving, error }: Props) {
+export function PreviewFinal({ vehicle, mediaType, carouselRaw, caption, hashtags, onChangeCaption, onBack, onSave, saving, error }: Props) {
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <div className="lg:w-[420px] shrink-0">
         {mediaType === "story" && <StoryPreview vehicle={vehicle} />}
         {mediaType === "post" && <PostPreview vehicle={vehicle} />}
-        {mediaType === "carousel" && <CarouselPreview vehicle={vehicle} />}
+        {mediaType === "carousel" && <CarouselPreview vehicle={vehicle} raw={carouselRaw} />}
       </div>
 
       <div className="flex-1 space-y-4">

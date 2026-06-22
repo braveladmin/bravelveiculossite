@@ -16,9 +16,9 @@ const FALLBACK_OPTIONALS_LIST = ["Conforto", "Segurança", "Tecnologia"]
 
 const PHOTO_OVERLAY_GRADIENT = "linear-gradient(to top, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.85) 45%, rgba(10,10,10,0.3) 75%, transparent 100%)"
 
-function Logo() {
+function Logo({ corner = "left" }: { corner?: "left" | "right" }) {
   return (
-    <div className="absolute top-0 left-0 z-10" style={{ padding: "6%" }}>
+    <div className={`absolute top-0 ${corner === "right" ? "right-0" : "left-0"} z-10`} style={{ padding: "6%" }}>
       <Image
         src="/bravel-logo.png"
         alt="Bravel Veículos"
@@ -43,20 +43,21 @@ function PhotoSlide({ src, children }: { src: string; children: ReactNode }) {
   )
 }
 
-function PlainPhotoSlide({ src }: { src: string }) {
+function PlainPhotoSlide({ src, showLogo = true, logoCorner = "left" }: { src: string; showLogo?: boolean; logoCorner?: "left" | "right" }) {
   return (
     <>
       <PhotoBackdrop src={src} />
-      <Logo />
+      {showLogo && <Logo corner={logoCorner} />}
     </>
   )
 }
 
 type Props = {
   vehicle: Vehicle
+  raw?: boolean
 }
 
-export function CarouselPreview({ vehicle }: Props) {
+export function CarouselPreview({ vehicle, raw = false }: Props) {
   const [index, setIndex] = useState(0)
 
   const fotos = vehicle.images?.length ? vehicle.images : []
@@ -65,7 +66,12 @@ export function CarouselPreview({ vehicle }: Props) {
 
   const opcionaisList = vehicle.optionals?.length ? vehicle.optionals.slice(0, 6) : FALLBACK_OPTIONALS_LIST
 
-  const slides: { bg?: string; content: ReactNode }[] = [
+  // Modo sem edição: fotos originais, sem corte, com a logo no canto superior direito
+  const rawSlides: { bg?: string; content: ReactNode }[] = (fotos.length ? fotos : [cover]).map((foto) => ({
+    content: <PlainPhotoSlide key={foto} src={foto} logoCorner="right" />,
+  }))
+
+  const slides: { bg?: string; content: ReactNode }[] = raw ? rawSlides : [
     // Slide 1 — Capa
     {
       content: (
