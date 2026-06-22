@@ -173,6 +173,17 @@ export function VehicleCard({ vehicle, onSold, onRestore, onFeatureToggle }: Pro
 
       {/* Body */}
       <div className="p-4 space-y-3">
+        {isSold && (
+          <button
+            type="button"
+            onClick={openConfirmRestore}
+            className="w-full inline-flex items-center justify-center gap-1.5 text-[12px] font-bold py-2 rounded-lg transition-colors hover:opacity-90"
+            style={{ backgroundColor: "rgba(255,174,31,0.15)", color: YELLOW, border: "1px solid rgba(255,174,31,0.35)" }}
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Voltar ao estoque
+          </button>
+        )}
         <div>
           <div className="flex items-center gap-2">
             <p className="text-[9px] font-black tracking-[0.2em] uppercase" style={{ color: TEXT3 }}>
@@ -223,17 +234,6 @@ export function VehicleCard({ vehicle, onSold, onRestore, onFeatureToggle }: Pro
             >
               <CheckCircle2 className="w-3 h-3" />
               Marcar como vendido
-            </button>
-          )}
-          {isSold && (
-            <button
-              type="button"
-              onClick={openConfirmRestore}
-              className="inline-flex items-center gap-1 text-[10.5px] font-semibold px-2 py-1 rounded-lg transition-colors hover:bg-white/10"
-              style={{ color: TEXT2 }}
-            >
-              <RotateCcw className="w-3 h-3" />
-              Voltar ao estoque
             </button>
           )}
           <p className="text-[11px] font-semibold ml-auto" style={{ color: ACCENT }}>
