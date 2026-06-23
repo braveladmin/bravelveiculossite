@@ -1,6 +1,7 @@
 "use client"
 
-import type { ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
+import { createPortal } from "react-dom"
 import { AnimatePresence, motion } from "motion/react"
 import { X } from "lucide-react"
 import { Button } from "@heroui/react"
@@ -10,10 +11,22 @@ const BORDER  = "rgba(255,255,255,0.08)"
 const TEXT    = "#ffffff"
 const MUTED   = "#777777"
 
+// Renderiza num portal pro <body> — a animação de transição de página (motion.div
+// com transform no Shell) cria um containing block novo pra elementos fixed, então
+// um modal "fixed inset-0" preso dentro da árvore da página não cobre o header fixo.
+function useBodyPortal() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  return mounted
+}
+
 export function Modal({ open, onClose, title, children }: {
   open: boolean; onClose: () => void; title: string; children: ReactNode
 }) {
-  return (
+  const mounted = useBodyPortal()
+  if (!mounted) return null
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -43,7 +56,8 @@ export function Modal({ open, onClose, title, children }: {
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }
 

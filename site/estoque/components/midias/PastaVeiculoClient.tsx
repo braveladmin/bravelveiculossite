@@ -1,6 +1,7 @@
 "use client"
 
-import { useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
+import { createPortal } from "react-dom"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toPng } from "html-to-image"
@@ -32,11 +33,17 @@ const GROUP_ORDER: { type: MediaType; label: string }[] = [
 
 // ── Primitives (mesmo padrão usado em VehicleDetailClient) ───────────────────
 
+// Renderiza num portal pro <body> — a animação de transição de página (motion.div
+// com transform no Shell) cria um containing block novo pra elementos fixed, então
+// um modal "fixed inset-0" preso dentro da árvore da página não cobre o header fixo.
 function Modal({ open, onClose, title, children }: {
   open: boolean; onClose: () => void; title: string; children: ReactNode
 }) {
-  if (!open) return null
-  return (
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!open || !mounted) return null
+
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div
@@ -51,7 +58,8 @@ function Modal({ open, onClose, title, children }: {
         </div>
         <div className="p-6 overflow-y-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

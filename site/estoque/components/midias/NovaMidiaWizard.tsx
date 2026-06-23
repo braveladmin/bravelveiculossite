@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Check, Sparkles } from "lucide-react"
@@ -44,6 +44,12 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   const [saved,            setSaved]            = useState(false)
   const [error,            setError]            = useState<string | null>(null)
   const [updatingNewBadge, setUpdatingNewBadge] = useState(false)
+
+  // Sem isso, trocar de passo num celular deixa o usuário olhando pro meio da
+  // tela anterior, já que o scroll não acompanha a troca de conteúdo do wizard.
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [step])
 
   const mediaType: MediaType | null = formato ? mediaTypeFromFormato(formato) : null
   const storyCollage = formato === "story-collage"
@@ -147,8 +153,22 @@ export function NovaMidiaWizard({ vehicles }: Props) {
         <h1 className="text-[22px] font-black mt-2" style={{ color: TEXT }}>Nova mídia</h1>
       </div>
 
-      {/* Stepper */}
-      <div className="flex items-center gap-2 flex-wrap">
+      {/* Stepper compacto — só no mobile, pra não quebrar em 3 linhas */}
+      <div className="sm:hidden space-y-1.5">
+        <div className="flex items-center justify-between text-[12px] font-semibold">
+          <span style={{ color: MUTED }}>Passo {step + 1} de {STEP_LABELS.length}</span>
+          <span style={{ color: ACCENT }}>{STEP_LABELS[step]}</span>
+        </div>
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: SURF2 }}>
+          <div
+            className="h-full rounded-full transition-all"
+            style={{ width: `${((step + 1) / STEP_LABELS.length) * 100}%`, backgroundColor: ACCENT }}
+          />
+        </div>
+      </div>
+
+      {/* Stepper completo — a partir de sm */}
+      <div className="hidden sm:flex items-center gap-2 flex-wrap">
         {STEP_LABELS.map((label, i) => (
           <div
             key={label}
