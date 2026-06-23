@@ -96,7 +96,7 @@ export function StoryCollagePreview({ vehicle }: Props) {
 
         {/* Banda 3 — externa, marca */}
         <Band src={fotoExterna2} alt={`${vehicle.name} - traseira`}>
-          <div className="absolute top-0 right-0 z-10" style={{ padding: "6% 6% 0" }}>
+          <div className="absolute bottom-0 right-0 z-10" style={{ padding: "0 6% 4% 0" }}>
             <Image
               src="/bravel-logo.png"
               alt="Bravel Veículos"
