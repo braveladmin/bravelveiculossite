@@ -7,8 +7,9 @@ import { ArrowLeft, Check, Sparkles } from "lucide-react"
 import { Button } from "@heroui/react"
 import { SelecionarVeiculo } from "@/components/midias/steps/SelecionarVeiculo"
 import { VeiculoResumoCard } from "@/components/midias/VeiculoResumoCard"
-import { EscolherFormato } from "@/components/midias/steps/EscolherFormato"
+import { EscolherFormato, mediaTypeFromFormato, type FormatoKey } from "@/components/midias/steps/EscolherFormato"
 import { SelecionarFotos, MAX_FOTOS_CARROSSEL } from "@/components/midias/steps/SelecionarFotos"
+import { SelecionarFotosCollage } from "@/components/midias/steps/SelecionarFotosCollage"
 import { Legenda } from "@/components/midias/steps/Legenda"
 import { PreviewFinal } from "@/components/midias/steps/PreviewFinal"
 import { getDimensionsForType } from "@/lib/midias/dimensoes"
@@ -35,7 +36,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
 
   const [step,             setStep]             = useState(0)
   const [vehicle,          setVehicle]          = useState<Vehicle | null>(null)
-  const [mediaType,        setMediaType]        = useState<MediaType | null>(null)
+  const [formato,          setFormato]          = useState<FormatoKey | null>(null)
   const [selectedPhotos,   setSelectedPhotos]   = useState<string[]>([])
   const [caption,          setCaption]          = useState("")
   const [hashtags,         setHashtags]         = useState<string[]>([])
@@ -44,6 +45,8 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   const [error,            setError]            = useState<string | null>(null)
   const [updatingNewBadge, setUpdatingNewBadge] = useState(false)
 
+  const mediaType: MediaType | null = formato ? mediaTypeFromFormato(formato) : null
+  const storyCollage = formato === "story-collage"
   const skipLegenda = mediaType === "story"
   const STEP_LABELS = skipLegenda
     ? ["Selecionar carro", "Escolher formato", "Gerar mídia", "Preview e salvar"]
@@ -52,6 +55,17 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   function handleSelectVehicle(v: Vehicle) {
     setVehicle(v)
     setSelectedPhotos((v.images ?? []).slice(0, MAX_FOTOS_CARROSSEL))
+  }
+
+  function handleSelectFormato(key: FormatoKey) {
+    setFormato(key)
+    if (!vehicle) return
+    const imgs = vehicle.images ?? []
+    if (key === "story-collage") {
+      setSelectedPhotos([imgs[0] ?? "", imgs[1] ?? imgs[0] ?? "", imgs[2] ?? imgs[0] ?? ""])
+    } else if (key === "carousel") {
+      setSelectedPhotos(imgs.slice(0, MAX_FOTOS_CARROSSEL))
+    }
   }
 
   function handleGerarMidia() {
@@ -67,7 +81,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   }
 
   const previewVehicle: Vehicle | null =
-    vehicle && mediaType === "carousel" ? { ...vehicle, images: selectedPhotos } : vehicle
+    vehicle && (mediaType === "carousel" || storyCollage) ? { ...vehicle, images: selectedPhotos } : vehicle
 
   async function handleToggleNewBadge(value: boolean) {
     if (!vehicle) return
@@ -90,7 +104,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
       vehicleId: vehicle.id,
       vehicleModel: vehicle.model || vehicle.name,
       mediaType,
-      title: `${MEDIA_TYPE_CFG[mediaType].label} ${vehicle.brand} ${vehicle.name}`.trim(),
+      title: `${MEDIA_TYPE_CFG[mediaType].label}${storyCollage ? " (3 fotos)" : ""} ${vehicle.brand} ${vehicle.name}`.trim(),
       previewData: {
         vehicleSnapshot: {
           brand: vehicle.brand,
@@ -100,7 +114,8 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           price: vehicle.price ? formatPrecoSemCentavos(vehicle.price) : "",
           mileage: vehicle.km ? formatKm(vehicle.km) : "",
         },
-        layout: `instagram-${mediaType}-v1`,
+        layout: storyCollage ? "instagram-story-collage-v1" : `instagram-${mediaType}-v1`,
+        ...(storyCollage ? { collagePhotos: selectedPhotos } : {}),
       },
       caption,
       hashtags,
@@ -167,10 +182,10 @@ export function NovaMidiaWizard({ vehicles }: Props) {
 
         {step === 1 && vehicle && (
           <div className="space-y-5">
-            <EscolherFormato selected={mediaType} onSelect={setMediaType} />
+            <EscolherFormato selected={formato} onSelect={handleSelectFormato} />
             <div className="flex justify-between pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
               <Button variant="outline" size="sm" className="font-semibold" onPress={() => setStep(0)}>Voltar</Button>
-              <Button variant="primary" size="sm" className="font-semibold" isDisabled={!mediaType} onPress={() => setStep(2)}>
+              <Button variant="primary" size="sm" className="font-semibold" isDisabled={!formato} onPress={() => setStep(2)}>
                 Avançar
               </Button>
             </div>
@@ -181,6 +196,13 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           <div className="space-y-5">
             {mediaType === "carousel" && (
               <SelecionarFotos
+                images={vehicle.images ?? []}
+                selected={selectedPhotos}
+                onChange={setSelectedPhotos}
+              />
+            )}
+            {storyCollage && (
+              <SelecionarFotosCollage
                 images={vehicle.images ?? []}
                 selected={selectedPhotos}
                 onChange={setSelectedPhotos}
@@ -205,7 +227,10 @@ export function NovaMidiaWizard({ vehicles }: Props) {
                 variant="primary"
                 size="sm"
                 className="font-semibold"
-                isDisabled={mediaType === "carousel" && (vehicle.images?.length ?? 0) > 0 && selectedPhotos.length === 0}
+                isDisabled={
+                  (mediaType === "carousel" && (vehicle.images?.length ?? 0) > 0 && selectedPhotos.length === 0) ||
+                  (storyCollage && selectedPhotos.filter(Boolean).length < 3)
+                }
                 onPress={handleGerarMidia}
               >
                 Gerar mídia
@@ -228,6 +253,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           <PreviewFinal
             vehicle={previewVehicle}
             mediaType={mediaType}
+            storyCollage={storyCollage}
             caption={caption}
             hashtags={hashtags}
             onChangeCaption={setCaption}
@@ -246,6 +272,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
           <PreviewFinal
             vehicle={previewVehicle}
             mediaType={mediaType}
+            storyCollage={storyCollage}
             caption={caption}
             hashtags={hashtags}
             onChangeCaption={setCaption}

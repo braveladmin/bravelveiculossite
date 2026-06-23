@@ -8,6 +8,7 @@ import { AlertTriangle, ArrowLeft, CheckCircle2, Clipboard, Download, Eye, Folde
 import { Button, Chip } from "@heroui/react"
 import { VeiculoResumoCard } from "@/components/midias/VeiculoResumoCard"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
+import { StoryCollagePreview } from "@/components/midias/preview/StoryCollagePreview"
 import { PostPreview } from "@/components/midias/preview/PostPreview"
 import { CarouselPreview } from "@/components/midias/preview/CarouselPreview"
 import { archiveMedia } from "@/lib/actions/media"
@@ -198,6 +199,10 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   const [downloading,       setDownloading]       = useState(false)
   const hiddenPreviewRef = useRef<HTMLDivElement>(null)
 
+  const isCollage = media.previewData?.layout === "instagram-story-collage-v1"
+  const collagePhotos = isCollage ? (media.previewData?.collagePhotos as string[] | undefined) : undefined
+  const previewVehicle = collagePhotos?.length ? { ...vehicle, images: collagePhotos } : vehicle
+
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(media.caption)
@@ -271,7 +276,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       {/* Instância oculta do Story — só pra capturar a arte na hora de salvar a imagem */}
       {media.mediaType === "story" && (
         <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: "-9999px", pointerEvents: "none" }} aria-hidden>
-          <StoryPreview vehicle={vehicle} />
+          {isCollage ? <StoryCollagePreview vehicle={previewVehicle} /> : <StoryPreview vehicle={vehicle} />}
         </div>
       )}
 
@@ -279,7 +284,8 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       <Modal open={showPreviewModal} onClose={() => setShowPreviewModal(false)} title={media.title}>
         <div className="space-y-5">
           <div className="flex justify-center">
-            {media.mediaType === "story" && <StoryPreview vehicle={vehicle} />}
+            {media.mediaType === "story" && isCollage && <StoryCollagePreview vehicle={previewVehicle} />}
+            {media.mediaType === "story" && !isCollage && <StoryPreview vehicle={vehicle} />}
             {media.mediaType === "post" && <PostPreview vehicle={vehicle} />}
             {media.mediaType === "carousel" && <CarouselPreview vehicle={vehicle} />}
           </div>

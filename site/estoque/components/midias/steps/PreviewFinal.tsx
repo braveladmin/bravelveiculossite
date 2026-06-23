@@ -6,6 +6,7 @@ import JSZip from "jszip"
 import { Button } from "@heroui/react"
 import { CheckCircle2, Download, Loader2, Send, Sparkles } from "lucide-react"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
+import { StoryCollagePreview } from "@/components/midias/preview/StoryCollagePreview"
 import { PostPreview } from "@/components/midias/preview/PostPreview"
 import { CarouselPreview, PhotoSlide } from "@/components/midias/preview/CarouselPreview"
 import { Switch } from "@/components/ui/Switch"
@@ -34,6 +35,8 @@ async function waitForFonts() {
 type Props = {
   vehicle: Vehicle
   mediaType: MediaType
+  /** Quando mediaType é "story", define se usa o layout único (1 foto) ou a colagem de 3 fotos. */
+  storyCollage?: boolean
   caption: string
   hashtags: string[]
   onChangeCaption: (caption: string) => void
@@ -48,7 +51,7 @@ type Props = {
 }
 
 export function PreviewFinal({
-  vehicle, mediaType, caption, hashtags, onChangeCaption, onBack, onSave, onDone,
+  vehicle, mediaType, storyCollage = false, caption, hashtags, onChangeCaption, onBack, onSave, onDone,
   onToggleNewBadge, updatingNewBadge, saving, saved, error,
 }: Props) {
   const previewWrapRef  = useRef<HTMLDivElement>(null)
@@ -160,7 +163,8 @@ export function PreviewFinal({
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <div className="lg:w-[420px] shrink-0" ref={previewWrapRef}>
-        {mediaType === "story" && <StoryPreview vehicle={vehicle} />}
+        {mediaType === "story" && storyCollage && <StoryCollagePreview vehicle={vehicle} />}
+        {mediaType === "story" && !storyCollage && <StoryPreview vehicle={vehicle} />}
         {mediaType === "post" && <PostPreview vehicle={vehicle} />}
         {mediaType === "carousel" && <CarouselPreview vehicle={vehicle} />}
       </div>

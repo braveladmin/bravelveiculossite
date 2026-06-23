@@ -1,6 +1,6 @@
 "use client"
 
-import { Clapperboard, GalleryHorizontal } from "lucide-react"
+import { Clapperboard, GalleryHorizontal, Rows3 } from "lucide-react"
 import { STORY_DIMENSIONS, CAROUSEL_DIMENSIONS } from "@/lib/midias/dimensoes"
 import type { MediaType } from "@/lib/types"
 
@@ -10,16 +10,29 @@ const ACCENT = "#cc1111"
 const TEXT   = "#ffffff"
 const MUTED  = "#777777"
 
-const FORMATOS: { type: MediaType; label: string; description: string; icon: typeof Clapperboard; dims: string }[] = [
+export type FormatoKey = "story" | "story-collage" | "carousel"
+
+export function mediaTypeFromFormato(key: FormatoKey): MediaType {
+  return key === "carousel" ? "carousel" : "story"
+}
+
+const FORMATOS: { key: FormatoKey; label: string; description: string; icon: typeof Clapperboard; dims: string }[] = [
   {
-    type: "story",
+    key: "story",
     label: "Story",
     description: "Formato vertical pra Stories do Instagram",
     icon: Clapperboard,
     dims: `${STORY_DIMENSIONS.width}×${STORY_DIMENSIONS.height} · ${STORY_DIMENSIONS.aspectRatio}`,
   },
   {
-    type: "carousel",
+    key: "story-collage",
+    label: "Story — 3 fotos",
+    description: "Um Story só com 3 fotos do carro (externa, interior e externa) e os dados em cada bloco",
+    icon: Rows3,
+    dims: `${STORY_DIMENSIONS.width}×${STORY_DIMENSIONS.height} · ${STORY_DIMENSIONS.aspectRatio}`,
+  },
+  {
+    key: "carousel",
     label: "Carrossel",
     description: "Carrossel com as fotos que você escolher",
     icon: GalleryHorizontal,
@@ -28,21 +41,21 @@ const FORMATOS: { type: MediaType; label: string; description: string; icon: typ
 ]
 
 type Props = {
-  selected: MediaType | null
-  onSelect: (type: MediaType) => void
+  selected: FormatoKey | null
+  onSelect: (key: FormatoKey) => void
 }
 
 export function EscolherFormato({ selected, onSelect }: Props) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {FORMATOS.map((f) => {
         const Icon = f.icon
-        const active = selected === f.type
+        const active = selected === f.key
         return (
           <button
-            key={f.type}
+            key={f.key}
             type="button"
-            onClick={() => onSelect(f.type)}
+            onClick={() => onSelect(f.key)}
             className="rounded-2xl p-6 text-left transition-all flex flex-col gap-3"
             style={{
               backgroundColor: SURF2,
