@@ -171,7 +171,7 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
   const router = useRouter()
 
   const [vehicle,           setVehicle]           = useState<Vehicle>(initialVehicle)
-  const [toast,             setToast]             = useState<string | null>(null)
+  const [toast,             setToast]             = useState<{ message: string; variant: "success" | "error" } | null>(null)
   const [showEditPrice,     setShowEditPrice]     = useState(false)
   const [showConfirmArchive,      setShowConfirmArchive]      = useState(false)
   const [showConfirmArchiveFinal, setShowConfirmArchiveFinal] = useState(false)
@@ -179,8 +179,8 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
   const [showConfirmRestore, setShowConfirmRestore] = useState(false)
   const [saving,             setSaving]             = useState(false)
 
-  function showToast(msg: string) {
-    setToast(msg)
+  function showToast(message: string, variant: "success" | "error" = "success") {
+    setToast({ message, variant })
     setTimeout(() => setToast(null), 3000)
   }
 
@@ -215,7 +215,13 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
 
   async function handleArchive() {
     setSaving(true)
-    await archiveVehicle(vehicle.id)
+    const { error } = await archiveVehicle(vehicle.id)
+    setSaving(false)
+    if (error) {
+      setShowConfirmArchiveFinal(false)
+      showToast(`Não foi possível apagar o carro: ${error}`, "error")
+      return
+    }
     router.push('/estoque')
   }
 
@@ -236,10 +242,15 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
       {toast && (
         <div
           className="fixed top-20 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl text-[13px] font-semibold"
-          style={{ backgroundColor: SURFACE, border: "1px solid rgba(37,211,102,0.3)", boxShadow: "0 8px 24px rgba(0,0,0,0.4)", color: TEXT }}
+          style={{
+            backgroundColor: SURFACE,
+            border: `1px solid ${toast.variant === "success" ? "rgba(37,211,102,0.3)" : "rgba(255,107,107,0.3)"}`,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            color: TEXT,
+          }}
         >
-          <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: SUCCESS }} />
-          {toast}
+          <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: toast.variant === "success" ? SUCCESS : "#ff6b6b" }} />
+          {toast.message}
         </div>
       )}
 
