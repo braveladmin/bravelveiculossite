@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import type { Vehicle, VehicleStatus } from '@/lib/types'
 import type { UserRole } from '@/lib/constants'
@@ -201,10 +202,10 @@ export async function updateVehicleAction(
 }
 
 export async function markAsSold(id: string): Promise<{ error: string | null }> {
-  const supabase = await createClient()
   const userInfo = await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('vehicles')
     .update({ status: 'vendido', sold_at: new Date().toISOString() })
@@ -212,17 +213,17 @@ export async function markAsSold(id: string): Promise<{ error: string | null }> 
     .select('id')
 
   if (error) return { error: error.message }
-  if (!data || data.length === 0) return { error: 'Não foi possível atualizar o veículo (sem permissão ou registro não encontrado)' }
+  if (!data || data.length === 0) return { error: 'Não foi possível atualizar o veículo (registro não encontrado)' }
   revalidatePath('/estoque')
   revalidatePath(`/estoque/${id}`)
   return { error: null }
 }
 
 export async function markAsAvailable(id: string): Promise<{ error: string | null }> {
-  const supabase = await createClient()
   const userInfo = await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('vehicles')
     .update({ status: 'disponivel', sold_at: null })
@@ -230,27 +231,24 @@ export async function markAsAvailable(id: string): Promise<{ error: string | nul
     .select('id')
 
   if (error) return { error: error.message }
-  if (!data || data.length === 0) return { error: 'Não foi possível atualizar o veículo (sem permissão ou registro não encontrado)' }
+  if (!data || data.length === 0) return { error: 'Não foi possível atualizar o veículo (registro não encontrado)' }
   revalidatePath('/estoque')
   revalidatePath(`/estoque/${id}`)
   return { error: null }
 }
 
 export async function archiveVehicle(id: string): Promise<{ error: string | null }> {
-  const supabase = await createClient()
   const userInfo = await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
+  const supabase = createAdminClient()
   const { error, count } = await supabase
     .from('vehicles')
     .update({ archived_at: new Date().toISOString() }, { count: 'exact' })
     .eq('id', id)
 
-  if (error) {
-    console.error('[archiveVehicle] userId=%s role=%s id=%s error=%o', userInfo.userId, userInfo.role, id, error)
-    return { error: error.message }
-  }
-  if (!count) return { error: 'Não foi possível apagar o veículo (sem permissão ou registro não encontrado)' }
+  if (error) return { error: error.message }
+  if (!count) return { error: 'Não foi possível apagar o veículo (registro não encontrado)' }
   revalidatePath('/estoque')
   return { error: null }
 }
