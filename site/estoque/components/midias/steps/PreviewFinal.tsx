@@ -64,7 +64,7 @@ export function PreviewFinal({
     setDownloading(true)
     setDownloadErr(null)
     try {
-      const dataUrl = await toPng(node, { pixelRatio: 3, cacheBust: true, style: { borderRadius: "0px" } })
+      const dataUrl = await toPng(node, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
       const link = document.createElement("a")
       const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       link.download = `${mediaType}-${slug}.png`
@@ -80,13 +80,13 @@ export function PreviewFinal({
     if (mediaType === "story") {
       const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
       if (!node) throw new Error("Preview do Story não encontrado")
-      return [await toPng(node, { pixelRatio: 3, cacheBust: true, style: { borderRadius: "0px" } })]
+      return [await toPng(node, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })]
     }
 
     const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
     const dataUrls: string[] = []
     for (const node of Array.from(nodes)) {
-      dataUrls.push(await toPng(node as HTMLElement, { pixelRatio: 3, cacheBust: true, style: { borderRadius: "0px" } }))
+      dataUrls.push(await toPng(node as HTMLElement, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } }))
     }
     return dataUrls
   }

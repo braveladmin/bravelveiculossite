@@ -19,7 +19,7 @@ export function StoryPreview({ vehicle }: Props) {
 
   return (
     <div className="media-preview story">
-      <PhotoBackdrop src={cover} alt={vehicle.name} fit="cover" />
+      <PhotoBackdrop src={cover} alt={vehicle.name} />
 
       {/* Aviso de novidade no estoque */}
       {vehicle.isNew && (
