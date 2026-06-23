@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, type ReactNode } from "react"
+import { useRef, useState, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertTriangle, ArrowLeft, CheckCircle2, Clipboard, Eye, Folder, Trash2, X } from "lucide-react"
+import { toPng } from "html-to-image"
+import { AlertTriangle, ArrowLeft, CheckCircle2, Clipboard, Download, Eye, Folder, Loader2, Trash2, X } from "lucide-react"
 import { Button, Chip } from "@heroui/react"
 import { VeiculoResumoCard } from "@/components/midias/VeiculoResumoCard"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
@@ -194,6 +195,8 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
 }) {
   const [showPreviewModal,  setShowPreviewModal]  = useState(false)
   const [showArchiveModal,  setShowArchiveModal]  = useState(false)
+  const [downloading,       setDownloading]       = useState(false)
+  const hiddenPreviewRef = useRef<HTMLDivElement>(null)
 
   async function handleCopy() {
     try {
@@ -202,6 +205,23 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     } catch {
       onToast("Não foi possível copiar a legenda. Tente selecionar o texto manualmente.", "error")
     }
+  }
+
+  async function handleDownloadImage() {
+    const node = hiddenPreviewRef.current?.querySelector(".media-preview") as HTMLElement | null
+    if (!node) return
+    setDownloading(true)
+    try {
+      const dataUrl = await toPng(node, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
+      const link = document.createElement("a")
+      const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      link.download = `${media.mediaType}-${slug}.png`
+      link.href = dataUrl
+      link.click()
+    } catch {
+      onToast("Não consegui gerar a imagem. Tente de novo.", "error")
+    }
+    setDownloading(false)
   }
 
   return (
@@ -230,15 +250,29 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
           <Eye className="w-3.5 h-3.5" />
           Visualizar
         </Button>
-        <Button variant="outline" size="sm" className="font-semibold" onPress={handleCopy}>
-          <Clipboard className="w-3.5 h-3.5" />
-          Copiar legenda
-        </Button>
+        {media.mediaType === "story" ? (
+          <Button variant="outline" size="sm" className="font-semibold" onPress={handleDownloadImage} isDisabled={downloading}>
+            {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+            Salvar imagem
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" className="font-semibold" onPress={handleCopy}>
+            <Clipboard className="w-3.5 h-3.5" />
+            Copiar legenda
+          </Button>
+        )}
         <Button variant="danger-soft" size="sm" className="font-semibold" onPress={() => setShowArchiveModal(true)}>
           <Trash2 className="w-3.5 h-3.5" />
           Arquivar
         </Button>
       </div>
+
+      {/* Instância oculta do Story — só pra capturar a arte na hora de salvar a imagem */}
+      {media.mediaType === "story" && (
+        <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: "-9999px", pointerEvents: "none" }} aria-hidden>
+          <StoryPreview vehicle={vehicle} />
+        </div>
+      )}
 
       {/* Modal de visualização — mídia + legenda */}
       <Modal open={showPreviewModal} onClose={() => setShowPreviewModal(false)} title={media.title}>
