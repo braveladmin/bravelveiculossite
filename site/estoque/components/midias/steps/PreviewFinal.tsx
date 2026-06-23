@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { toPng } from "html-to-image"
+import JSZip from "jszip"
 import { Button } from "@heroui/react"
 import { CheckCircle2, Download, Loader2, Send, Sparkles } from "lucide-react"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
@@ -71,11 +72,15 @@ export function PreviewFinal({
     try {
       if (mediaType === "carousel") {
         const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
+        const zip = new JSZip()
         let i = 0
         for (const node of Array.from(nodes)) {
           const dataUrl = await toPng(node as HTMLElement, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
-          downloadDataUrl(dataUrl, `carousel-${slug}-${++i}.png`)
+          const base64 = dataUrl.split(",")[1]
+          zip.file(`carousel-${slug}-${++i}.png`, base64, { base64: true })
         }
+        const zipBlob = await zip.generateAsync({ type: "blob" })
+        downloadDataUrl(URL.createObjectURL(zipBlob), `carousel-${slug}.zip`)
       } else {
         const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
         if (!node) return
