@@ -84,9 +84,22 @@ CREATE POLICY "Managers inserem veículos" ON vehicles
   );
 
 -- Vehicles: apenas INVENTORY_MANAGER e SUPER_ADMIN atualizam (inclui soft delete)
+-- WITH CHECK explicito e igual ao USING: sem isso o Postgres reusaria o USING
+-- por padrão, mas se a policy no banco já tiver um WITH CHECK divergente
+-- (ex: herdado por engano da policy de leitura, com "archived_at IS NULL"),
+-- arquivar um veículo (que seta archived_at) falha com
+-- "new row violates row-level security policy".
 CREATE POLICY "Managers atualizam veículos" ON vehicles
   FOR UPDATE TO authenticated
   USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid()
+        AND role IN ('SUPER_ADMIN', 'INVENTORY_MANAGER')
+        AND active = true
+    )
+  )
+  WITH CHECK (
     EXISTS (
       SELECT 1 FROM profiles
       WHERE id = auth.uid()
