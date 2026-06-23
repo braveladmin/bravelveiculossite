@@ -212,7 +212,8 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     if (!node) return
     setDownloading(true)
     try {
-      const dataUrl = await toPng(node, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
+      if (document.fonts) await document.fonts.ready
+      const dataUrl = await toPng(node, { pixelRatio: 4, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
       const link = document.createElement("a")
       const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       link.download = `${media.mediaType}-${slug}.png`

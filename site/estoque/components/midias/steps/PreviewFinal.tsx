@@ -23,6 +23,14 @@ const SUCCESS = "#25d366"
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1503736334956-4c8f8e4733e7?w=800&q=80&auto=format&fit=crop"
 
+// pixelRatio 4 sobre o quadro 360x640 do preview gera 1440x2560 — acima do mínimo
+// 1080x1920 do Instagram, então a arte sai nítida mesmo depois do Instagram comprimir/redimensionar.
+const EXPORT_OPTIONS = { pixelRatio: 4, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
+
+async function waitForFonts() {
+  if (typeof document !== "undefined" && document.fonts) await document.fonts.ready
+}
+
 type Props = {
   vehicle: Vehicle
   mediaType: MediaType
@@ -70,12 +78,13 @@ export function PreviewFinal({
     setDownloadErr(null)
     const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
     try {
+      await waitForFonts()
       if (mediaType === "carousel") {
         const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
         const zip = new JSZip()
         let i = 0
         for (const node of Array.from(nodes)) {
-          const dataUrl = await toPng(node as HTMLElement, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
+          const dataUrl = await toPng(node as HTMLElement, EXPORT_OPTIONS)
           const base64 = dataUrl.split(",")[1]
           zip.file(`carousel-${slug}-${++i}.png`, base64, { base64: true })
         }
@@ -84,7 +93,7 @@ export function PreviewFinal({
       } else {
         const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
         if (!node) return
-        const dataUrl = await toPng(node, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
+        const dataUrl = await toPng(node, EXPORT_OPTIONS)
         downloadDataUrl(dataUrl, `${mediaType}-${slug}.png`)
       }
     } catch {
@@ -94,16 +103,17 @@ export function PreviewFinal({
   }
 
   async function captureArtImages(): Promise<string[]> {
+    await waitForFonts()
     if (mediaType === "story") {
       const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
       if (!node) throw new Error("Preview do Story não encontrado")
-      return [await toPng(node, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })]
+      return [await toPng(node, EXPORT_OPTIONS)]
     }
 
     const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
     const dataUrls: string[] = []
     for (const node of Array.from(nodes)) {
-      dataUrls.push(await toPng(node as HTMLElement, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } }))
+      dataUrls.push(await toPng(node as HTMLElement, EXPORT_OPTIONS))
     }
     return dataUrls
   }
