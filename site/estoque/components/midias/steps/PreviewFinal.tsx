@@ -3,11 +3,14 @@
 import { useRef, useState } from "react"
 import { toPng } from "html-to-image"
 import { Button } from "@heroui/react"
-import { CheckCircle2, Download, Loader2, Sparkles } from "lucide-react"
+import { CheckCircle2, Download, Loader2, Send, Sparkles } from "lucide-react"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
 import { PostPreview } from "@/components/midias/preview/PostPreview"
-import { CarouselPreview } from "@/components/midias/preview/CarouselPreview"
+import { CarouselPreview, PhotoSlide } from "@/components/midias/preview/CarouselPreview"
 import { Switch } from "@/components/ui/Switch"
+import { ConfirmModal } from "@/components/ui/ConfirmModal"
+import { createClient } from "@/lib/supabase/client"
+import { postToInstagram } from "@/lib/actions/instagram"
 import type { MediaType, Vehicle } from "@/lib/types"
 
 const SURF2  = "#111111"
@@ -16,6 +19,8 @@ const ACCENT = "#cc1111"
 const TEXT   = "#ffffff"
 const MUTED  = "#777777"
 const SUCCESS = "#25d366"
+const PLACEHOLDER_IMAGE =
+  "https://images.unsplash.com/photo-1503736334956-4c8f8e4733e7?w=800&q=80&auto=format&fit=crop"
 
 type Props = {
   vehicle: Vehicle
@@ -37,9 +42,20 @@ export function PreviewFinal({
   vehicle, mediaType, caption, hashtags, onChangeCaption, onBack, onSave, onDone,
   onToggleNewBadge, updatingNewBadge, saving, saved, error,
 }: Props) {
-  const previewWrapRef = useRef<HTMLDivElement>(null)
+  const previewWrapRef  = useRef<HTMLDivElement>(null)
+  const hiddenSlidesRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
   const [downloadErr, setDownloadErr] = useState<string | null>(null)
+
+  const [showPostConfirm, setShowPostConfirm] = useState(false)
+  const [posting,         setPosting]         = useState(false)
+  const [postErr,         setPostErr]         = useState<string | null>(null)
+  const [postedLink,      setPostedLink]      = useState<string | null>(null)
+
+  const canAutoPost = mediaType === "story" || mediaType === "carousel"
+  const carouselSlides = vehicle.images?.length
+    ? vehicle.images
+    : [vehicle.imageUrl || PLACEHOLDER_IMAGE]
 
   async function handleDownload() {
     const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
@@ -60,6 +76,60 @@ export function PreviewFinal({
     setDownloading(false)
   }
 
+  async function captureArtImages(): Promise<string[]> {
+    if (mediaType === "story") {
+      const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
+      if (!node) throw new Error("Preview do Story não encontrado")
+      return [await toPng(node, { pixelRatio: 2, cacheBust: true })]
+    }
+
+    const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
+    const dataUrls: string[] = []
+    for (const node of Array.from(nodes)) {
+      dataUrls.push(await toPng(node as HTMLElement, { pixelRatio: 2, cacheBust: true }))
+    }
+    return dataUrls
+  }
+
+  async function uploadArtImages(dataUrls: string[]): Promise<string[]> {
+    const supabase = createClient()
+    const urls: string[] = []
+    for (let i = 0; i < dataUrls.length; i++) {
+      const blob = await (await fetch(dataUrls[i])).blob()
+      const path = `instagram-posts/${Date.now()}_${i}_${Math.random().toString(36).slice(2)}.png`
+      const { error: uploadError } = await supabase.storage
+        .from("vehicle-images")
+        .upload(path, blob, { contentType: "image/png" })
+      if (uploadError) throw new Error(uploadError.message)
+      const { data } = supabase.storage.from("vehicle-images").getPublicUrl(path)
+      urls.push(data.publicUrl)
+    }
+    return urls
+  }
+
+  async function handlePostInstagram() {
+    setPosting(true)
+    setPostErr(null)
+    try {
+      const dataUrls = await captureArtImages()
+      const publicUrls = await uploadArtImages(dataUrls)
+      const result = await postToInstagram({
+        images: publicUrls,
+        caption,
+        mediaType: mediaType === "story" ? "story" : "carousel",
+      })
+      if (result.error) {
+        setPostErr(result.error)
+      } else {
+        setPostedLink(result.permalink)
+        setShowPostConfirm(false)
+      }
+    } catch (err) {
+      setPostErr(err instanceof Error ? err.message : "Erro ao publicar no Instagram")
+    }
+    setPosting(false)
+  }
+
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       <div className="lg:w-[420px] shrink-0" ref={previewWrapRef}>
@@ -67,6 +137,17 @@ export function PreviewFinal({
         {mediaType === "post" && <PostPreview vehicle={vehicle} />}
         {mediaType === "carousel" && <CarouselPreview vehicle={vehicle} />}
       </div>
+
+      {/* Slides escondidos — só pra capturar todas as fotos do carrossel na hora de postar */}
+      {mediaType === "carousel" && (
+        <div ref={hiddenSlidesRef} style={{ position: "fixed", top: 0, left: "-9999px", pointerEvents: "none" }} aria-hidden>
+          {carouselSlides.map((src, i) => (
+            <div key={i} className="media-preview carousel-slide">
+              <PhotoSlide src={src} />
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex-1 space-y-4">
         {mediaType !== "story" && (
@@ -123,10 +204,18 @@ export function PreviewFinal({
           <p className="text-[13px]" style={{ color: "#ff6b6b" }}>{error}</p>
         )}
 
-        {saved && (
+        {saved && !postedLink && (
           <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-[13px] font-semibold" style={{ backgroundColor: "rgba(37,211,102,0.1)", border: "1px solid rgba(37,211,102,0.3)", color: SUCCESS }}>
             <CheckCircle2 className="w-4 h-4 shrink-0" />
-            Mídia salva. {mediaType === "carousel" ? "Baixe cada slide pra postar (navegue pelas setas do preview)." : "Baixe a imagem pra postar."}
+            Mídia salva. {canAutoPost ? "Poste direto no Instagram ou baixe a arte." : "Baixe a imagem pra postar."}
+          </div>
+        )}
+
+        {postedLink && (
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-[13px] font-semibold" style={{ backgroundColor: "rgba(37,211,102,0.1)", border: "1px solid rgba(37,211,102,0.3)", color: SUCCESS }}>
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            Publicado no Instagram!{" "}
+            <a href={postedLink} target="_blank" rel="noopener noreferrer" className="underline">Ver post</a>
           </div>
         )}
 
@@ -134,7 +223,11 @@ export function PreviewFinal({
           <p className="text-[13px]" style={{ color: "#ff6b6b" }}>{downloadErr}</p>
         )}
 
-        <div className="flex gap-2 justify-end pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
+        {postErr && (
+          <p className="text-[13px]" style={{ color: "#ff6b6b" }}>Falha ao publicar: {postErr}</p>
+        )}
+
+        <div className="flex flex-wrap gap-2 justify-end pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
           {!saved && (
             <>
               <Button type="button" variant="outline" size="sm" onPress={onBack} className="font-semibold" isDisabled={saving}>
@@ -151,6 +244,19 @@ export function PreviewFinal({
                 {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                 Baixar imagem
               </Button>
+              {canAutoPost && !postedLink && (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  className="font-semibold bg-linear-to-tr! from-[#feda75]! via-[#d62976]! to-[#4f5bd5]!"
+                  onPress={() => setShowPostConfirm(true)}
+                  isDisabled={posting}
+                >
+                  <Send className="w-4 h-4" />
+                  Postar no Instagram
+                </Button>
+              )}
               <Button type="button" variant="primary" size="sm" className="font-semibold" onPress={onDone}>
                 Ir pra Central de Mídias
               </Button>
@@ -158,6 +264,20 @@ export function PreviewFinal({
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        open={showPostConfirm}
+        onClose={() => setShowPostConfirm(false)}
+        onConfirm={handlePostInstagram}
+        title="Postar no Instagram"
+        description={
+          mediaType === "story"
+            ? `Vou gerar a arte e publicar como Story no Instagram da Bravel agora. Essa ação é imediata e pública — não dá pra desfazer por aqui.${posting ? " Publicando…" : ""}`
+            : `Vou gerar as ${carouselSlides.length} fotos do carrossel e publicar no feed do Instagram da Bravel agora, com a legenda ao lado. Essa ação é imediata e pública — não dá pra desfazer por aqui.${posting ? " Publicando…" : ""}`
+        }
+        confirmLabel={posting ? "Publicando…" : "Sim, postar agora"}
+        danger
+      />
     </div>
   )
 }

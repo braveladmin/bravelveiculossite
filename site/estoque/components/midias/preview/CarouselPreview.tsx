@@ -9,7 +9,7 @@ import type { Vehicle } from "@/lib/types"
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1503736334956-4c8f8e4733e7?w=800&q=80&auto=format&fit=crop"
 
-function PhotoSlide({ src }: { src: string }) {
+export function PhotoSlide({ src }: { src: string }) {
   return (
     <>
       <PhotoBackdrop src={src} />
