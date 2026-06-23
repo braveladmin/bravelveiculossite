@@ -57,19 +57,31 @@ export function PreviewFinal({
     ? vehicle.images
     : [vehicle.imageUrl || PLACEHOLDER_IMAGE]
 
-  async function handleDownload() {
-    const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
-    if (!node) return
+  function downloadDataUrl(dataUrl: string, filename: string) {
+    const link = document.createElement("a")
+    link.download = filename
+    link.href = dataUrl
+    link.click()
+  }
 
+  async function handleDownload() {
     setDownloading(true)
     setDownloadErr(null)
+    const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
     try {
-      const dataUrl = await toPng(node, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
-      const link = document.createElement("a")
-      const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-      link.download = `${mediaType}-${slug}.png`
-      link.href = dataUrl
-      link.click()
+      if (mediaType === "carousel") {
+        const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
+        let i = 0
+        for (const node of Array.from(nodes)) {
+          const dataUrl = await toPng(node as HTMLElement, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
+          downloadDataUrl(dataUrl, `carousel-${slug}-${++i}.png`)
+        }
+      } else {
+        const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
+        if (!node) return
+        const dataUrl = await toPng(node, { pixelRatio: 3, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
+        downloadDataUrl(dataUrl, `${mediaType}-${slug}.png`)
+      }
     } catch {
       setDownloadErr("Não consegui gerar a imagem. Tenta de novo.")
     }
