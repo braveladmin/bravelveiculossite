@@ -44,12 +44,12 @@ export function StoryCollagePreview({ vehicle }: Props) {
         {/* Banda 1 — externa, nome do carro */}
         <Band src={fotoExterna1} alt={vehicle.name} borderBottom>
           {vehicle.isNew && (
-            <div className="absolute top-0 left-0 z-10" style={{ padding: "10% 6% 0" }}>
+            <div className="absolute top-0 left-0 z-10" style={{ padding: "4% 5% 0" }}>
               <span
-                className="preview-commercial inline-block text-white text-[8px] font-extrabold uppercase tracking-[0.12em]"
-                style={{ backgroundColor: "#cc1111", borderRadius: "4px", padding: "5px 10px", boxShadow: "0 2px 10px rgba(0,0,0,0.4)" }}
+                className="preview-commercial inline-block text-white text-[6px] font-extrabold uppercase tracking-[0.1em]"
+                style={{ backgroundColor: "#cc1111", borderRadius: "3px", padding: "3px 6px", boxShadow: "0 2px 8px rgba(0,0,0,0.4)" }}
               >
-                Novidade no estoque
+                Novidade
               </span>
             </div>
           )}
