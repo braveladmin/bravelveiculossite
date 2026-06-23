@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "motion/react"
-import { LogOut, Plus } from "lucide-react"
+import { LogOut, Menu, Plus, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 const NAV = [
@@ -18,11 +18,16 @@ export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router   = useRouter()
   const [userName, setUserName] = useState<string | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Render plain children on the login page (no header)
   if (pathname === '/login') {
     return <>{children}</>
   }
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     const supabase = createClient()
@@ -100,6 +105,17 @@ export function Shell({ children }: { children: ReactNode }) {
 
         <div className="flex-1" />
 
+        {/* Mobile menu toggle */}
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen((v) => !v)}
+          className="sm:hidden inline-flex items-center justify-center w-9 h-9 rounded-xl shrink-0 transition-colors"
+          style={{ backgroundColor: mobileMenuOpen ? "rgba(204,17,17,0.15)" : "rgba(255,255,255,0.06)", color: mobileMenuOpen ? "#cc1111" : "#fff" }}
+          aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+        >
+          {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+        </button>
+
         {/* Mobile quick add */}
         <Link
           href="/estoque/novo"
@@ -132,6 +148,48 @@ export function Shell({ children }: { children: ReactNode }) {
           <span className="text-[11px] font-black text-white select-none">{initials}</span>
         </div>
       </motion.header>
+
+      {/* Menu mobile — fora do <main> de propósito, senão a transição de página
+          (motion.div com transform) cria um containing block novo e o painel
+          "fixed" deixa de cobrir corretamente a tela. */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+            className="sm:hidden fixed left-0 right-0 z-40 px-4 py-3 space-y-1"
+            style={{ top: "64px", backgroundColor: "#181818", borderBottom: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 24px rgba(0,0,0,0.4)" }}
+          >
+            {NAV.map(({ href, label }) => {
+              const active =
+                href === "/estoque"
+                  ? pathname === href || (pathname.startsWith("/estoque/") && pathname !== "/estoque/novo")
+                  : pathname === href || pathname.startsWith(`${href}/`)
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className="block px-3.5 py-2.5 rounded-lg text-[14px] font-semibold transition-colors"
+                  style={{ backgroundColor: active ? "#cc1111" : "transparent", color: active ? "#fff" : "#cccccc" }}
+                >
+                  {label}
+                </Link>
+              )
+            })}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-[14px] font-semibold text-left transition-colors"
+              style={{ color: "#777777" }}
+            >
+              <LogOut className="w-4 h-4" />
+              Sair
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main style={{ paddingTop: "64px" }}>
         <AnimatePresence mode="wait">
