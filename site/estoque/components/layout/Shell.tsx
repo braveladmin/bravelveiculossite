@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "motion/react"
-import { LogOut, Menu, Plus, X } from "lucide-react"
+import { LogOut, Menu, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 
 const NAV = [
@@ -115,15 +115,6 @@ export function Shell({ children }: { children: ReactNode }) {
         >
           {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
         </button>
-
-        {/* Mobile quick add */}
-        <Link
-          href="/estoque/novo"
-          className="inline-flex items-center gap-1.5 text-[13px] font-semibold px-4 rounded-xl shrink-0 sm:hidden"
-          style={{ height: "36px", background: "linear-gradient(135deg, #cc1111, #a80e0e)", color: "#fff" }}
-        >
-          <Plus className="w-4 h-4" />
-        </Link>
 
         {/* Logout */}
         <button
