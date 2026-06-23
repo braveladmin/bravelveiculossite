@@ -6,11 +6,26 @@ const PLACEHOLDER_IMAGE =
 type Props = {
   src: string
   alt?: string
+  /** "cover" preenche o quadro de ponta a ponta (pode cortar o carro). "contain" mostra o carro inteiro com fundo desfocado preenchendo as laterais/bordas. */
+  fit?: "cover" | "contain"
 }
 
-// Evita cortar o carro quando a foto (paisagem) não bate com o formato vertical
-// do preview: fundo desfocado preenche o quadro, foto nítida fica inteira por cima.
-export function PhotoBackdrop({ src, alt = "" }: Props) {
+export function PhotoBackdrop({ src, alt = "", fit = "contain" }: Props) {
+  if (fit === "cover") {
+    return (
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={src}
+          alt={alt}
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }}
+        />
+      </div>
+    )
+  }
+
+  // Evita cortar o carro quando a foto (paisagem) não bate com o formato vertical
+  // do preview: fundo desfocado preenche o quadro, foto nítida fica inteira por cima.
   return (
     <div className="absolute inset-0 overflow-hidden">
       <img

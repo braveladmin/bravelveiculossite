@@ -205,12 +205,14 @@ export async function markAsSold(id: string): Promise<{ error: string | null }> 
   const userInfo = await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('vehicles')
     .update({ status: 'vendido', sold_at: new Date().toISOString() })
     .eq('id', id)
+    .select('id')
 
   if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: 'Não foi possível atualizar o veículo (sem permissão ou registro não encontrado)' }
   revalidatePath('/estoque')
   revalidatePath(`/estoque/${id}`)
   return { error: null }
@@ -221,12 +223,14 @@ export async function markAsAvailable(id: string): Promise<{ error: string | nul
   const userInfo = await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('vehicles')
     .update({ status: 'disponivel', sold_at: null })
     .eq('id', id)
+    .select('id')
 
   if (error) return { error: error.message }
+  if (!data || data.length === 0) return { error: 'Não foi possível atualizar o veículo (sem permissão ou registro não encontrado)' }
   revalidatePath('/estoque')
   revalidatePath(`/estoque/${id}`)
   return { error: null }
@@ -237,12 +241,13 @@ export async function archiveVehicle(id: string): Promise<{ error: string | null
   const userInfo = await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
-  const { error } = await supabase
+  const { error, count } = await supabase
     .from('vehicles')
-    .update({ archived_at: new Date().toISOString() })
+    .update({ archived_at: new Date().toISOString() }, { count: 'exact' })
     .eq('id', id)
 
   if (error) return { error: error.message }
+  if (!count) return { error: 'Não foi possível apagar o veículo (sem permissão ou registro não encontrado)' }
   revalidatePath('/estoque')
   return { error: null }
 }

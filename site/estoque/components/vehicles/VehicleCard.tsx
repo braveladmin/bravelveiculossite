@@ -63,17 +63,25 @@ export function VehicleCard({ vehicle, onSold, onRestore, onFeatureToggle }: Pro
 
   async function handleConfirmSold() {
     setSaving(true)
-    await markAsSold(vehicle.id)
+    const { error } = await markAsSold(vehicle.id)
     setSaving(false)
     setShowConfirmSold(false)
+    if (error) {
+      alert(`Não foi possível marcar como vendido: ${error}`)
+      return
+    }
     onSold?.(vehicle.id)
   }
 
   async function handleConfirmRestore() {
     setSaving(true)
-    await markAsAvailable(vehicle.id)
+    const { error } = await markAsAvailable(vehicle.id)
     setSaving(false)
     setShowConfirmRestore(false)
+    if (error) {
+      alert(`Não foi possível voltar ao estoque: ${error}`)
+      return
+    }
     onRestore?.(vehicle.id)
   }
 

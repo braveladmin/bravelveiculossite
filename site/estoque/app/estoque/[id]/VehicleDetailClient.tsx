@@ -197,19 +197,27 @@ export function VehicleDetailClient({ vehicle: initialVehicle, canSeeSensitive }
 
   async function handleMarkSold() {
     setSaving(true)
-    await markAsSold(vehicle.id)
-    setVehicle((v) => ({ ...v, status: "vendido", soldAt: new Date().toISOString() }))
-    setShowConfirmSold(false)
+    const { error } = await markAsSold(vehicle.id)
     setSaving(false)
+    setShowConfirmSold(false)
+    if (error) {
+      showToast(`Não foi possível marcar como vendido: ${error}`, "error")
+      return
+    }
+    setVehicle((v) => ({ ...v, status: "vendido", soldAt: new Date().toISOString() }))
     showToast("Veículo marcado como vendido")
   }
 
   async function handleRestore() {
     setSaving(true)
-    await markAsAvailable(vehicle.id)
-    setVehicle((v) => ({ ...v, status: "disponivel", soldAt: undefined }))
-    setShowConfirmRestore(false)
+    const { error } = await markAsAvailable(vehicle.id)
     setSaving(false)
+    setShowConfirmRestore(false)
+    if (error) {
+      showToast(`Não foi possível voltar ao estoque: ${error}`, "error")
+      return
+    }
+    setVehicle((v) => ({ ...v, status: "disponivel", soldAt: undefined }))
     showToast("Veículo voltou ao estoque")
   }
 
