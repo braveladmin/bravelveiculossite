@@ -246,7 +246,10 @@ export async function archiveVehicle(id: string): Promise<{ error: string | null
     .update({ archived_at: new Date().toISOString() }, { count: 'exact' })
     .eq('id', id)
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[archiveVehicle] userId=%s role=%s id=%s error=%o', userInfo.userId, userInfo.role, id, error)
+    return { error: error.message }
+  }
   if (!count) return { error: 'Não foi possível apagar o veículo (sem permissão ou registro não encontrado)' }
   revalidatePath('/estoque')
   return { error: null }
