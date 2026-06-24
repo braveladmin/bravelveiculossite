@@ -254,3 +254,38 @@ CREATE POLICY "Managers atualizam mídias geradas" ON generated_media
         AND active = true
     )
   );
+
+-- ============================================================
+-- Comandos por IA — log de auditoria de toda ação executada via chat
+-- (criar/editar/remover veículo, marcar vendido/disponível, destaque,
+-- publicar no Instagram). vehicle_id usa ON DELETE SET NULL (não CASCADE)
+-- porque o log precisa sobreviver mesmo que o veículo seja arquivado depois
+-- — por isso `params` sempre guarda um snapshot legível (nome/marca/modelo),
+-- não só o id. Sem policy de INSERT: a gravação sempre passa pelo client
+-- com service role (mesmo padrão de bypass de RLS já usado em
+-- markAsSold/archiveVehicle), só SELECT é liberado via RLS abaixo.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS ai_action_logs (
+  id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       uuid        REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_name     text        NOT NULL,
+  action        text        NOT NULL,
+  vehicle_id    uuid        REFERENCES vehicles(id) ON DELETE SET NULL,
+  params        jsonb       NOT NULL DEFAULT '{}',
+  result        text        NOT NULL CHECK (result IN ('success', 'error', 'cancelled')),
+  error_message text,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE ai_action_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Managers leem log de IA" ON ai_action_logs
+  FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid()
+        AND role IN ('SUPER_ADMIN', 'INVENTORY_MANAGER')
+        AND active = true
+    )
+  );

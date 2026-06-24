@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.105.0",
     "@heroui/react": "^3.1.0",
     "@heroui/styles": "^3.1.0",
     "@supabase/ssr": "^0.5.0",

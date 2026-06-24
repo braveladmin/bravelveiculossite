@@ -1,8 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { toPng } from "html-to-image"
-import JSZip from "jszip"
+import { useState } from "react"
 import { Button } from "@heroui/react"
 import { CheckCircle2, Download, Loader2, Send, Sparkles } from "lucide-react"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
@@ -11,7 +9,7 @@ import { PostPreview } from "@/components/midias/preview/PostPreview"
 import { CarouselPreview, PhotoSlide } from "@/components/midias/preview/CarouselPreview"
 import { Switch } from "@/components/ui/Switch"
 import { ConfirmModal } from "@/components/ui/ConfirmModal"
-import { createClient } from "@/lib/supabase/client"
+import { useArtCapture } from "@/lib/midias/useArtCapture"
 import { postToInstagram } from "@/lib/actions/instagram"
 import type { MediaType, Vehicle } from "@/lib/types"
 
@@ -23,14 +21,6 @@ const MUTED  = "#777777"
 const SUCCESS = "#25d366"
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1503736334956-4c8f8e4733e7?w=800&q=80&auto=format&fit=crop"
-
-// pixelRatio 4 sobre o quadro 360x640 do preview gera 1440x2560 — acima do mínimo
-// 1080x1920 do Instagram, então a arte sai nítida mesmo depois do Instagram comprimir/redimensionar.
-const EXPORT_OPTIONS = { pixelRatio: 4, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
-
-async function waitForFonts() {
-  if (typeof document !== "undefined" && document.fonts) await document.fonts.ready
-}
 
 type Props = {
   vehicle: Vehicle
@@ -54,10 +44,10 @@ export function PreviewFinal({
   vehicle, mediaType, storyCollage = false, caption, hashtags, onChangeCaption, onBack, onSave, onDone,
   onToggleNewBadge, updatingNewBadge, saving, saved, error,
 }: Props) {
-  const previewWrapRef  = useRef<HTMLDivElement>(null)
-  const hiddenSlidesRef = useRef<HTMLDivElement>(null)
-  const [downloading, setDownloading] = useState(false)
-  const [downloadErr, setDownloadErr] = useState<string | null>(null)
+  const {
+    previewWrapRef, hiddenSlidesRef, downloading, downloadErr,
+    handleDownload, captureArtImages, uploadArtImages,
+  } = useArtCapture(mediaType, vehicle)
 
   const [showPostConfirm, setShowPostConfirm] = useState(false)
   const [posting,         setPosting]         = useState(false)
@@ -68,74 +58,6 @@ export function PreviewFinal({
   const carouselSlides = vehicle.images?.length
     ? vehicle.images
     : [vehicle.imageUrl || PLACEHOLDER_IMAGE]
-
-  function downloadDataUrl(dataUrl: string, filename: string) {
-    const link = document.createElement("a")
-    link.download = filename
-    link.href = dataUrl
-    link.click()
-  }
-
-  async function handleDownload() {
-    setDownloading(true)
-    setDownloadErr(null)
-    const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-    try {
-      await waitForFonts()
-      if (mediaType === "carousel") {
-        const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
-        const zip = new JSZip()
-        let i = 0
-        for (const node of Array.from(nodes)) {
-          const dataUrl = await toPng(node as HTMLElement, EXPORT_OPTIONS)
-          const base64 = dataUrl.split(",")[1]
-          zip.file(`carousel-${slug}-${++i}.png`, base64, { base64: true })
-        }
-        const zipBlob = await zip.generateAsync({ type: "blob" })
-        downloadDataUrl(URL.createObjectURL(zipBlob), `carousel-${slug}.zip`)
-      } else {
-        const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
-        if (!node) return
-        const dataUrl = await toPng(node, EXPORT_OPTIONS)
-        downloadDataUrl(dataUrl, `${mediaType}-${slug}.png`)
-      }
-    } catch {
-      setDownloadErr("Não consegui gerar a imagem. Tenta de novo.")
-    }
-    setDownloading(false)
-  }
-
-  async function captureArtImages(): Promise<string[]> {
-    await waitForFonts()
-    if (mediaType === "story") {
-      const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
-      if (!node) throw new Error("Preview do Story não encontrado")
-      return [await toPng(node, EXPORT_OPTIONS)]
-    }
-
-    const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
-    const dataUrls: string[] = []
-    for (const node of Array.from(nodes)) {
-      dataUrls.push(await toPng(node as HTMLElement, EXPORT_OPTIONS))
-    }
-    return dataUrls
-  }
-
-  async function uploadArtImages(dataUrls: string[]): Promise<string[]> {
-    const supabase = createClient()
-    const urls: string[] = []
-    for (let i = 0; i < dataUrls.length; i++) {
-      const blob = await (await fetch(dataUrls[i])).blob()
-      const path = `instagram-posts/${Date.now()}_${i}_${Math.random().toString(36).slice(2)}.png`
-      const { error: uploadError } = await supabase.storage
-        .from("vehicle-images")
-        .upload(path, blob, { contentType: "image/png" })
-      if (uploadError) throw new Error(uploadError.message)
-      const { data } = supabase.storage.from("vehicle-images").getPublicUrl(path)
-      urls.push(data.publicUrl)
-    }
-    return urls
-  }
 
   async function handlePostInstagram() {
     setPosting(true)
