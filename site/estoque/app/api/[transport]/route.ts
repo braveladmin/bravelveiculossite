@@ -1,6 +1,7 @@
 import { createMcpHandler, withMcpAuth } from "mcp-handler"
 import { registerMcpTools } from "@/lib/mcp/tools"
 import { verifyAccessToken } from "@/lib/mcp/oauthStore"
+import { ISSUER_URL } from "@/lib/mcp/oauthConfig"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 const baseHandler = createMcpHandler(
@@ -41,7 +42,13 @@ const handler = withMcpAuth(
       extra: { userId: verified.userId, role: profile.role, name: profile.name },
     }
   },
-  { required: true }
+  {
+    required: true,
+    // Sem isso, a lib deriva a origem só dos headers de proxy (sem o
+    // basePath "/admin"), e o header WWW-Authenticate aponta pro
+    // .well-known errado (faltando /admin no caminho).
+    resourceUrl: ISSUER_URL,
+  }
 )
 
 export { handler as GET, handler as POST, handler as DELETE }
