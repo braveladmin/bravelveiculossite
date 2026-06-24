@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import type { Vehicle, VehicleStatus } from '@/lib/types'
 import type { UserRole } from '@/lib/constants'
 
@@ -60,14 +61,34 @@ export async function getUserInfo(): Promise<UserInfo | null> {
   }
 }
 
+// Guard de página inteira — usar em Server Components de rotas restritas a
+// managers (ex: app/estoque/rascunhos/[id]/page.tsx). Bloqueia VENDEDOR antes
+// de qualquer render client.
+export async function requireManagerOrRedirect(): Promise<UserInfo> {
+  const userInfo = await getUserInfo()
+  if (!userInfo || userInfo.role === 'VENDEDOR') redirect('/estoque')
+  return userInfo
+}
+
+// Mesma checagem, mas pra ser usada fora de Server Components (ex: handlers
+// do servidor MCP) — redirect() do Next só funciona em Server Component ou
+// navegação real.
+export async function requireManagerOrError(): Promise<{ userInfo: UserInfo | null; error: string | null }> {
+  const userInfo = await getUserInfo()
+  if (!userInfo || userInfo.role === 'VENDEDOR') return { userInfo: null, error: 'Sem permissão' }
+  return { userInfo, error: null }
+}
+
 // ── Queries ───────────────────────────────────────────────────────────────────
 
-export async function getVehicles(): Promise<{
+// `opts.admin` usa o service role em vez do client de cookies — necessário
+// pra chamadas vindas do servidor MCP, que não têm sessão de navegador.
+export async function getVehicles(opts: { admin?: boolean } = {}): Promise<{
   vehicles:        Vehicle[]
   canSeeSensitive: boolean
   userInfo:        UserInfo | null
 }> {
-  const supabase  = await createClient()
+  const supabase  = opts.admin ? createAdminClient() : await createClient()
   const userInfo  = await getUserInfo()
 
   const { data, error } = await supabase
@@ -84,12 +105,12 @@ export async function getVehicles(): Promise<{
   return { vehicles, canSeeSensitive, userInfo }
 }
 
-export async function getVehicleById(id: string): Promise<{
+export async function getVehicleById(id: string, opts: { admin?: boolean } = {}): Promise<{
   vehicle:         Vehicle | null
   canSeeSensitive: boolean
   userInfo:        UserInfo | null
 }> {
-  const supabase = await createClient()
+  const supabase = opts.admin ? createAdminClient() : await createClient()
   const userInfo = await getUserInfo()
 
   const { data, error } = await supabase
@@ -111,14 +132,19 @@ export async function getVehicleById(id: string): Promise<{
 
 export type VehicleFormInput = Omit<Vehicle, 'id' | 'createdAt' | 'archivedAt'>
 
+// `opts.userInfo` permite injetar uma identidade já resolvida (ex: pelo
+// servidor MCP, que não tem sessão de cookies pra chamar getUserInfo()) —
+// nesse caso também usa o service role pra escrever, já que o client de
+// cookies não teria uma sessão autenticada pra passar a policy de INSERT.
 export async function createVehicle(
-  input: VehicleFormInput
+  input: VehicleFormInput,
+  opts: { userInfo?: UserInfo } = {}
 ): Promise<{ vehicle: Vehicle | null; error: string | null }> {
-  const supabase  = await createClient()
-  const userInfo  = await getUserInfo()
+  const userInfo  = opts.userInfo ?? await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') {
     return { vehicle: null, error: 'Sem permissão' }
   }
+  const supabase = opts.userInfo ? createAdminClient() : await createClient()
 
   const { data, error } = await supabase
     .from('vehicles')
@@ -156,13 +182,14 @@ export async function createVehicle(
 
 export async function updateVehicleAction(
   id:    string,
-  input: Partial<VehicleFormInput>
+  input: Partial<VehicleFormInput>,
+  opts: { userInfo?: UserInfo } = {}
 ): Promise<{ vehicle: Vehicle | null; error: string | null }> {
-  const supabase = await createClient()
-  const userInfo = await getUserInfo()
+  const userInfo = opts.userInfo ?? await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') {
     return { vehicle: null, error: 'Sem permissão' }
   }
+  const supabase = opts.userInfo ? createAdminClient() : await createClient()
 
   const patch: Record<string, unknown> = {}
   if (input.name         !== undefined) patch.name         = input.name
@@ -201,8 +228,8 @@ export async function updateVehicleAction(
   return { vehicle: rowToVehicle(data as Record<string, unknown>), error: null }
 }
 
-export async function markAsSold(id: string): Promise<{ error: string | null }> {
-  const userInfo = await getUserInfo()
+export async function markAsSold(id: string, opts: { userInfo?: UserInfo } = {}): Promise<{ error: string | null }> {
+  const userInfo = opts.userInfo ?? await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
   const supabase = createAdminClient()
@@ -219,8 +246,8 @@ export async function markAsSold(id: string): Promise<{ error: string | null }> 
   return { error: null }
 }
 
-export async function markAsAvailable(id: string): Promise<{ error: string | null }> {
-  const userInfo = await getUserInfo()
+export async function markAsAvailable(id: string, opts: { userInfo?: UserInfo } = {}): Promise<{ error: string | null }> {
+  const userInfo = opts.userInfo ?? await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
   const supabase = createAdminClient()
@@ -237,8 +264,8 @@ export async function markAsAvailable(id: string): Promise<{ error: string | nul
   return { error: null }
 }
 
-export async function archiveVehicle(id: string): Promise<{ error: string | null }> {
-  const userInfo = await getUserInfo()
+export async function archiveVehicle(id: string, opts: { userInfo?: UserInfo } = {}): Promise<{ error: string | null }> {
+  const userInfo = opts.userInfo ?? await getUserInfo()
   if (!userInfo || userInfo.role === 'VENDEDOR') return { error: 'Sem permissão' }
 
   const supabase = createAdminClient()

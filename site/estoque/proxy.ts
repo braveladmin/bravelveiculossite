@@ -29,8 +29,18 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // Rotas do conector MCP (/api/*) e OAuth (/oauth/*, /.well-known/*) não usam
+  // sessão de cookie de navegador — são chamadas servidor-a-servidor
+  // autenticadas por token Bearer (ou endpoints públicos de metadata), então
+  // não passam por esse redirect.
+  const isMcpOrOAuthRoute =
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/oauth/') ||
+    pathname.startsWith('/.well-known/')
+
   if (
     !user &&
+    !isMcpOrOAuthRoute &&
     !pathname.startsWith('/login') &&
     !pathname.startsWith('/_next') &&
     pathname !== '/favicon.ico'

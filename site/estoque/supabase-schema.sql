@@ -254,3 +254,67 @@ CREATE POLICY "Managers atualizam mídias geradas" ON generated_media
         AND active = true
     )
   );
+
+-- ============================================================
+-- Conector MCP — rascunhos/edições/remoções propostas via chat do Claude,
+-- só aplicadas de verdade depois de confirmação explícita do dealer, e log
+-- de auditoria de toda ação que passou pelo MCP.
+--
+-- payload guarda, pra kind='criar', os dados do veículo (inclui `images`,
+-- que começa vazio e é preenchido pela página /estoque/rascunhos/[id] antes
+-- da confirmação); pra kind='editar', o patch parcial; pra kind='remover',
+-- fica vazio (a ação já está totalmente descrita por vehicle_id).
+--
+-- Sem policy de INSERT: a gravação sempre passa por createAdminClient()
+-- (mesmo padrão de bypass de RLS já usado em markAsSold/archiveVehicle) —
+-- só SELECT é liberado via RLS abaixo.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS mcp_pending_actions (
+  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  kind        text        NOT NULL CHECK (kind IN ('criar', 'editar', 'remover', 'publicar')),
+  vehicle_id  uuid        REFERENCES vehicles(id) ON DELETE SET NULL,
+  payload     jsonb       NOT NULL DEFAULT '{}',
+  summary     text        NOT NULL,
+  created_by  uuid        REFERENCES auth.users(id) ON DELETE SET NULL,
+  status      text        NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'expired')),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  expires_at  timestamptz NOT NULL DEFAULT (now() + interval '24 hours')
+);
+
+ALTER TABLE mcp_pending_actions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Managers leem acoes pendentes do MCP" ON mcp_pending_actions
+  FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid()
+        AND role IN ('SUPER_ADMIN', 'INVENTORY_MANAGER')
+        AND active = true
+    )
+  );
+
+CREATE TABLE IF NOT EXISTS mcp_action_logs (
+  id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id       uuid        REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_name     text        NOT NULL,
+  tool          text        NOT NULL,
+  vehicle_id    uuid        REFERENCES vehicles(id) ON DELETE SET NULL,
+  params        jsonb       NOT NULL DEFAULT '{}',
+  result        text        NOT NULL CHECK (result IN ('success', 'error', 'cancelled')),
+  error_message text,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE mcp_action_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Managers leem log do MCP" ON mcp_action_logs
+  FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid()
+        AND role IN ('SUPER_ADMIN', 'INVENTORY_MANAGER')
+        AND active = true
+    )
+  );
