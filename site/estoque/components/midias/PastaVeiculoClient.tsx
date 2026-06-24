@@ -5,7 +5,7 @@ import { createPortal } from "react-dom"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toPng } from "html-to-image"
-import { AlertTriangle, ArrowLeft, CheckCircle2, Clipboard, Download, Eye, Folder, Loader2, Trash2, X } from "lucide-react"
+import { AlertTriangle, ArrowLeft, CheckCircle2, Clipboard, Download, Eye, Folder, Loader2, Send, Trash2, X } from "lucide-react"
 import { Button, Chip } from "@heroui/react"
 import { VeiculoResumoCard } from "@/components/midias/VeiculoResumoCard"
 import { StoryPreview } from "@/components/midias/preview/StoryPreview"
@@ -13,8 +13,14 @@ import { StoryCollagePreview } from "@/components/midias/preview/StoryCollagePre
 import { PostPreview } from "@/components/midias/preview/PostPreview"
 import { CarouselPreview } from "@/components/midias/preview/CarouselPreview"
 import { archiveMedia } from "@/lib/actions/media"
+import { postToInstagram } from "@/lib/actions/instagram"
+import { createClient } from "@/lib/supabase/client"
 import { MEDIA_TYPE_CFG } from "@/lib/constants"
 import type { GeneratedMedia, MediaFolder, MediaType, Vehicle } from "@/lib/types"
+
+// pixelRatio 4 sobre o preview gera resolução acima do mínimo 1080x1920 do
+// Instagram, então a arte sai nítida mesmo depois do Instagram comprimir/redimensionar.
+const EXPORT_OPTIONS = { pixelRatio: 4, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
 
 const SURFACE = "#181818"
 const SURF2   = "#111111"
@@ -204,7 +210,9 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
 }) {
   const [showPreviewModal,  setShowPreviewModal]  = useState(false)
   const [showArchiveModal,  setShowArchiveModal]  = useState(false)
+  const [showPostModal,     setShowPostModal]     = useState(false)
   const [downloading,       setDownloading]       = useState(false)
+  const [posting,           setPosting]           = useState(false)
   const hiddenPreviewRef = useRef<HTMLDivElement>(null)
 
   const isCollage = media.previewData?.layout === "instagram-story-collage-v1"
@@ -226,7 +234,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     setDownloading(true)
     try {
       if (document.fonts) await document.fonts.ready
-      const dataUrl = await toPng(node, { pixelRatio: 4, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } })
+      const dataUrl = await toPng(node, EXPORT_OPTIONS)
       const link = document.createElement("a")
       const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       link.download = `${media.mediaType}-${slug}.png`
@@ -236,6 +244,34 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       onToast("Não consegui gerar a imagem. Tente de novo.", "error")
     }
     setDownloading(false)
+  }
+
+  async function handlePostInstagram() {
+    const node = hiddenPreviewRef.current?.querySelector(".media-preview") as HTMLElement | null
+    if (!node) return
+    setPosting(true)
+    try {
+      if (document.fonts) await document.fonts.ready
+      const dataUrl = await toPng(node, EXPORT_OPTIONS)
+      const blob = await (await fetch(dataUrl)).blob()
+
+      const supabase = createClient()
+      const path = `instagram-posts/${Date.now()}_${Math.random().toString(36).slice(2)}.png`
+      const { error: uploadError } = await supabase.storage
+        .from("vehicle-images")
+        .upload(path, blob, { contentType: "image/png" })
+      if (uploadError) throw new Error(uploadError.message)
+      const { data } = supabase.storage.from("vehicle-images").getPublicUrl(path)
+
+      const result = await postToInstagram({ images: [data.publicUrl], caption: "", mediaType: "story" })
+      if (result.error) throw new Error(result.error)
+
+      onToast("Postado no Instagram Stories!")
+      setShowPostModal(false)
+    } catch (err) {
+      onToast(err instanceof Error ? `Falha ao publicar: ${err.message}` : "Falha ao publicar no Instagram", "error")
+    }
+    setPosting(false)
   }
 
   return (
@@ -265,10 +301,22 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
           Visualizar
         </Button>
         {media.mediaType === "story" ? (
-          <Button variant="outline" size="sm" className="font-semibold" onPress={handleDownloadImage} isDisabled={downloading}>
-            {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-            Salvar imagem
-          </Button>
+          <>
+            <Button variant="outline" size="sm" className="font-semibold" onPress={handleDownloadImage} isDisabled={downloading}>
+              {downloading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+              Salvar imagem
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              className="font-semibold bg-linear-to-tr! from-[#feda75]! via-[#d62976]! to-[#4f5bd5]!"
+              onPress={() => setShowPostModal(true)}
+              isDisabled={posting}
+            >
+              <Send className="w-3.5 h-3.5" />
+              Postar no Instagram
+            </Button>
+          </>
         ) : (
           <Button variant="outline" size="sm" className="font-semibold" onPress={handleCopy}>
             <Clipboard className="w-3.5 h-3.5" />
@@ -318,6 +366,18 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
         description="Essa mídia deixa de aparecer como ativa na Central de Mídias e na pasta do veículo, mas não é excluída — fica guardada com status arquivado."
         confirmLabel="Sim, arquivar"
         confirming={archiving}
+        danger
+      />
+
+      {/* Confirmação de publicação */}
+      <ConfirmModal
+        open={showPostModal}
+        onClose={() => setShowPostModal(false)}
+        onConfirm={handlePostInstagram}
+        title="Postar no Instagram"
+        description={`Vou gerar a arte dessa mídia salva e publicar como Story no Instagram da Bravel agora.${posting ? " Publicando…" : " Essa ação é imediata e pública — não dá pra desfazer por aqui. Pode postar de novo quantas vezes quiser."}`}
+        confirmLabel={posting ? "Publicando…" : "Sim, postar agora"}
+        confirming={posting}
         danger
       />
     </div>

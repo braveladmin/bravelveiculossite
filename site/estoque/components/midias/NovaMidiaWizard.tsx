@@ -110,7 +110,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
       vehicleId: vehicle.id,
       vehicleModel: vehicle.model || vehicle.name,
       mediaType,
-      title: `${MEDIA_TYPE_CFG[mediaType].label}${storyCollage ? " (3 fotos)" : ""} ${vehicle.brand} ${vehicle.name}`.trim(),
+      title: `${MEDIA_TYPE_CFG[mediaType].label}${storyCollage ? " (3 fotos)" : ""} ${vehicle.name}`.trim(),
       previewData: {
         vehicleSnapshot: {
           brand: vehicle.brand,
