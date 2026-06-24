@@ -7,9 +7,8 @@ import { usePathname, useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "motion/react"
 import { LogOut, Menu, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import type { UserRole } from "@/lib/constants"
 
-const NAV_BASE = [
+const NAV = [
   { href: "/estoque",      label: "Estoque" },
   { href: "/estoque/novo", label: "Novo carro" },
   { href: "/midias",       label: "Central de Mídias" },
@@ -19,12 +18,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router   = useRouter()
   const [userName, setUserName] = useState<string | null>(null)
-  const [userRole, setUserRole] = useState<UserRole | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-  const nav = userRole && userRole !== "VENDEDOR"
-    ? [...NAV_BASE, { href: "/comandos-ia", label: "Comandos por IA" }]
-    : NAV_BASE
 
   // Render plain children on the login page (no header)
   if (pathname === '/login') {
@@ -41,12 +35,11 @@ export function Shell({ children }: { children: ReactNode }) {
       if (!user) return
       supabase
         .from('profiles')
-        .select('name, role')
+        .select('name')
         .eq('id', user.id)
         .single()
         .then(({ data }) => {
           setUserName(data?.name ?? user.email?.split('@')[0] ?? 'BV')
-          setUserRole((data?.role as UserRole) ?? null)
         })
     })
   }, [])
@@ -84,7 +77,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
         {/* Nav */}
         <nav className="hidden sm:flex items-center gap-1 ml-6">
-          {nav.map(({ href, label }) => {
+          {NAV.map(({ href, label }) => {
             const active =
               href === "/estoque"
                 ? pathname === href || (pathname.startsWith("/estoque/") && pathname !== "/estoque/novo")
@@ -160,7 +153,7 @@ export function Shell({ children }: { children: ReactNode }) {
             className="sm:hidden fixed left-0 right-0 z-40 px-4 py-3 space-y-1"
             style={{ top: "64px", backgroundColor: "#181818", borderBottom: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 12px 24px rgba(0,0,0,0.4)" }}
           >
-            {nav.map(({ href, label }) => {
+            {NAV.map(({ href, label }) => {
               const active =
                 href === "/estoque"
                   ? pathname === href || (pathname.startsWith("/estoque/") && pathname !== "/estoque/novo")

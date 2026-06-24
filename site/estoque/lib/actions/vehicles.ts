@@ -3,7 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import type { Vehicle, VehicleStatus } from '@/lib/types'
 import type { UserRole } from '@/lib/constants'
 
@@ -59,25 +58,6 @@ export async function getUserInfo(): Promise<UserInfo | null> {
     role:   data.role as UserRole,
     name:   (data.name as string) ?? user.email ?? 'Usuário',
   }
-}
-
-// Guard de página inteira — usar em Server Components de rotas restritas a
-// managers (ex: app/comandos-ia/page.tsx). Bloqueia VENDEDOR antes de qualquer
-// render client, sem toast de "sem permissão" (a app ainda não tem esse padrão
-// de tela, mantemos simples: redireciona pro estoque).
-export async function requireManagerOrRedirect(): Promise<UserInfo> {
-  const userInfo = await getUserInfo()
-  if (!userInfo || userInfo.role === 'VENDEDOR') redirect('/estoque')
-  return userInfo
-}
-
-// Mesma checagem, mas pra Server Actions chamadas via fetch do client (chat de
-// IA) — redirect() do Next só funciona em Server Component/navegação real, numa
-// Server Action ele quebraria a resposta esperada pelo client.
-export async function requireManagerOrError(): Promise<{ userInfo: UserInfo | null; error: string | null }> {
-  const userInfo = await getUserInfo()
-  if (!userInfo || userInfo.role === 'VENDEDOR') return { userInfo: null, error: 'Sem permissão' }
-  return { userInfo, error: null }
 }
 
 // ── Queries ───────────────────────────────────────────────────────────────────
