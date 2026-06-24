@@ -57,7 +57,10 @@ export default async function AuthorizePage({ searchParams }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    const next = `/oauth/authorize?${new URLSearchParams(
+    // O valor de "next" é lido cru pelo login (window.location.href = next),
+    // sem passar pelo router do Next — então precisa já vir com o basePath
+    // "/admin" embutido, já que aqui não tem prepend automático nenhum.
+    const next = `/admin/oauth/authorize?${new URLSearchParams(
       Object.entries(params).filter(([, v]) => v !== undefined) as [string, string][]
     ).toString()}`
     redirect(`/login?next=${encodeURIComponent(next)}`)
