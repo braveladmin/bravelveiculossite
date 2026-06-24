@@ -32,11 +32,14 @@ export async function proxy(request: NextRequest) {
   // Rotas do conector MCP (/api/*) e OAuth (/oauth/*, /.well-known/*) não usam
   // sessão de cookie de navegador — são chamadas servidor-a-servidor
   // autenticadas por token Bearer (ou endpoints públicos de metadata), então
-  // não passam por esse redirect.
+  // não passam por esse redirect. /estoque/rascunhos/* também é público de
+  // propósito — o link (uuid v4) funciona como capability link, mandado pelo
+  // Claude na conversa, pro admin subir foto sem precisar logar de novo.
   const isMcpOrOAuthRoute =
     pathname.startsWith('/api/') ||
     pathname.startsWith('/oauth/') ||
-    pathname.startsWith('/.well-known/')
+    pathname.startsWith('/.well-known/') ||
+    pathname.startsWith('/estoque/rascunhos/')
 
   if (
     !user &&

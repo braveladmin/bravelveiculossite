@@ -18,12 +18,37 @@ const labelCls = "text-[10px] font-bold tracking-[0.12em] uppercase";
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1503736334956-4c8f8e4733e7?w=800&q=80&auto=format&fit=crop";
 
-type Props = { images: string[]; onChange: (imgs: string[]) => void };
+async function uploadDirectToStorage(file: File): Promise<string> {
+  const supabase = createClient();
+  const ext  = file.name.split(".").pop() ?? "jpg";
+  const path = `vehicles/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from("vehicle-images")
+    .upload(path, file, { upsert: false, contentType: file.type });
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from("vehicle-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+type Props = {
+  images: string[];
+  onChange: (imgs: string[]) => void;
+  /**
+   * Override opcional de como cada arquivo é enviado — por padrão sobe direto
+   * do navegador pro Supabase Storage (exige sessão autenticada, RLS do
+   * bucket). A página de rascunhos do conector MCP (sem login, só com o
+   * capability link) passa uma versão que sobe via Server Action com o
+   * service role, já que não tem sessão pra satisfazer a policy do bucket.
+   */
+  uploadFile?: (file: File) => Promise<string>;
+};
 
 // Uploader de fotos pra Supabase Storage (bucket vehicle-images), compartilhado
 // entre o formulário de veículo (VehicleForm.tsx) e a página de rascunhos do
 // conector MCP (/estoque/rascunhos/[id]).
-export function PhotoManager({ images, onChange }: Props) {
+export function PhotoManager({ images, onChange, uploadFile }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
@@ -39,26 +64,17 @@ export function PhotoManager({ images, onChange }: Props) {
     setUploading(true);
     setUploadErr(null);
 
-    const supabase = createClient();
     const urls: string[] = [];
 
     for (const file of files) {
-      const ext  = file.name.split(".").pop() ?? "jpg";
-      const path = `vehicles/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from("vehicle-images")
-        .upload(path, file, { upsert: false, contentType: file.type });
-
-      if (error) {
-        setUploadErr(`Erro ao enviar ${file.name}: ${error.message}`);
+      try {
+        urls.push(uploadFile ? await uploadFile(file) : await uploadDirectToStorage(file));
+      } catch (err) {
+        setUploadErr(`Erro ao enviar ${file.name}: ${err instanceof Error ? err.message : "erro desconhecido"}`);
         setUploading(false);
         e.target.value = "";
         return;
       }
-
-      const { data } = supabase.storage.from("vehicle-images").getPublicUrl(path);
-      urls.push(data.publicUrl);
     }
 
     onChange([...images, ...urls]);

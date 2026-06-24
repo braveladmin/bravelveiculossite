@@ -5,7 +5,7 @@ import Link from "next/link"
 import { ArrowLeft, CheckCircle2, ImagePlus } from "lucide-react"
 import { Chip } from "@heroui/react"
 import { PhotoManager } from "@/components/vehicles/PhotoManager"
-import { setDraftImages } from "@/lib/actions/pendingActions"
+import { setDraftImages, uploadDraftPhoto } from "@/lib/actions/pendingActions"
 import { formatCurrency } from "@/lib/format"
 import type { MCPPendingAction } from "@/lib/mcp/types"
 
@@ -53,6 +53,17 @@ export function RascunhoClient({ pendingAction }: Props) {
     const { error } = await setDraftImages(pendingAction.id, next)
     if (error) setSaveErr(error)
     setSaved(true)
+  }
+
+  // Sem sessão de navegador nessa página (de propósito — ver proxy.ts), então
+  // o upload não pode ir direto do client pro Storage (RLS exige login). Sobe
+  // via Server Action com o service role, gated pelo próprio ID do rascunho.
+  async function uploadViaServerAction(file: File): Promise<string> {
+    const formData = new FormData()
+    formData.append("file", file)
+    const result = await uploadDraftPhoto(pendingAction.id, formData)
+    if (result.error || !result.url) throw new Error(result.error ?? "Erro ao enviar")
+    return result.url
   }
 
   const payload = pendingAction.payload as Record<string, unknown>
@@ -116,7 +127,7 @@ export function RascunhoClient({ pendingAction }: Props) {
             Suba as fotos antes de voltar pro Claude e confirmar o cadastro. A primeira foto vira a capa.
           </p>
 
-          <PhotoManager images={images} onChange={handleImagesChange} />
+          <PhotoManager images={images} onChange={handleImagesChange} uploadFile={uploadViaServerAction} />
 
           {saveErr && <p className="text-[12px]" style={{ color: "#ff6b6b" }}>{saveErr}</p>}
           {saved && images.length > 0 && (
