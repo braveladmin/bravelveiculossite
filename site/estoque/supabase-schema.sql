@@ -318,3 +318,50 @@ CREATE POLICY "Managers leem log do MCP" ON mcp_action_logs
         AND active = true
     )
   );
+
+-- ============================================================
+-- OAuth 2.1 do conector MCP (Fase 2). Guarda só hash de secret/token, nunca
+-- o valor em texto puro. RLS habilitada SEM nenhuma policy — só o service
+-- role (createAdminClient()) lê/escreve essas tabelas; nem managers logados
+-- têm acesso direto via client autenticado, porque são credenciais
+-- sensíveis (revogar = apagar a linha ou trocar o client secret via SQL).
+-- ============================================================
+CREATE TABLE IF NOT EXISTS mcp_oauth_clients (
+  client_id          text        PRIMARY KEY,
+  client_secret_hash text        NOT NULL,
+  redirect_uris      text[]      NOT NULL,
+  client_name        text        NOT NULL DEFAULT 'Claude.ai',
+  created_at         timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE mcp_oauth_clients ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS mcp_oauth_codes (
+  code                  text        PRIMARY KEY,
+  client_id             text        NOT NULL REFERENCES mcp_oauth_clients(client_id) ON DELETE CASCADE,
+  user_id               uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  redirect_uri          text        NOT NULL,
+  code_challenge        text        NOT NULL,
+  code_challenge_method text        NOT NULL DEFAULT 'S256',
+  scope                 text,
+  created_at            timestamptz NOT NULL DEFAULT now(),
+  expires_at            timestamptz NOT NULL DEFAULT (now() + interval '5 minutes'),
+  consumed_at           timestamptz
+);
+
+ALTER TABLE mcp_oauth_codes ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS mcp_tokens (
+  id                 uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id          text        NOT NULL REFERENCES mcp_oauth_clients(client_id) ON DELETE CASCADE,
+  user_id            uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  access_token_hash  text        NOT NULL UNIQUE,
+  refresh_token_hash text        UNIQUE,
+  scope              text,
+  access_expires_at  timestamptz NOT NULL,
+  refresh_expires_at timestamptz,
+  revoked_at         timestamptz,
+  created_at         timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE mcp_tokens ENABLE ROW LEVEL SECURITY;

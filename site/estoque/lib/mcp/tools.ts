@@ -64,7 +64,8 @@ export function registerMcpTools(server: McpServer) {
       precoMin:  z.number().optional(),
       precoMax:  z.number().optional(),
     },
-    async (args) => {
+    async (args, extra) => {
+      const user = resolveMcpUser(extra)
       const { vehicles } = await getVehicles({ admin: true })
       let filtered = vehicles
 
@@ -78,7 +79,6 @@ export function registerMcpTools(server: McpServer) {
       if (args.precoMin !== undefined) filtered = filtered.filter((v) => v.price >= args.precoMin!)
       if (args.precoMax !== undefined) filtered = filtered.filter((v) => v.price <= args.precoMax!)
 
-      const user = resolveMcpUser()
       await logMcpAction({ userId: user.userId, userName: user.name, tool: 'estoque_listar_veiculos', params: args, result: 'success' })
 
       return ok({ total: filtered.length, veiculos: filtered.slice(0, 30).map(vehicleSummary) })
@@ -92,8 +92,8 @@ export function registerMcpTools(server: McpServer) {
       id:    z.string().optional(),
       termo: z.string().optional().describe('Nome, marca, modelo ou ano pra buscar'),
     },
-    async (args) => {
-      const user = resolveMcpUser()
+    async (args, extra) => {
+      const user = resolveMcpUser(extra)
       if (args.id) {
         const { vehicle } = await getVehicleById(args.id, { admin: true })
         await logMcpAction({ userId: user.userId, userName: user.name, tool: 'estoque_buscar_veiculo', vehicleId: args.id, params: args, result: vehicle ? 'success' : 'error' })
@@ -126,7 +126,7 @@ export function registerMcpTools(server: McpServer) {
       optionals: z.array(z.string()).optional(),
       isPremium: z.boolean().optional(), isNew: z.boolean().optional(),
     },
-    async (args) => {
+    async (args, extra) => {
       const missing = CRIAR_VEICULO_REQUIRED.filter((f) => args[f] === undefined || args[f] === null)
       if (missing.length) return fail(`Campos obrigatórios faltando: ${missing.join(', ')}`)
 
@@ -144,7 +144,7 @@ export function registerMcpTools(server: McpServer) {
         acquiredAt: new Date().toISOString(),
       }
 
-      const user = resolveMcpUser()
+      const user = resolveMcpUser(extra)
       const summary = `Cadastro novo: ${input.brand} ${input.name} (${input.year}, ${input.km.toLocaleString('pt-BR')} km, ${formatPrecoSemCentavos(input.price)}). Precisa de pelo menos 1 foto antes de confirmar.`
       const pendingAction = await createPendingAction({
         kind: 'criar', payload: { ...input }, summary, userId: user.userId,
@@ -165,8 +165,8 @@ export function registerMcpTools(server: McpServer) {
     'estoque_confirmar_criacao_veiculo',
     'Confirma e efetiva o cadastro de um veículo criado com estoque_criar_rascunho_veiculo. Só funciona se o rascunho já tiver pelo menos 1 foto.',
     { pendingActionId: z.string() },
-    async ({ pendingActionId }) => {
-      const user = resolveMcpUser()
+    async ({ pendingActionId }, extra) => {
+      const user = resolveMcpUser(extra)
       const pendingAction = await getPendingActionAdmin(pendingActionId)
       if (!pendingAction || pendingAction.kind !== 'criar') return fail('Rascunho não encontrado')
       if (pendingAction.status !== 'pending') return fail(`Esse rascunho já está "${pendingAction.status}"`)
@@ -203,7 +203,7 @@ export function registerMcpTools(server: McpServer) {
       transmission: z.string().optional(), fuel: z.string().optional(), doors: z.number().optional(),
       motor: z.string().optional(), optionals: z.array(z.string()).optional(),
     },
-    async (args) => {
+    async (args, extra) => {
       const { vehicleId, ...patch } = args
       const { vehicle } = await getVehicleById(vehicleId, { admin: true })
       if (!vehicle) return fail('Veículo não encontrado')
@@ -211,7 +211,7 @@ export function registerMcpTools(server: McpServer) {
       const fields = Object.entries(patch).filter(([, v]) => v !== undefined)
       if (fields.length === 0) return fail('Nenhum campo pra alterar foi informado')
 
-      const user = resolveMcpUser()
+      const user = resolveMcpUser(extra)
       const diff = fields.map(([k, v]) => `${k}: ${v}`).join(', ')
       const summary = `Editar ${vehicleLabel(vehicle)} — ${diff}.`
       const pendingAction = await createPendingAction({
@@ -228,8 +228,8 @@ export function registerMcpTools(server: McpServer) {
     'estoque_confirmar_edicao_veiculo',
     'Aplica de verdade a edição proposta com estoque_editar_rascunho_veiculo.',
     { pendingActionId: z.string() },
-    async ({ pendingActionId }) => {
-      const user = resolveMcpUser()
+    async ({ pendingActionId }, extra) => {
+      const user = resolveMcpUser(extra)
       const pendingAction = await getPendingActionAdmin(pendingActionId)
       if (!pendingAction || pendingAction.kind !== 'editar' || !pendingAction.vehicleId) return fail('Rascunho não encontrado')
       if (pendingAction.status !== 'pending') return fail(`Esse rascunho já está "${pendingAction.status}"`)
@@ -253,11 +253,11 @@ export function registerMcpTools(server: McpServer) {
     'estoque_remover_rascunho_veiculo',
     'Propõe arquivar (remover das listagens) um veículo. É reversível — nunca apaga de verdade.',
     { vehicleId: z.string() },
-    async ({ vehicleId }) => {
+    async ({ vehicleId }, extra) => {
       const { vehicle } = await getVehicleById(vehicleId, { admin: true })
       if (!vehicle) return fail('Veículo não encontrado')
 
-      const user = resolveMcpUser()
+      const user = resolveMcpUser(extra)
       const summary = `Arquivar ${vehicleLabel(vehicle)} — sai das listagens, mas fica guardado e pode ser restaurado depois.`
       const pendingAction = await createPendingAction({ kind: 'remover', vehicleId, payload: {}, summary, userId: user.userId })
 
@@ -271,8 +271,8 @@ export function registerMcpTools(server: McpServer) {
     'estoque_confirmar_remocao_veiculo',
     'Efetiva a remoção (arquivamento) proposta com estoque_remover_rascunho_veiculo.',
     { pendingActionId: z.string() },
-    async ({ pendingActionId }) => {
-      const user = resolveMcpUser()
+    async ({ pendingActionId }, extra) => {
+      const user = resolveMcpUser(extra)
       const pendingAction = await getPendingActionAdmin(pendingActionId)
       if (!pendingAction || pendingAction.kind !== 'remover' || !pendingAction.vehicleId) return fail('Rascunho não encontrado')
       if (pendingAction.status !== 'pending') return fail(`Esse rascunho já está "${pendingAction.status}"`)
@@ -296,8 +296,8 @@ export function registerMcpTools(server: McpServer) {
     'estoque_marcar_vendido',
     'Marca um veículo como VENDIDO. Reversível (o usuário pode pedir pra marcar como disponível de novo).',
     { vehicleId: z.string() },
-    async ({ vehicleId }) => {
-      const user = resolveMcpUser()
+    async ({ vehicleId }, extra) => {
+      const user = resolveMcpUser(extra)
       const { vehicle } = await getVehicleById(vehicleId, { admin: true })
       if (!vehicle) return fail('Veículo não encontrado')
 
@@ -313,8 +313,8 @@ export function registerMcpTools(server: McpServer) {
     'estoque_marcar_disponivel',
     'Marca um veículo como DISPONÍVEL de novo (ex: desfazer uma venda registrada por engano).',
     { vehicleId: z.string() },
-    async ({ vehicleId }) => {
-      const user = resolveMcpUser()
+    async ({ vehicleId }, extra) => {
+      const user = resolveMcpUser(extra)
       const { vehicle } = await getVehicleById(vehicleId, { admin: true })
       if (!vehicle) return fail('Veículo não encontrado')
 
@@ -330,8 +330,8 @@ export function registerMcpTools(server: McpServer) {
     'estoque_definir_destaque',
     'Marca ou desmarca o selo "Carro premium / Destaque especial no estoque" de um veículo. Não afeta o selo separado de "Novidade no estoque".',
     { vehicleId: z.string(), destaque: z.boolean() },
-    async ({ vehicleId, destaque }) => {
-      const user = resolveMcpUser()
+    async ({ vehicleId, destaque }, extra) => {
+      const user = resolveMcpUser(extra)
       const { vehicle } = await getVehicleById(vehicleId, { admin: true })
       if (!vehicle) return fail('Veículo não encontrado')
 
@@ -349,8 +349,8 @@ export function registerMcpTools(server: McpServer) {
     'instagram_gerar_preview_post',
     'Monta a legenda e a lista de fotos de um veículo pra revisão antes de publicar. Não publica nada.',
     { vehicleId: z.string() },
-    async ({ vehicleId }) => {
-      const user = resolveMcpUser()
+    async ({ vehicleId }, extra) => {
+      const user = resolveMcpUser(extra)
       const { vehicle } = await getVehicleById(vehicleId, { admin: true })
       if (!vehicle) return fail('Veículo não encontrado')
       if (!vehicle.images?.length) return fail(`${vehicleLabel(vehicle)} não tem fotos cadastradas — suba fotos pelo painel antes.`)
@@ -371,8 +371,8 @@ export function registerMcpTools(server: McpServer) {
     'instagram_publicar_post',
     'Publica de verdade um carrossel no Instagram da loja com as fotos do veículo (sem overlay de arte) + legenda. Cria uma proposta que exige confirmação explícita do usuário antes de publicar.',
     { vehicleId: z.string(), caption: z.string().optional() },
-    async ({ vehicleId, caption }) => {
-      const user = resolveMcpUser()
+    async ({ vehicleId, caption }, extra) => {
+      const user = resolveMcpUser(extra)
       const { vehicle } = await getVehicleById(vehicleId, { admin: true })
       if (!vehicle) return fail('Veículo não encontrado')
       if (!vehicle.images?.length) return fail(`${vehicleLabel(vehicle)} não tem fotos cadastradas.`)
@@ -393,8 +393,8 @@ export function registerMcpTools(server: McpServer) {
     'instagram_confirmar_publicacao',
     'Confirma e publica de verdade no Instagram a proposta criada com instagram_publicar_post.',
     { pendingActionId: z.string() },
-    async ({ pendingActionId }) => {
-      const user = resolveMcpUser()
+    async ({ pendingActionId }, extra) => {
+      const user = resolveMcpUser(extra)
       const pendingAction = await getPendingActionAdmin(pendingActionId)
       if (!pendingAction || pendingAction.kind !== 'publicar') return fail('Rascunho não encontrado')
       if (pendingAction.status !== 'pending') return fail(`Esse rascunho já está "${pendingAction.status}"`)

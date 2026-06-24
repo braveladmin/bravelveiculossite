@@ -20,8 +20,10 @@ export function Shell({ children }: { children: ReactNode }) {
   const [userName, setUserName] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Render plain children on the login page (no header)
-  if (pathname === '/login') {
+  // Render plain children no login e nas telas de OAuth do conector MCP
+  // (tela de consentimento é pra um cliente externo, não pro uso normal
+  // do painel — não faz sentido mostrar o header de navegação ali).
+  if (pathname === '/login' || pathname.startsWith('/oauth/')) {
     return <>{children}</>
   }
 

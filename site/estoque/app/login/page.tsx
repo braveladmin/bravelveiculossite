@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'motion/react'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -16,6 +17,7 @@ const MUTED   = "#777777"
 const DANGER  = "#a80e0e"
 
 export default function LoginPage() {
+  const searchParams = useSearchParams()
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [showPw,   setShowPw]   = useState(false)
@@ -39,7 +41,11 @@ export default function LoginPage() {
     // Navegação completa (em vez de router.push) — evita falha do fetch
     // RSC do Next.js ao atravessar o rewrite /admin do site principal pra
     // esse projeto, que só acontecia no primeiro login de um navegador novo.
-    window.location.href = '/admin/estoque'
+    // `next` é usado pelo fluxo de autorização do conector MCP, pra voltar
+    // direto pra tela de consentimento depois do login (só aceita caminho
+    // relativo começando com "/", nunca uma URL externa).
+    const next = searchParams.get('next')
+    window.location.href = next && next.startsWith('/') ? next : '/admin/estoque'
   }
 
   return (
