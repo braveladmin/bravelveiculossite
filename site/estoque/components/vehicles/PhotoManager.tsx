@@ -53,6 +53,14 @@ export function PhotoManager({ images, onChange, uploadFile }: Props) {
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
   const [draggedSrc, setDraggedSrc] = useState<string | null>(null);
+  // Reordenar dispara "dragover" várias vezes por segundo enquanto o dedo/mouse
+  // passa por cada posição — chamar onChange (e o autosave do rascunho) a cada
+  // evento desses cria várias chamadas concorrentes que podem terminar fora de
+  // ordem e sobrescrever a ordem final com uma intermediária. Por isso o
+  // arraste só atualiza esse preview local; onChange só dispara uma vez, no
+  // drop/dragEnd, com a ordem definitiva.
+  const [previewOrder, setPreviewOrder] = useState<string[] | null>(null);
+  const displayImages = previewOrder ?? images;
 
   function openPicker() {
     fileRef.current?.click();
@@ -93,19 +101,25 @@ export function PhotoManager({ images, onChange, uploadFile }: Props) {
     onChange(reordered);
   }
 
-  function reorder(from: number, to: number) {
-    if (from === to) return;
-    const next = [...images];
-    const [item] = next.splice(from, 1);
-    next.splice(to, 0, item);
-    onChange(next);
+  function handleDragStart(src: string) {
+    setDraggedSrc(src);
+    setPreviewOrder(images);
   }
 
   function handleDragOver(i: number) {
-    if (!draggedSrc) return;
-    const from = images.indexOf(draggedSrc);
+    if (!draggedSrc || !previewOrder) return;
+    const from = previewOrder.indexOf(draggedSrc);
     if (from === -1 || from === i) return;
-    reorder(from, i);
+    const next = [...previewOrder];
+    const [item] = next.splice(from, 1);
+    next.splice(i, 0, item);
+    setPreviewOrder(next);
+  }
+
+  function handleDragEnd() {
+    if (previewOrder) onChange(previewOrder);
+    setDraggedSrc(null);
+    setPreviewOrder(null);
   }
 
   return (
@@ -145,18 +159,18 @@ export function PhotoManager({ images, onChange, uploadFile }: Props) {
         <p className="text-[11px]" style={{ color: DANGER }}>{uploadErr}</p>
       )}
 
-      {images.length > 0 ? (
+      {displayImages.length > 0 ? (
         <motion.div layout className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-          {images.map((src, i) => (
+          {displayImages.map((src, i) => (
             <motion.div
               key={src}
               layout
               transition={{ type: "spring", stiffness: 500, damping: 32, mass: 0.6 }}
               draggable
-              onDragStart={() => setDraggedSrc(src)}
+              onDragStart={() => handleDragStart(src)}
               onDragOver={(e) => { e.preventDefault(); handleDragOver(i); }}
               onDrop={(e) => e.preventDefault()}
-              onDragEnd={() => setDraggedSrc(null)}
+              onDragEnd={handleDragEnd}
               className="relative rounded-xl overflow-hidden group cursor-grab active:cursor-grabbing"
               style={{
                 aspectRatio: "4/3",
