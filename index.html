@@ -565,7 +565,10 @@
               ${v.badge ? `<span class="car-badge">${v.badge}</span>` : ''}
             </div>
             <div class="car-body">
-              <h3 class="car-name">${v.brand} ${v.version}</h3>
+              <div>
+                <span class="car-brand">${v.brand}</span>
+                <h3 class="car-name">${v.version}</h3>
+              </div>
               <div class="car-tags">
                 <span>${v.year}</span>
                 <span>${v.km}</span>

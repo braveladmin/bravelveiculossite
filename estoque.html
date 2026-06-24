@@ -207,6 +207,12 @@
       display: flex; align-items: center; gap: 0.45rem;
       flex-wrap: wrap; margin-bottom: 0.6rem;
     }
+    .clc-brand {
+      display: block;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.4);
+      margin-bottom: 0.15rem;
+    }
     .clc-model {
       font-family: 'Montserrat', sans-serif;
       font-size: 1rem; font-weight: 800; color: #fff;
@@ -600,7 +606,10 @@
             <div class="clc-body">
               <a href="veiculo.html?id=${v.id}" class="clc-corner-btn" title="Ver detalhes"><i class="fa-solid fa-chevron-right"></i></a>
               <div class="clc-model-row">
-                <h3 class="clc-model">${v.brand} ${v.version}</h3>
+                <div>
+                  <span class="clc-brand">${v.brand}</span>
+                  <h3 class="clc-model">${v.version}</h3>
+                </div>
               </div>
               <div class="clc-tags-row">
                 <div class="clc-tags">
