@@ -29,6 +29,7 @@ export function MediaCard({ media, onDeleted }: Props) {
   const tc = MEDIA_TYPE_CFG[media.mediaType]
   const sc = MEDIA_STATUS_CFG[media.status]
   const Icon = TYPE_ICON[media.mediaType]
+  const isCarousel = media.mediaType === "carousel"
 
   const [showConfirm, setShowConfirm] = useState(false)
   const [deleting,    setDeleting]    = useState(false)
@@ -78,19 +79,33 @@ export function MediaCard({ media, onDeleted }: Props) {
           </div>
         </div>
 
+        {isCarousel && (
+          <div className="rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", backgroundColor: "#111111" }}>
+            {media.vehicleImage ? (
+              <img src={media.vehicleImage} alt={media.vehicleName} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Icon className="w-5 h-5" style={{ color: MUTED }} />
+              </div>
+            )}
+          </div>
+        )}
+
         <div>
           <p className="text-[14px] font-bold line-clamp-1" style={{ color: TEXT }}>{media.title}</p>
           <p className="text-[12px] mt-0.5" style={{ color: MUTED }}>{media.vehicleName || "Veículo não encontrado"}</p>
         </div>
 
-        {media.folderName && (
+        {!isCarousel && media.folderName && (
           <div className="flex items-center gap-1.5 text-[11px]" style={{ color: MUTED }}>
             <Folder className="w-3 h-3" />
             {media.folderName}
           </div>
         )}
 
-        <p className="text-[11px] line-clamp-2" style={{ color: MUTED }}>{media.caption}</p>
+        {!isCarousel && (
+          <p className="text-[11px] line-clamp-2" style={{ color: MUTED }}>{media.caption}</p>
+        )}
       </Link>
 
       <ConfirmModal

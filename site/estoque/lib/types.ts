@@ -66,4 +66,5 @@ export type GeneratedMedia = {
 export type GeneratedMediaWithRelations = GeneratedMedia & {
   vehicleName: string
   folderName: string
+  vehicleImage: string
 }

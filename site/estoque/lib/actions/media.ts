@@ -49,7 +49,7 @@ export async function listAllMedia(filterType?: MediaType): Promise<GeneratedMed
 
   let query = supabase
     .from('generated_media')
-    .select('*, vehicle:vehicles(name), folder:media_folders(folder_name)')
+    .select('*, vehicle:vehicles(name, images, image_url), folder:media_folders(folder_name)')
     .neq('status', 'archived')
     .order('created_at', { ascending: false })
 
@@ -58,11 +58,15 @@ export async function listAllMedia(filterType?: MediaType): Promise<GeneratedMed
   const { data, error } = await query
   if (error || !data) return []
 
-  return data.map((row: Record<string, unknown>) => ({
-    ...rowToMedia(row),
-    vehicleName: (row.vehicle as { name?: string } | null)?.name ?? '',
-    folderName:  (row.folder  as { folder_name?: string } | null)?.folder_name ?? '',
-  }))
+  return data.map((row: Record<string, unknown>) => {
+    const vehicle = row.vehicle as { name?: string; images?: string[]; image_url?: string } | null
+    return {
+      ...rowToMedia(row),
+      vehicleName:  vehicle?.name ?? '',
+      folderName:   (row.folder as { folder_name?: string } | null)?.folder_name ?? '',
+      vehicleImage: vehicle?.images?.[0] ?? vehicle?.image_url ?? '',
+    }
+  })
 }
 
 export async function getOrCreateFolder(
