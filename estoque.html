@@ -95,6 +95,23 @@
     }
     .estoque-results-count strong { color: var(--white); font-weight: 700; }
 
+    /* Paginação */
+    .estoque-pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.5rem; margin-top: 3rem; flex-wrap: wrap;
+    }
+    .pag-btn {
+      min-width: 2.4rem; height: 2.4rem; padding: 0 0.5rem;
+      border: 1.5px solid rgba(255,255,255,0.1); border-radius: 0.6rem;
+      background: transparent; color: rgba(255,255,255,0.5);
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: all 0.22s;
+    }
+    .pag-btn:hover:not(:disabled) { border-color: var(--red); color: var(--red); }
+    .pag-btn.active { background: var(--red); color: var(--white); border-color: var(--red); }
+    .pag-btn:disabled { opacity: 0.3; cursor: default; }
+    .pag-btn.pag-arrow { font-size: 0.75rem; }
+
     /* Botão voltar */
     .estoque-back {
       display: inline-flex; align-items: center; gap: 0.45rem;
@@ -491,6 +508,8 @@
         <p>Nenhum veículo encontrado com esse filtro.</p>
       </div>
 
+      <div class="estoque-pagination" id="pagination"></div>
+
     </div>
   </section>
 
@@ -565,18 +584,15 @@
 
     // ─── Render cards ─────────────────────────────────────────────
     function renderCars(list) {
-      const grid  = document.getElementById('carsGrid');
-      const none  = document.getElementById('noResults');
-      const count = document.getElementById('resultsCount');
+      const grid = document.getElementById('carsGrid');
+      const none = document.getElementById('noResults');
 
       if (!list.length) {
         grid.innerHTML = '';
         none.classList.remove('hidden');
-        count.innerHTML = 'Nenhum resultado';
         return;
       }
       none.classList.add('hidden');
-      count.innerHTML = `<strong>${list.length}</strong> veículo${list.length > 1 ? 's' : ''} encontrado${list.length > 1 ? 's' : ''}`;
 
       grid.innerHTML = list.map((v, i) => {
         const photos = v.photos && v.photos.length ? v.photos : [];
@@ -647,6 +663,47 @@
     // ─── Filtros ─────────────────────────────────────────────────
     let activeType = 'all', activePrice = 'all';
 
+    // ─── Paginação ─────────────────────────────────────────────────
+    const PAGE_SIZE = 10;
+    let filteredList = BRAVEL_VEHICLES;
+    let currentPage = 1;
+
+    function showPage() {
+      const count = document.getElementById('resultsCount');
+      count.innerHTML = filteredList.length
+        ? `<strong>${filteredList.length}</strong> veículo${filteredList.length > 1 ? 's' : ''} encontrado${filteredList.length > 1 ? 's' : ''}`
+        : 'Nenhum resultado';
+
+      const start = (currentPage - 1) * PAGE_SIZE;
+      renderCars(filteredList.slice(start, start + PAGE_SIZE));
+      renderPagination();
+    }
+
+    function goToPage(page) {
+      const totalPages = Math.max(1, Math.ceil(filteredList.length / PAGE_SIZE));
+      currentPage = Math.min(Math.max(1, page), totalPages);
+      showPage();
+      document.getElementById('estoque-main').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderPagination() {
+      const pag = document.getElementById('pagination');
+      const totalPages = Math.ceil(filteredList.length / PAGE_SIZE);
+
+      if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+      let html = `<button class="pag-btn pag-arrow" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>`;
+      for (let p = 1; p <= totalPages; p++) {
+        html += `<button class="pag-btn${p === currentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
+      }
+      html += `<button class="pag-btn pag-arrow" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button>`;
+      pag.innerHTML = html;
+
+      pag.querySelectorAll('.pag-btn').forEach(btn => {
+        btn.addEventListener('click', () => goToPage(parseInt(btn.dataset.page)));
+      });
+    }
+
     function applyFilters() {
       let r = BRAVEL_VEHICLES;
       if (activeType !== 'all') r = r.filter(v => v.type === activeType);
@@ -659,7 +716,9 @@
         };
         r = r.filter(ranges[activePrice]);
       }
-      renderCars(r);
+      filteredList = r;
+      currentPage = 1;
+      showPage();
     }
 
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -775,7 +834,8 @@
     });
 
     // ─── Init ────────────────────────────────────────────────────
-    renderCars(BRAVEL_VEHICLES);
+    filteredList = BRAVEL_VEHICLES;
+    showPage();
   })();
   </script>
 </body>
