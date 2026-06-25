@@ -65,7 +65,8 @@ const BRAVEL_VEHICLES_READY = (async () => {
     });
     if (!res.ok) throw new Error(`Supabase respondeu ${res.status}`);
     const rows = await res.json();
-    BRAVEL_VEHICLES = rows.map(rowToSiteVehicle);
+    BRAVEL_VEHICLES = rows.map(rowToSiteVehicle)
+      .sort((a, b) => a.model.localeCompare(b.model, 'pt-BR'));
   } catch (err) {
     console.error('Erro ao carregar estoque do Supabase:', err);
     BRAVEL_VEHICLES = [];
