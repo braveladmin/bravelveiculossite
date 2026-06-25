@@ -30,6 +30,7 @@ export function MediaCard({ media, onDeleted }: Props) {
   const sc = MEDIA_STATUS_CFG[media.status]
   const Icon = TYPE_ICON[media.mediaType]
   const isCarousel = media.mediaType === "carousel"
+  const showThumbnail = isCarousel || media.mediaType === "story"
 
   const [showConfirm, setShowConfirm] = useState(false)
   const [deleting,    setDeleting]    = useState(false)
@@ -79,7 +80,7 @@ export function MediaCard({ media, onDeleted }: Props) {
           </div>
         </div>
 
-        {isCarousel && (
+        {showThumbnail && (
           <div className="rounded-lg overflow-hidden" style={{ aspectRatio: "16/9", backgroundColor: "#111111" }}>
             {media.vehicleImage ? (
               <img src={media.vehicleImage} alt={media.vehicleName} className="w-full h-full object-cover" />
