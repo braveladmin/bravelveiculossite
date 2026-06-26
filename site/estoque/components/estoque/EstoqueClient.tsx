@@ -1,14 +1,17 @@
 "use client"
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
 import { Car, Plus, Search, X } from 'lucide-react'
 import { VehicleCard } from '@/components/vehicles/VehicleCard'
+import { Pagination } from '@/components/ui/Pagination'
 import { CATEGORIES } from '@/lib/constants'
 import { maskCurrencyInput, parseCurrencyInput } from '@/lib/format'
 import type { Vehicle } from '@/lib/types'
 import type { UserInfo } from '@/lib/actions/vehicles'
+
+const PAGE_SIZE = 12
 
 const SURFACE = "#181818"
 const SURF2   = "#111111"
@@ -31,6 +34,7 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
   const [category, setCategory] = useState("")
   const [priceMin, setPriceMin] = useState("")
   const [priceMax, setPriceMax] = useState("")
+  const [page,     setPage]     = useState(1)
 
   function handleSold(id: string) {
     setVehicles((vs) => vs.map((v) =>
@@ -91,6 +95,19 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
       return okStatus && okSearch && okCategory && okPrice
     })
   }, [vehicles, search, filter, category, priceMin, priceMax])
+
+  useEffect(() => {
+    setPage(1)
+  }, [search, filter, category, priceMin, priceMax])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const paginated  = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
+  function handlePageChange(p: number) {
+    setPage(p)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
 
   return (
     <div className="p-5 space-y-6 max-w-400 mx-auto">
@@ -216,23 +233,27 @@ export function EstoqueClient({ vehicles: initialVehicles }: Props) {
       {filtered.length === 0 ? (
         <EmptyState search={search} filter={filter} hasExtraFilters={hasExtraFilters} />
       ) : (
-        <motion.div
-          key={filter}
-          className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"
-          initial="hidden"
-          animate="show"
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.035 } } }}
-        >
-          {filtered.map((v) => (
-            <motion.div
-              key={v.id}
-              variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-            >
-              <VehicleCard vehicle={v} onSold={handleSold} onRestore={handleRestore} onFeatureToggle={handleFeatureToggle} />
-            </motion.div>
-          ))}
-        </motion.div>
+        <>
+          <motion.div
+            key={`${filter}-${currentPage}`}
+            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"
+            initial="hidden"
+            animate="show"
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.035 } } }}
+          >
+            {paginated.map((v) => (
+              <motion.div
+                key={v.id}
+                variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+              >
+                <VehicleCard vehicle={v} onSold={handleSold} onRestore={handleRestore} onFeatureToggle={handleFeatureToggle} />
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} onChange={handlePageChange} />
+        </>
       )}
     </div>
   )
