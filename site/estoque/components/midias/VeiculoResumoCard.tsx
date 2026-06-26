@@ -1,5 +1,7 @@
 "use client"
 
+import { ArrowRight } from "lucide-react"
+import { Button } from "@heroui/react"
 import { formatCurrency, formatKm } from "@/lib/format"
 import type { Vehicle } from "@/lib/types"
 
@@ -15,9 +17,10 @@ const PLACEHOLDER_IMAGE =
 
 type Props = {
   vehicle: Vehicle
+  onAdvance?: () => void
 }
 
-export function VeiculoResumoCard({ vehicle }: Props) {
+export function VeiculoResumoCard({ vehicle, onAdvance }: Props) {
   const cover = vehicle.images?.[0] ?? vehicle.imageUrl ?? PLACEHOLDER_IMAGE
   const fotosCount = vehicle.images?.length ?? (vehicle.imageUrl ? 1 : 0)
 
@@ -36,13 +39,24 @@ export function VeiculoResumoCard({ vehicle }: Props) {
 
   return (
     <div className="rounded-2xl overflow-hidden flex flex-col sm:flex-row" style={{ backgroundColor: SURFACE, border: `1px solid ${BORDER}` }}>
-      <div className="sm:w-[200px] shrink-0" style={{ height: "160px" }}>
+      <div className="sm:w-[200px] shrink-0 relative" style={{ height: "160px" }}>
         <img
           src={cover}
           alt={vehicle.name}
           className="w-full h-full object-cover"
           onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }}
         />
+        {onAdvance && (
+          <Button
+            variant="primary"
+            size="sm"
+            className="absolute bottom-2 right-2 font-semibold shadow-lg"
+            onPress={onAdvance}
+          >
+            Avançar
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        )}
       </div>
       <div className="p-5 flex-1 space-y-3">
         <div>

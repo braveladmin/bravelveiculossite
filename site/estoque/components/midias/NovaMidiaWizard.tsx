@@ -191,12 +191,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
         {step === 0 && (
           <div className="space-y-5">
             <SelecionarVeiculo vehicles={vehicles} selectedId={vehicle?.id ?? null} onSelect={handleSelectVehicle} />
-            {vehicle && <VeiculoResumoCard vehicle={vehicle} />}
-            <div className="flex justify-end pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
-              <Button variant="primary" size="sm" className="font-semibold" isDisabled={!vehicle} onPress={() => setStep(1)}>
-                Avançar
-              </Button>
-            </div>
+            {vehicle && <VeiculoResumoCard vehicle={vehicle} onAdvance={() => setStep(1)} />}
           </div>
         )}
 
