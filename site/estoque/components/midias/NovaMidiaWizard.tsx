@@ -194,6 +194,7 @@ export function NovaMidiaWizard({ vehicles }: Props) {
               vehicles={vehicles}
               selectedId={vehicle?.id ?? null}
               onSelect={handleSelectVehicle}
+              onDeselect={() => setVehicle(null)}
               renderDetail={(v) => <VeiculoResumoCard vehicle={v} onAdvance={() => setStep(1)} />}
             />
           </div>

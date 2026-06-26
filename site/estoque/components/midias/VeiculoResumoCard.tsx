@@ -39,20 +39,17 @@ export function VeiculoResumoCard({ vehicle, onAdvance }: Props) {
 
   return (
     <div className="rounded-2xl overflow-hidden flex flex-col sm:flex-row" style={{ backgroundColor: SURFACE, border: `1px solid ${BORDER}` }}>
-      <div className="sm:w-[200px] shrink-0 relative" style={{ height: "160px" }}>
-        <img
-          src={cover}
-          alt={vehicle.name}
-          className="w-full h-full object-cover"
-          onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }}
-        />
+      <div className="sm:w-[200px] shrink-0 flex flex-col gap-2 p-2">
+        <div className="rounded-xl overflow-hidden" style={{ height: "160px" }}>
+          <img
+            src={cover}
+            alt={vehicle.name}
+            className="w-full h-full object-cover"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE }}
+          />
+        </div>
         {onAdvance && (
-          <Button
-            variant="primary"
-            size="sm"
-            className="absolute bottom-2 right-2 font-semibold shadow-lg"
-            onPress={onAdvance}
-          >
+          <Button variant="primary" size="sm" className="w-full font-semibold" onPress={onAdvance}>
             Avançar
             <ArrowRight className="w-4 h-4" />
           </Button>

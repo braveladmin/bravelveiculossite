@@ -1,6 +1,7 @@
 "use client"
 
-import { Fragment, useMemo, useState, type ReactNode } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
+import { AnimatePresence, motion } from "motion/react"
 import { Search } from "lucide-react"
 import { formatCurrency } from "@/lib/format"
 import type { Vehicle } from "@/lib/types"
@@ -18,12 +19,25 @@ type Props = {
   vehicles: Vehicle[]
   selectedId: string | null
   onSelect: (vehicle: Vehicle) => void
+  /** Chamado quando o usuário clica fora da área de seleção, pra minimizar o detalhe aberto. */
+  onDeselect?: () => void
   /** Renderizado em largura cheia, logo após o card do veículo selecionado, pra não exigir scroll até o final da lista. */
   renderDetail?: (vehicle: Vehicle) => ReactNode
 }
 
-export function SelecionarVeiculo({ vehicles, selectedId, onSelect, renderDetail }: Props) {
+export function SelecionarVeiculo({ vehicles, selectedId, onSelect, onDeselect, renderDetail }: Props) {
   const [search, setSearch] = useState("")
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!selectedId || !onDeselect) return
+    const deselect = onDeselect
+    function handlePointerDown(e: PointerEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) deselect()
+    }
+    document.addEventListener("pointerdown", handlePointerDown)
+    return () => document.removeEventListener("pointerdown", handlePointerDown)
+  }, [selectedId, onDeselect])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
@@ -36,7 +50,7 @@ export function SelecionarVeiculo({ vehicles, selectedId, onSelect, renderDetail
   }, [vehicles, search])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={rootRef}>
       <div
         className="flex items-center gap-2.5 px-3.5 rounded-xl max-w-sm"
         style={{ height: "40px", backgroundColor: SURF2, border: `1px solid ${BORDER}` }}
@@ -87,11 +101,19 @@ export function SelecionarVeiculo({ vehicles, selectedId, onSelect, renderDetail
                     </p>
                   </div>
                 </button>
-                {active && renderDetail && (
-                  <div className="col-span-full">
-                    {renderDetail(v)}
-                  </div>
-                )}
+                <AnimatePresence>
+                  {active && renderDetail && (
+                    <motion.div
+                      className="col-span-full overflow-hidden"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25, ease: "easeInOut" }}
+                    >
+                      {renderDetail(v)}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </Fragment>
             )
           })}
