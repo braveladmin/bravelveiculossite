@@ -1497,6 +1497,7 @@ footer { background: #050505; color: var(--white); padding: 3.5rem 1.5rem 1.5rem
   .nav-right        { margin-right: auto; margin-left: 0; }
   .mobile-menu      { left: 1rem; right: auto; transform-origin: top left; }
   .nav-search-box   { width: min(290px, calc(100vw - 2rem)); left: 0; right: auto; transform-origin: top left; }
+  .nav-search-toggle { width: 44px; height: 44px; font-size: 1.05rem; }
 
   /* Hero — mobile equilibrado */
   #hero { align-items: flex-start; min-height: auto; }
