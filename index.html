@@ -32,6 +32,15 @@
       </ul>
 
       <div class="nav-right">
+        <div class="nav-search" id="navSearch">
+          <button class="nav-search-toggle" id="navSearchToggle" aria-label="Buscar veículo">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <div class="nav-search-box" id="navSearchBox">
+            <input type="text" id="navSearchInput" class="nav-search-input" placeholder="Buscar veículo (ex: Onix, T-Cross)" autocomplete="off">
+            <div class="nav-search-results" id="navSearchResults"></div>
+          </div>
+        </div>
         <a href="https://wa.me/556699135492?text=Olá!%20Vi%20o%20site%20da%20Bravel%20Veículos%20e%20gostaria%20de%20mais%20informações." target="_blank" class="btn btn-whatsapp-nav">
           <i class="fa-brands fa-whatsapp"></i> WhatsApp
         </a>
@@ -741,6 +750,68 @@
         menuDots.classList.remove('active');
       }
     });
+
+    // ─── Busca de veículo (nav) ───────────────────────────────────────────────
+    (function () {
+      const wrap    = document.getElementById('navSearch');
+      const toggle  = document.getElementById('navSearchToggle');
+      const input   = document.getElementById('navSearchInput');
+      const results = document.getElementById('navSearchResults');
+      if (!wrap) return;
+
+      function openSearch() {
+        wrap.classList.add('open');
+        setTimeout(() => input.focus(), 150);
+      }
+      function closeSearch() {
+        wrap.classList.remove('open');
+        input.value = '';
+        results.innerHTML = '';
+      }
+
+      toggle.addEventListener('click', e => {
+        e.stopPropagation();
+        wrap.classList.contains('open') ? closeSearch() : openSearch();
+      });
+
+      document.addEventListener('click', e => {
+        if (!wrap.contains(e.target)) closeSearch();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSearch();
+      });
+
+      input.addEventListener('input', () => {
+        const term = input.value.trim().toLowerCase();
+        if (!term) { results.innerHTML = ''; return; }
+
+        const matches = BRAVEL_VEHICLES.filter(v =>
+          `${v.brand} ${v.modelOnly} ${v.version || ''}`.toLowerCase().includes(term)
+        ).slice(0, 6);
+
+        if (!matches.length) {
+          results.innerHTML = `<div class="nav-search-empty">Nenhum veículo encontrado.</div>`;
+          return;
+        }
+
+        results.innerHTML = matches.map(v => `
+          <a href="veiculo.html?id=${v.id}" class="nav-search-result">
+            <span class="nav-search-result-emoji">${v.emoji}</span>
+            <span class="nav-search-result-info">
+              <span class="nav-search-result-name">${v.brand} ${v.modelOnly}</span>
+              <span class="nav-search-result-meta">${v.year} · ${fmtPrice(v.price)}</span>
+            </span>
+          </a>
+        `).join('');
+      });
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          const first = results.querySelector('.nav-search-result');
+          if (first) window.location.href = first.getAttribute('href');
+        }
+      });
+    })();
 
     // ─── Smooth scroll ────────────────────────────────────────────────────────
     document.querySelectorAll('a[href^="#"]').forEach(a => {

@@ -7,7 +7,7 @@ const SUPABASE_URL      = 'https://hukregsjrnvtkedywgih.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_H70Duzc6e3cUuz5IrBLwog_-jOyMpe2';
 
 const CATEGORY_TO_TYPE = {
-  Hatch: 'hatch', Sedan: 'sedan', SUV: 'suv', Pickup: 'pickup', Van: 'minivan',
+  Hatch: 'hatch', Sedan: 'sedan', SUV: 'suv', Pickup: 'pickup', Picape: 'pickup', Van: 'minivan',
   'Conversível': 'esportivo', 'Coupé': 'esportivo', Moto: 'moto', 'Elétrico': 'outro', Outro: 'outro',
 };
 
