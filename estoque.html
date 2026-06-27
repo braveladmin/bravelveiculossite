@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=20260627a">
+  <link rel="stylesheet" href="styles.css?v=20260627b">
   <style>
     /* ── Estilos específicos do estoque.html ── */
 
@@ -474,6 +474,14 @@
       <div class="estoque-filters-wrap anim-up">
         <div class="filters-wrap">
           <div class="filter-row">
+            <span class="filter-row-label">BUSCA</span>
+            <div class="estoque-search-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="estoqueSearchInput" class="estoque-search-input" placeholder="Buscar por marca ou modelo (ex: Onix, T-Cross, Strada)" autocomplete="off">
+              <button type="button" id="estoqueSearchClear" class="estoque-search-clear hidden" aria-label="Limpar busca"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+          <div class="filter-row">
             <span class="filter-row-label">TIPO</span>
             <div class="filter-bar" id="typeFilters">
               <button class="filter-btn active" data-filter="type" data-value="all">Todos</button>
@@ -661,7 +669,7 @@
     }
 
     // ─── Filtros ─────────────────────────────────────────────────
-    let activeType = 'all', activePrice = 'all';
+    let activeType = 'all', activePrice = 'all', searchTerm = '';
 
     // ─── Paginação ─────────────────────────────────────────────────
     const PAGE_SIZE = 10;
@@ -706,6 +714,9 @@
 
     function applyFilters() {
       let r = BRAVEL_VEHICLES;
+      if (searchTerm) {
+        r = r.filter(v => `${v.brand} ${v.modelOnly} ${v.version || ''}`.toLowerCase().includes(searchTerm));
+      }
       if (activeType !== 'all') r = r.filter(v => v.type === activeType);
       if (activePrice !== 'all') {
         const ranges = {
@@ -730,6 +741,23 @@
         if (filter === 'price') activePrice = value;
         applyFilters();
       });
+    });
+
+    // ─── Busca por nome ─────────────────────────────────────────────
+    const searchInput = document.getElementById('estoqueSearchInput');
+    const searchClear  = document.getElementById('estoqueSearchClear');
+
+    searchInput.addEventListener('input', () => {
+      searchTerm = searchInput.value.trim().toLowerCase();
+      searchClear.classList.toggle('hidden', !searchTerm);
+      applyFilters();
+    });
+
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      searchTerm = '';
+      searchClear.classList.add('hidden');
+      applyFilters();
     });
 
     document.getElementById('carsGrid').addEventListener('click', e => {
