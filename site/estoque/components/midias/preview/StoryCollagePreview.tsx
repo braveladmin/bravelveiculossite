@@ -91,8 +91,8 @@ export function StoryCollagePreview({ vehicle }: Props) {
             style={{ top: "calc(33.33% - 1px)", transform: "translateY(-50%)" }}
           >
             <span
-              className="preview-commercial inline-block text-white text-[6px] font-extrabold uppercase tracking-[0.12em]"
-              style={{ backgroundColor: "#cc1111", borderRadius: "3px", padding: "3px 8px", boxShadow: "0 2px 10px rgba(0,0,0,0.5)" }}
+              className="preview-commercial inline-block text-white text-[9px] font-extrabold uppercase tracking-[0.12em]"
+              style={{ backgroundColor: "#cc1111", borderRadius: "4px", padding: "5px 12px", boxShadow: "0 2px 10px rgba(0,0,0,0.5)" }}
             >
               Novidade
             </span>
