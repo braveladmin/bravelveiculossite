@@ -1,6 +1,6 @@
 "use client"
 
-import { Clapperboard, GalleryHorizontal, Rows3 } from "lucide-react"
+import { Check, Clapperboard, GalleryHorizontal, Rows3 } from "lucide-react"
 import { STORY_DIMENSIONS, CAROUSEL_DIMENSIONS } from "@/lib/midias/dimensoes"
 import type { MediaType } from "@/lib/types"
 
@@ -41,42 +41,55 @@ const FORMATOS: { key: FormatoKey; label: string; description: string; icon: typ
 ]
 
 type Props = {
-  selected: FormatoKey | null
-  onSelect: (key: FormatoKey) => void
+  selected: FormatoKey[]
+  onToggle: (key: FormatoKey) => void
 }
 
-export function EscolherFormato({ selected, onSelect }: Props) {
+export function EscolherFormato({ selected, onToggle }: Props) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {FORMATOS.map((f) => {
-        const Icon = f.icon
-        const active = selected === f.key
-        return (
-          <button
-            key={f.key}
-            type="button"
-            onClick={() => onSelect(f.key)}
-            className="rounded-2xl p-6 text-left transition-all flex flex-col gap-3"
-            style={{
-              backgroundColor: SURF2,
-              border: `2px solid ${active ? ACCENT : BORDER}`,
-              boxShadow: active ? "0 0 0 3px rgba(204,17,17,0.2)" : "none",
-            }}
-          >
-            <div
-              className="w-11 h-11 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: active ? ACCENT : "rgba(255,255,255,0.06)" }}
+    <div className="space-y-3">
+      <p className="text-[12px] font-semibold" style={{ color: MUTED }}>
+        Selecione um ou mais formatos
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {FORMATOS.map((f) => {
+          const Icon = f.icon
+          const active = selected.includes(f.key)
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => onToggle(f.key)}
+              className="rounded-2xl p-6 text-left transition-all flex flex-col gap-3 relative"
+              style={{
+                backgroundColor: SURF2,
+                border: `2px solid ${active ? ACCENT : BORDER}`,
+                boxShadow: active ? "0 0 0 3px rgba(204,17,17,0.2)" : "none",
+              }}
             >
-              <Icon className="w-5 h-5" style={{ color: active ? "#fff" : MUTED }} />
-            </div>
-            <div>
-              <p className="text-[15px] font-bold" style={{ color: TEXT }}>{f.label}</p>
-              <p className="text-[12px] mt-0.5" style={{ color: MUTED }}>{f.description}</p>
-            </div>
-            <p className="text-[11px] font-semibold" style={{ color: ACCENT }}>{f.dims}</p>
-          </button>
-        )
-      })}
+              {active && (
+                <div
+                  className="absolute top-3 right-3 w-5 h-5 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: ACCENT }}
+                >
+                  <Check className="w-3 h-3 text-white" />
+                </div>
+              )}
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: active ? ACCENT : "rgba(255,255,255,0.06)" }}
+              >
+                <Icon className="w-5 h-5" style={{ color: active ? "#fff" : MUTED }} />
+              </div>
+              <div>
+                <p className="text-[15px] font-bold" style={{ color: TEXT }}>{f.label}</p>
+                <p className="text-[12px] mt-0.5" style={{ color: MUTED }}>{f.description}</p>
+              </div>
+              <p className="text-[11px] font-semibold" style={{ color: ACCENT }}>{f.dims}</p>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
