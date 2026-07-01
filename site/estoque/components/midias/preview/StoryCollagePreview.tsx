@@ -43,16 +43,6 @@ export function StoryCollagePreview({ vehicle }: Props) {
 
         {/* Banda 1 — externa, nome do carro */}
         <Band src={fotoExterna1} alt={vehicle.name} borderBottom>
-          {vehicle.isNew && (
-            <div className="absolute top-0 left-0 z-10" style={{ padding: "4% 5% 0" }}>
-              <span
-                className="preview-commercial inline-block text-white text-[6px] font-extrabold uppercase tracking-[0.1em]"
-                style={{ backgroundColor: "#cc1111", borderRadius: "3px", padding: "3px 6px", boxShadow: "0 2px 8px rgba(0,0,0,0.4)" }}
-              >
-                Novidade
-              </span>
-            </div>
-          )}
           <div
             className="absolute inset-x-0 bottom-0"
             style={{ padding: "7% 6% 5%", background: "linear-gradient(to top, rgba(10,10,10,0.9) 0%, rgba(10,10,10,0.3) 70%, transparent 100%)" }}
@@ -93,6 +83,21 @@ export function StoryCollagePreview({ vehicle }: Props) {
             )}
           </div>
         </Band>
+
+        {/* Badge Novidade — centralizado sobre a linha vermelha entre Band 1 e Band 2 */}
+        {vehicle.isNew && (
+          <div
+            className="absolute inset-x-0 z-20 flex justify-center"
+            style={{ top: "calc(33.33% - 1px)", transform: "translateY(-50%)" }}
+          >
+            <span
+              className="preview-commercial inline-block text-white text-[6px] font-extrabold uppercase tracking-[0.12em]"
+              style={{ backgroundColor: "#cc1111", borderRadius: "3px", padding: "3px 8px", boxShadow: "0 2px 10px rgba(0,0,0,0.5)" }}
+            >
+              Novidade
+            </span>
+          </div>
+        )}
 
         {/* Banda 3 — externa, marca */}
         <Band src={fotoExterna2} alt={`${vehicle.name} - traseira`}>
