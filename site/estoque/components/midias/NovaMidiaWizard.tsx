@@ -83,10 +83,9 @@ export function NovaMidiaWizard({ vehicles }: Props) {
   }
 
   function handleToggleFormato(key: FormatoKey) {
-    const isSelected = formatos.includes(key)
-    const next = isSelected ? formatos.filter(k => k !== key) : [...formatos, key]
-    setFormatos(next)
-    if (isSelected || !vehicle) return
+    const adding = !formatos.includes(key)
+    setFormatos(prev => adding ? [...prev, key] : prev.filter(k => k !== key))
+    if (!adding || !vehicle) return
     const imgs = vehicle.images ?? []
     if (key === "story-collage" && collagePhotos.length === 0) {
       setCollagePhotos([imgs[0] ?? "", imgs[1] ?? imgs[0] ?? "", imgs[2] ?? imgs[0] ?? ""])
