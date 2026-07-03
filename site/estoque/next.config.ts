@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   basePath: "/admin",
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
   // Descoberta de OAuth (RFC 8414 / RFC 9728) precisa viver na raiz do
   // domínio, sem o /admin — clientes OAuth (Claude.ai) tentam
   // "{issuer}/.well-known/X" ou "/.well-known/X{path-do-issuer}" e não tem
