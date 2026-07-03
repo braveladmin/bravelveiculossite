@@ -61,31 +61,41 @@ export async function setDraftImages(id: string, images: string[]): Promise<{ er
 // browser (anon key) não passa pela RLS do bucket vehicle-images. Faz o
 // upload aqui, pelo service role, depois de validar que o rascunho existe e
 // ainda está pendente (mesma checagem de setDraftImages).
+const MIME_BY_EXT: Record<string, string> = {
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+  webp: 'image/webp', gif: 'image/gif', heic: 'image/heic', heif: 'image/heif',
+}
+
 export async function uploadDraftPhoto(
   pendingActionId: string,
   formData: FormData
 ): Promise<{ url: string | null; error: string | null }> {
-  const file = formData.get('file')
-  if (!(file instanceof File)) return { url: null, error: 'Nenhum arquivo enviado' }
+  try {
+    const file = formData.get('file')
+    if (!(file instanceof File)) return { url: null, error: 'Nenhum arquivo enviado' }
 
-  const supabase = createAdminClient()
-  const { data: existing, error: fetchError } = await supabase
-    .from('mcp_pending_actions')
-    .select('status')
-    .eq('id', pendingActionId)
-    .single()
+    const supabase = createAdminClient()
+    const { data: existing, error: fetchError } = await supabase
+      .from('mcp_pending_actions')
+      .select('status')
+      .eq('id', pendingActionId)
+      .single()
 
-  if (fetchError || !existing) return { url: null, error: 'Rascunho não encontrado' }
-  if (existing.status !== 'pending') return { url: null, error: 'Esse rascunho não está mais pendente de confirmação' }
+    if (fetchError || !existing) return { url: null, error: 'Rascunho não encontrado' }
+    if (existing.status !== 'pending') return { url: null, error: 'Esse rascunho não está mais pendente de confirmação' }
 
-  const ext = file.name.split('.').pop() ?? 'jpg'
-  const path = `vehicles/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
-  const { error: uploadError } = await supabase.storage
-    .from('vehicle-images')
-    .upload(path, file, { upsert: false, contentType: file.type })
+    const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase()
+    const contentType = file.type || MIME_BY_EXT[ext] || 'image/jpeg'
+    const path = `vehicles/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('vehicle-images')
+      .upload(path, file, { upsert: false, contentType })
 
-  if (uploadError) return { url: null, error: uploadError.message }
+    if (uploadError) return { url: null, error: uploadError.message }
 
-  const { data } = supabase.storage.from('vehicle-images').getPublicUrl(path)
-  return { url: data.publicUrl, error: null }
+    const { data } = supabase.storage.from('vehicle-images').getPublicUrl(path)
+    return { url: data.publicUrl, error: null }
+  } catch (err) {
+    return { url: null, error: err instanceof Error ? err.message : 'Erro ao enviar foto' }
+  }
 }

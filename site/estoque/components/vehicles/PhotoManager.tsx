@@ -18,14 +18,26 @@ const labelCls = "text-[10px] font-bold tracking-[0.12em] uppercase";
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1503736334956-4c8f8e4733e7?w=800&q=80&auto=format&fit=crop";
 
+// iOS Safari envia file.type vazio para HEIC/HEIF e alguns JPEG vindos de apps
+// de mensagens. Deriva o content-type pela extensão como fallback.
+const MIME_BY_EXT: Record<string, string> = {
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+  webp: "image/webp", gif: "image/gif", heic: "image/heic", heif: "image/heif",
+};
+function resolveContentType(file: File): string {
+  if (file.type) return file.type;
+  const ext = (file.name.split(".").pop() ?? "").toLowerCase();
+  return MIME_BY_EXT[ext] ?? "image/jpeg";
+}
+
 async function uploadDirectToStorage(file: File): Promise<string> {
   const supabase = createClient();
-  const ext  = file.name.split(".").pop() ?? "jpg";
+  const ext  = (file.name.split(".").pop() ?? "jpg").toLowerCase();
   const path = `vehicles/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 
   const { error } = await supabase.storage
     .from("vehicle-images")
-    .upload(path, file, { upsert: false, contentType: file.type });
+    .upload(path, file, { upsert: false, contentType: resolveContentType(file) });
   if (error) throw new Error(error.message);
 
   const { data } = supabase.storage.from("vehicle-images").getPublicUrl(path);
@@ -241,7 +253,7 @@ export function PhotoManager({ images, onChange, uploadFile }: Props) {
         >
           <ImagePlus className="w-8 h-8" />
           <span className="text-[13px] font-semibold" style={{ color: TEXT }}>Clique para selecionar fotos</span>
-          <span className="text-[11px]">JPG, PNG, WEBP — pode selecionar várias de uma vez</span>
+          <span className="text-[11px]">JPG, PNG, WEBP — pode selecionar várias de uma vez. No iPhone, prefira JPEG.</span>
         </button>
       )}
     </div>
