@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { AnimatePresence, motion } from "motion/react"
-import { Search } from "lucide-react"
+import { Check, Search } from "lucide-react"
 import { formatCurrency } from "@/lib/format"
 import type { Vehicle } from "@/lib/types"
 
@@ -17,27 +17,33 @@ const PLACEHOLDER_IMAGE =
 
 type Props = {
   vehicles: Vehicle[]
-  selectedId: string | null
-  onSelect: (vehicle: Vehicle) => void
-  /** Chamado quando o usuário clica fora da área de seleção, pra minimizar o detalhe aberto. */
+  // Modo single (existente)
+  selectedId?: string | null
+  onSelect?: (vehicle: Vehicle) => void
   onDeselect?: () => void
-  /** Renderizado em largura cheia, logo após o card do veículo selecionado, pra não exigir scroll até o final da lista. */
   renderDetail?: (vehicle: Vehicle) => ReactNode
+  // Modo multi (lote)
+  selectedIds?: string[]
+  onToggle?: (vehicle: Vehicle) => void
 }
 
-export function SelecionarVeiculo({ vehicles, selectedId, onSelect, onDeselect, renderDetail }: Props) {
+export function SelecionarVeiculo({
+  vehicles, selectedId, onSelect, onDeselect, renderDetail,
+  selectedIds, onToggle,
+}: Props) {
   const [search, setSearch] = useState("")
   const rootRef = useRef<HTMLDivElement>(null)
+  const multiMode = selectedIds !== undefined && onToggle !== undefined
 
   useEffect(() => {
-    if (!selectedId || !onDeselect) return
+    if (multiMode || !selectedId || !onDeselect) return
     const deselect = onDeselect
     function handlePointerDown(e: PointerEvent) {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) deselect()
     }
     document.addEventListener("pointerdown", handlePointerDown)
     return () => document.removeEventListener("pointerdown", handlePointerDown)
-  }, [selectedId, onDeselect])
+  }, [multiMode, selectedId, onDeselect])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
@@ -71,20 +77,32 @@ export function SelecionarVeiculo({ vehicles, selectedId, onSelect, onDeselect, 
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((v) => {
-            const active = v.id === selectedId
-            const cover = v.images?.[0] ?? v.imageUrl ?? PLACEHOLDER_IMAGE
+            const active = multiMode ? selectedIds.includes(v.id) : v.id === selectedId
+            const cover  = v.images?.[0] ?? v.imageUrl ?? PLACEHOLDER_IMAGE
             return (
               <Fragment key={v.id}>
                 <button
                   type="button"
-                  onClick={() => onSelect(v)}
-                  className="rounded-xl overflow-hidden text-left transition-all"
+                  onClick={() => multiMode ? onToggle(v) : onSelect?.(v)}
+                  className="rounded-xl overflow-hidden text-left transition-all relative"
                   style={{
                     border: `2px solid ${active ? ACCENT : BORDER}`,
                     backgroundColor: SURF2,
                     boxShadow: active ? "0 0 0 3px rgba(204,17,17,0.2)" : "none",
                   }}
                 >
+                  {/* Checkmark do modo multi */}
+                  {multiMode && (
+                    <div
+                      className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full flex items-center justify-center transition-all"
+                      style={{
+                        backgroundColor: active ? ACCENT : "rgba(0,0,0,0.5)",
+                        border: `2px solid ${active ? ACCENT : "rgba(255,255,255,0.3)"}`,
+                      }}
+                    >
+                      {active && <Check className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                  )}
                   <div style={{ height: "120px" }}>
                     <img
                       src={cover}
@@ -101,19 +119,23 @@ export function SelecionarVeiculo({ vehicles, selectedId, onSelect, onDeselect, 
                     </p>
                   </div>
                 </button>
-                <AnimatePresence>
-                  {active && renderDetail && (
-                    <motion.div
-                      className="col-span-full overflow-hidden"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.25, ease: "easeInOut" }}
-                    >
-                      {renderDetail(v)}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+
+                {/* Detail panel — só no modo single */}
+                {!multiMode && (
+                  <AnimatePresence>
+                    {active && renderDetail && (
+                      <motion.div
+                        className="col-span-full overflow-hidden"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                      >
+                        {renderDetail(v)}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
               </Fragment>
             )
           })}
