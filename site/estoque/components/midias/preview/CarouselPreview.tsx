@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { PhotoBackdrop } from "@/components/midias/preview/PhotoBackdrop"
 import type { Vehicle } from "@/lib/types"
@@ -14,12 +13,10 @@ export function PhotoSlide({ src }: { src: string }) {
     <>
       <PhotoBackdrop src={src} />
       <div className="absolute top-0 right-0 z-10" style={{ padding: "6%" }}>
-        <Image
-          src="/bravel-logo.png"
+        <img
+          src="/admin/bravel-logo.png"
           alt="Bravel Veículos"
-          width={28}
-          height={28}
-          className="w-7 h-7 rounded-md"
+          className="w-7 h-7 rounded-md object-cover"
           style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.7))" }}
         />
       </div>

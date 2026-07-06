@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { formatPrecoSemCentavos } from "@/lib/midias/legenda"
 import { STORE_NAME } from "@/lib/constants"
 import { PhotoBackdrop } from "@/components/midias/preview/PhotoBackdrop"
@@ -35,12 +34,10 @@ export function StoryPreview({ vehicle }: Props) {
 
       {/* Logo da loja */}
       <div className="absolute bottom-0 right-0 z-10" style={{ padding: "0 6% 5% 0" }}>
-        <Image
-          src="/bravel-logo.png"
+        <img
+          src="/admin/bravel-logo.png"
           alt="Bravel Veículos"
-          width={36}
-          height={36}
-          className="w-9 h-9 rounded-lg"
+          className="w-9 h-9 rounded-lg object-cover"
           style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.7))" }}
         />
       </div>

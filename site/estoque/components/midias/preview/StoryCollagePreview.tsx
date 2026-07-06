@@ -1,7 +1,6 @@
 "use client"
 
 import type { ReactNode } from "react"
-import Image from "next/image"
 import { formatKm } from "@/lib/format"
 import { formatPrecoSemCentavos } from "@/lib/midias/legenda"
 import { STORE_NAME } from "@/lib/constants"
@@ -102,12 +101,10 @@ export function StoryCollagePreview({ vehicle }: Props) {
         {/* Banda 3 — externa, marca */}
         <Band src={fotoExterna2} alt={`${vehicle.name} - traseira`}>
           <div className="absolute bottom-0 right-0 z-10" style={{ padding: "0 6% 4% 0" }}>
-            <Image
-              src="/bravel-logo.png"
+            <img
+              src="/admin/bravel-logo.png"
               alt="Bravel Veículos"
-              width={24}
-              height={24}
-              className="w-6 h-6 rounded-lg"
+              className="w-6 h-6 rounded-lg object-cover"
               style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.7))" }}
             />
           </div>

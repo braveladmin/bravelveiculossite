@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { formatKm } from "@/lib/format"
 import { formatPrecoSemCentavos } from "@/lib/midias/legenda"
 import { PhotoBackdrop } from "@/components/midias/preview/PhotoBackdrop"
@@ -28,12 +27,10 @@ export function PostPreview({ vehicle }: Props) {
       <PhotoBackdrop src={cover} alt={vehicle.name} />
 
       <div className="absolute bottom-0 right-0 z-10" style={{ padding: "0 6% 5% 0" }}>
-        <Image
-          src="/bravel-logo.png"
+        <img
+          src="/admin/bravel-logo.png"
           alt="Bravel Veículos"
-          width={32}
-          height={32}
-          className="w-8 h-8 rounded-lg"
+          className="w-8 h-8 rounded-lg object-cover"
           style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.7))" }}
         />
       </div>
