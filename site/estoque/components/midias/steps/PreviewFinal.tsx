@@ -87,6 +87,8 @@ export function PreviewFinal({
         const zip = new JSZip()
         let i = 0
         for (const node of Array.from(nodes)) {
+          // Primeira chamada cacheia os recursos; segunda gera a imagem correta
+          await toPng(node as HTMLElement, EXPORT_OPTIONS)
           const dataUrl = await toPng(node as HTMLElement, EXPORT_OPTIONS)
           const base64 = dataUrl.split(",")[1]
           zip.file(`carousel-${slug}-${++i}.png`, base64, { base64: true })
@@ -96,8 +98,14 @@ export function PreviewFinal({
       } else {
         const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
         if (!node) return
+        // Primeira chamada cacheia os recursos; segunda gera a imagem correta
+        await toPng(node, EXPORT_OPTIONS)
         const dataUrl = await toPng(node, EXPORT_OPTIONS)
-        downloadDataUrl(dataUrl, `${mediaType}-${slug}.png`)
+        // Converte para Blob antes de baixar — data URL direto pode corromper o arquivo
+        const blob = await (await fetch(dataUrl)).blob()
+        const objectUrl = URL.createObjectURL(blob)
+        downloadDataUrl(objectUrl, `${mediaType}-${slug}.png`)
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
       }
     } catch {
       setDownloadErr("Não consegui gerar a imagem. Tenta de novo.")
@@ -110,12 +118,14 @@ export function PreviewFinal({
     if (mediaType === "story") {
       const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
       if (!node) throw new Error("Preview do Story não encontrado")
+      await toPng(node, EXPORT_OPTIONS)
       return [await toPng(node, EXPORT_OPTIONS)]
     }
 
     const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
     const dataUrls: string[] = []
     for (const node of Array.from(nodes)) {
+      await toPng(node as HTMLElement, EXPORT_OPTIONS)
       dataUrls.push(await toPng(node as HTMLElement, EXPORT_OPTIONS))
     }
     return dataUrls
