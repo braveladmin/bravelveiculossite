@@ -104,7 +104,7 @@ export function PastaVeiculoClient({ folder, vehicle, media }: Props) {
 
   function showToast(message: string, variant: "success" | "error" = "success") {
     setToast({ message, variant })
-    setTimeout(() => setToast(null), 3000)
+    setTimeout(() => setToast(null), variant === "error" ? 8000 : 3000)
   }
 
   async function handleArchive(id: string) {
@@ -219,6 +219,46 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   const collagePhotos = isCollage ? (media.previewData?.collagePhotos as string[] | undefined) : undefined
   const previewVehicle = collagePhotos?.length ? { ...vehicle, images: collagePhotos } : vehicle
 
+  // Pré-converte todas as <img> para base64 antes de capturar.
+  // Necessário pois o canvas bloqueia imagens cross-origin (fotos Supabase)
+  // e produziria áreas pretas sem esse passo. Retorna função de restauração.
+  async function inlineImagesAsBase64(node: HTMLElement): Promise<() => void> {
+    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
+    const restores: Array<() => void> = []
+    await Promise.all(imgs.map(async (img) => {
+      const src = img.getAttribute("src") ?? ""
+      if (!src || src.startsWith("data:")) return
+      try {
+        const res  = await fetch(src, { mode: "cors", cache: "force-cache" })
+        const blob = await res.blob()
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload  = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+        img.setAttribute("src", dataUrl)
+        restores.push(() => img.setAttribute("src", src))
+        await new Promise<void>((resolve) => {
+          if (img.complete && img.naturalWidth > 0) { resolve(); return }
+          img.addEventListener("load",  resolve as () => void, { once: true })
+          img.addEventListener("error", resolve as () => void, { once: true })
+        })
+      } catch { /* mantém src original */ }
+    }))
+    return () => restores.forEach(fn => fn())
+  }
+
+  async function captureNode(node: HTMLElement): Promise<string> {
+    const cleanup = await inlineImagesAsBase64(node)
+    try {
+      await toPng(node, EXPORT_OPTIONS) // primeira chamada cacheia fontes/recursos
+      return await toPng(node, EXPORT_OPTIONS)
+    } finally {
+      cleanup()
+    }
+  }
+
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(media.caption)
@@ -234,12 +274,22 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     setDownloading(true)
     try {
       if (document.fonts) await document.fonts.ready
-      const dataUrl = await toPng(node, EXPORT_OPTIONS)
-      const link = document.createElement("a")
-      const slug = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
-      link.download = `${media.mediaType}-${slug}.png`
-      link.href = dataUrl
-      link.click()
+      const dataUrl  = await captureNode(node)
+      const blob     = await (await fetch(dataUrl)).blob()
+      const slug     = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      const filename = `${media.mediaType}-${slug}.png`
+      const file     = new File([blob], filename, { type: "image/png" })
+      const isIOS    = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      if (isIOS && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] })
+      } else {
+        const url  = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.download = filename
+        link.href     = url
+        link.click()
+        setTimeout(() => URL.revokeObjectURL(url), 60_000)
+      }
     } catch {
       onToast("Não consegui gerar a imagem. Tente de novo.", "error")
     }
@@ -252,8 +302,8 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     setPosting(true)
     try {
       if (document.fonts) await document.fonts.ready
-      const dataUrl = await toPng(node, EXPORT_OPTIONS)
-      const blob = await (await fetch(dataUrl)).blob()
+      const dataUrl = await captureNode(node)
+      const blob    = await (await fetch(dataUrl)).blob()
 
       const supabase = createClient()
       const path = `instagram-posts/${Date.now()}_${Math.random().toString(36).slice(2)}.png`
