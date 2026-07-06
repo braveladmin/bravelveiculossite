@@ -69,11 +69,62 @@ export function PreviewFinal({
     ? vehicle.images
     : [vehicle.imageUrl || PLACEHOLDER_IMAGE]
 
-  function downloadDataUrl(dataUrl: string, filename: string) {
-    const link = document.createElement("a")
-    link.download = filename
-    link.href = dataUrl
-    link.click()
+  // Pré-converte todas as <img> do elemento para base64 antes de capturar.
+  // Necessário no iOS/Safari: o canvas bloqueia imagens cross-origin e
+  // produz áreas pretas sem esse passo. Retorna função de restauração.
+  async function inlineImagesAsBase64(node: HTMLElement): Promise<() => void> {
+    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
+    const restores: Array<() => void> = []
+    await Promise.all(imgs.map(async (img) => {
+      const src = img.getAttribute("src") ?? ""
+      if (!src || src.startsWith("data:")) return
+      try {
+        const res  = await fetch(src, { mode: "cors", cache: "force-cache" })
+        const blob = await res.blob()
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload  = () => resolve(reader.result as string)
+          reader.onerror = reject
+          reader.readAsDataURL(blob)
+        })
+        img.setAttribute("src", dataUrl)
+        restores.push(() => img.setAttribute("src", src))
+        await new Promise<void>((resolve) => {
+          if (img.complete && img.naturalWidth > 0) { resolve(); return }
+          img.addEventListener("load",  resolve as () => void, { once: true })
+          img.addEventListener("error", resolve as () => void, { once: true })
+        })
+      } catch { /* mantém src original */ }
+    }))
+    return () => restores.forEach(fn => fn())
+  }
+
+  // No iOS o atributo "download" é ignorado pelo Safari — usa Web Share API
+  // pra abrir o menu nativo de compartilhamento/salvar. Em outros navegadores
+  // usa o fluxo normal com createObjectURL.
+  async function triggerDownload(blob: Blob, filename: string) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const file  = new File([blob], filename, { type: blob.type })
+    if (isIOS && navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file] })
+    } else {
+      const url  = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.download = filename
+      link.href     = url
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    }
+  }
+
+  async function captureNode(node: HTMLElement): Promise<string> {
+    const cleanup = await inlineImagesAsBase64(node)
+    try {
+      await toPng(node, EXPORT_OPTIONS) // primeira chamada cacheia fontes/recursos
+      return await toPng(node, EXPORT_OPTIONS)
+    } finally {
+      cleanup()
+    }
   }
 
   async function handleDownload() {
@@ -83,29 +134,20 @@ export function PreviewFinal({
     try {
       await waitForFonts()
       if (mediaType === "carousel") {
-        const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
+        const nodes = Array.from(hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? [])
         const zip = new JSZip()
-        let i = 0
-        for (const node of Array.from(nodes)) {
-          // Primeira chamada cacheia os recursos; segunda gera a imagem correta
-          await toPng(node as HTMLElement, EXPORT_OPTIONS)
-          const dataUrl = await toPng(node as HTMLElement, EXPORT_OPTIONS)
-          const base64 = dataUrl.split(",")[1]
-          zip.file(`carousel-${slug}-${++i}.png`, base64, { base64: true })
+        for (let i = 0; i < nodes.length; i++) {
+          const dataUrl = await captureNode(nodes[i] as HTMLElement)
+          zip.file(`carousel-${slug}-${i + 1}.png`, dataUrl.split(",")[1], { base64: true })
         }
         const zipBlob = await zip.generateAsync({ type: "blob" })
-        downloadDataUrl(URL.createObjectURL(zipBlob), `carousel-${slug}.zip`)
+        await triggerDownload(zipBlob, `carousel-${slug}.zip`)
       } else {
         const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
         if (!node) return
-        // Primeira chamada cacheia os recursos; segunda gera a imagem correta
-        await toPng(node, EXPORT_OPTIONS)
-        const dataUrl = await toPng(node, EXPORT_OPTIONS)
-        // Converte para Blob antes de baixar — data URL direto pode corromper o arquivo
-        const blob = await (await fetch(dataUrl)).blob()
-        const objectUrl = URL.createObjectURL(blob)
-        downloadDataUrl(objectUrl, `${mediaType}-${slug}.png`)
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000)
+        const dataUrl = await captureNode(node)
+        const blob    = await (await fetch(dataUrl)).blob()
+        await triggerDownload(blob, `${mediaType}-${slug}.png`)
       }
     } catch {
       setDownloadErr("Não consegui gerar a imagem. Tenta de novo.")
@@ -118,15 +160,12 @@ export function PreviewFinal({
     if (mediaType === "story") {
       const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
       if (!node) throw new Error("Preview do Story não encontrado")
-      await toPng(node, EXPORT_OPTIONS)
-      return [await toPng(node, EXPORT_OPTIONS)]
+      return [await captureNode(node)]
     }
-
-    const nodes = hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? []
+    const nodes = Array.from(hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? [])
     const dataUrls: string[] = []
-    for (const node of Array.from(nodes)) {
-      await toPng(node as HTMLElement, EXPORT_OPTIONS)
-      dataUrls.push(await toPng(node as HTMLElement, EXPORT_OPTIONS))
+    for (const node of nodes) {
+      dataUrls.push(await captureNode(node as HTMLElement))
     }
     return dataUrls
   }
