@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { toPng } from "html-to-image"
+import { toPng, toBlob } from "html-to-image"
 import { AlertTriangle, ArrowLeft, CheckCircle2, Clipboard, Download, Eye, Folder, Loader2, Send, Trash2, X } from "lucide-react"
 import { Button, Chip } from "@heroui/react"
 import { VeiculoResumoCard } from "@/components/midias/VeiculoResumoCard"
@@ -249,11 +249,13 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     return () => restores.forEach(fn => fn())
   }
 
-  async function captureNode(node: HTMLElement): Promise<string> {
+  async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineImagesAsBase64(node)
     try {
-      await toPng(node, EXPORT_OPTIONS) // primeira chamada cacheia fontes/recursos
-      return await toPng(node, EXPORT_OPTIONS)
+      await toPng(node, EXPORT_OPTIONS) // aquece cache de fontes/recursos
+      const blob = await toBlob(node, EXPORT_OPTIONS)
+      if (!blob) throw new Error("Captura retornou vazia")
+      return blob
     } finally {
       cleanup()
     }
@@ -274,8 +276,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     setDownloading(true)
     try {
       if (document.fonts) await document.fonts.ready
-      const dataUrl  = await captureNode(node)
-      const blob     = await (await fetch(dataUrl)).blob()
+      const blob     = await captureNode(node)
       const slug     = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       const filename = `${media.mediaType}-${slug}.png`
       const file     = new File([blob], filename, { type: "image/png" })
@@ -302,8 +303,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     setPosting(true)
     try {
       if (document.fonts) await document.fonts.ready
-      const dataUrl = await captureNode(node)
-      const blob    = await (await fetch(dataUrl)).blob()
+      const blob = await captureNode(node)
 
       const supabase = createClient()
       const path = `instagram-posts/${Date.now()}_${Math.random().toString(36).slice(2)}.png`

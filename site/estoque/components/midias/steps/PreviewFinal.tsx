@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { toPng } from "html-to-image"
+import { toPng, toBlob } from "html-to-image"
 import JSZip from "jszip"
 import { Button } from "@heroui/react"
 import { CheckCircle2, Download, Loader2, Send, Sparkles } from "lucide-react"
@@ -117,11 +117,16 @@ export function PreviewFinal({
     }
   }
 
-  async function captureNode(node: HTMLElement): Promise<string> {
+  // Captura o nó como Blob diretamente (sem passar por data URL intermediário).
+  // O toPng de aquecimento cacheia fontes/recursos; o toBlob gera o arquivo final.
+  // Usar toBlob evita o problema de data URLs de 20MB+ corrompendo em alguns browsers.
+  async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineImagesAsBase64(node)
     try {
-      await toPng(node, EXPORT_OPTIONS) // primeira chamada cacheia fontes/recursos
-      return await toPng(node, EXPORT_OPTIONS)
+      await toPng(node, EXPORT_OPTIONS)
+      const blob = await toBlob(node, EXPORT_OPTIONS)
+      if (!blob) throw new Error("Captura retornou vazia")
+      return blob
     } finally {
       cleanup()
     }
@@ -137,16 +142,16 @@ export function PreviewFinal({
         const nodes = Array.from(hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? [])
         const zip = new JSZip()
         for (let i = 0; i < nodes.length; i++) {
-          const dataUrl = await captureNode(nodes[i] as HTMLElement)
-          zip.file(`carousel-${slug}-${i + 1}.png`, dataUrl.split(",")[1], { base64: true })
+          const blob   = await captureNode(nodes[i] as HTMLElement)
+          const buffer = await blob.arrayBuffer()
+          zip.file(`carousel-${slug}-${i + 1}.png`, buffer)
         }
         const zipBlob = await zip.generateAsync({ type: "blob" })
         await triggerDownload(zipBlob, `carousel-${slug}.zip`)
       } else {
         const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
         if (!node) return
-        const dataUrl = await captureNode(node)
-        const blob    = await (await fetch(dataUrl)).blob()
+        const blob = await captureNode(node)
         await triggerDownload(blob, `${mediaType}-${slug}.png`)
       }
     } catch {
@@ -155,17 +160,27 @@ export function PreviewFinal({
     setDownloading(false)
   }
 
+  // Para o upload no Instagram, converte o Blob para data URL (uploadArtImages espera strings)
+  async function blobToDataUrl(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload  = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  }
+
   async function captureArtImages(): Promise<string[]> {
     await waitForFonts()
     if (mediaType === "story") {
       const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
       if (!node) throw new Error("Preview do Story não encontrado")
-      return [await captureNode(node)]
+      return [await blobToDataUrl(await captureNode(node))]
     }
     const nodes = Array.from(hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? [])
     const dataUrls: string[] = []
     for (const node of nodes) {
-      dataUrls.push(await captureNode(node as HTMLElement))
+      dataUrls.push(await blobToDataUrl(await captureNode(node as HTMLElement)))
     }
     return dataUrls
   }
