@@ -291,7 +291,8 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
         link.click()
         setTimeout(() => URL.revokeObjectURL(url), 60_000)
       }
-    } catch {
+    } catch (err) {
+      console.error("[download] falha ao capturar preview:", err)
       onToast("Não consegui gerar a imagem. Tente de novo.", "error")
     }
     setDownloading(false)
@@ -319,6 +320,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       onToast("Postado no Instagram Stories!")
       setShowPostModal(false)
     } catch (err) {
+      console.error("[instagram] falha ao capturar/publicar:", err)
       onToast(err instanceof Error ? `Falha ao publicar: ${err.message}` : "Falha ao publicar no Instagram", "error")
     }
     setPosting(false)
@@ -381,7 +383,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
 
       {/* Instância oculta do Story — só pra capturar a arte na hora de salvar a imagem */}
       {media.mediaType === "story" && (
-        <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: "-9999px", pointerEvents: "none" }} aria-hidden>
+        <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: "-9999px", width: "360px", pointerEvents: "none" }} aria-hidden>
           {isCollage ? <StoryCollagePreview vehicle={previewVehicle} /> : <StoryPreview vehicle={vehicle} />}
         </div>
       )}
