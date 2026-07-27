@@ -7,9 +7,18 @@ const SUPABASE_URL      = 'https://hukregsjrnvtkedywgih.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_H70Duzc6e3cUuz5IrBLwog_-jOyMpe2';
 
 const CATEGORY_TO_TYPE = {
-  Hatch: 'hatch', Sedan: 'sedan', SUV: 'suv', Pickup: 'pickup', Picape: 'pickup', Van: 'minivan',
-  'Conversível': 'esportivo', 'Coupé': 'esportivo', Moto: 'moto', 'Elétrico': 'outro', Outro: 'outro',
+  hatch: 'hatch', sedan: 'sedan', suv: 'suv', pickup: 'pickup', picape: 'pickup',
+  van: 'minivan', minivan: 'minivan', conversível: 'esportivo', coupe: 'esportivo',
+  coupé: 'esportivo', esportivo: 'esportivo', moto: 'moto', elétrico: 'outro',
+  eletrico: 'outro', outro: 'outro', hatchback: 'hatch', pickedup: 'pickup',
 };
+
+function resolveType(category) {
+  if (!category) return 'outro';
+  const key = category.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const normalized = category.trim().toLowerCase();
+  return CATEGORY_TO_TYPE[normalized] || CATEGORY_TO_TYPE[key] || 'outro';
+}
 
 const TYPE_VISUAL = {
   suv:       { emoji: '🚙', gradient: 'linear-gradient(135deg,#1e3a8a,#2563eb)' },
@@ -25,7 +34,7 @@ const TYPE_VISUAL = {
 const NEW_BADGE_DAYS = 14;
 
 function rowToSiteVehicle(row) {
-  const type   = CATEGORY_TO_TYPE[row.category] || 'outro';
+  const type   = resolveType(row.category);
   const visual = TYPE_VISUAL[type] || TYPE_VISUAL.outro;
   const isNew  = row.created_at &&
     (Date.now() - new Date(row.created_at).getTime()) < NEW_BADGE_DAYS * 24 * 60 * 60 * 1000;
