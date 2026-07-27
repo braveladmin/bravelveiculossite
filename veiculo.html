@@ -92,7 +92,7 @@
             <span><i class="fa-regular fa-clock"></i> Proposta na hora</span>
           </div>
 
-          <a href="index.html#estoque" class="vp-btn-estoque" style="animation:fadeUp 0.5s ease 0.82s both">
+          <a href="estoque.html" class="vp-btn-estoque" id="vpVerOutros" style="animation:fadeUp 0.5s ease 0.82s both">
             <i class="fa-solid fa-arrow-right"></i>
             Ver outros veículos
           </a>
@@ -768,15 +768,17 @@
       window.open(`https://wa.me/${BRAVEL_WPP}?text=${encodeURIComponent(msg)}`, '_blank');
     });
 
-    // ─── Botão voltar ao estoque ──────────────────────────────────
-    document.getElementById('vpBack').addEventListener('click', e => {
+    // ─── Botões de retorno ao estoque ────────────────────────────
+    function goBackToEstoque(e) {
       e.preventDefault();
       if (document.referrer && document.referrer.includes('estoque.html')) {
         history.back();
       } else {
         window.location.href = 'estoque.html';
       }
-    });
+    }
+    document.getElementById('vpBack').addEventListener('click', goBackToEstoque);
+    document.getElementById('vpVerOutros').addEventListener('click', goBackToEstoque);
 
     // ─── Animações de scroll ──────────────────────────────────────
     const animObserver = new IntersectionObserver(entries => {
