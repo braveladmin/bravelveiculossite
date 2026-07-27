@@ -846,12 +846,7 @@
       document.querySelectorAll('.clc-ampliar').forEach(btn => {
         btn.addEventListener('click', e => {
           e.stopPropagation();
-          const id = btn.dataset.id;
-          const vehicle = BRAVEL_VEHICLES.find(v => v.id === id);
-          if (vehicle?.photos?.length) {
-            const carousel = btn.closest('.clc-carousel');
-            openLightbox(vehicle.photos, parseInt(carousel?.dataset.idx || '0'));
-          }
+          window.location.href = `veiculo.html?id=${btn.dataset.id}`;
         });
       });
     }
