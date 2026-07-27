@@ -676,6 +676,16 @@
     let filteredList = BRAVEL_VEHICLES;
     let currentPage = 1;
 
+    function syncURL() {
+      const p = new URLSearchParams();
+      if (activeType  !== 'all') p.set('type',   activeType);
+      if (activePrice !== 'all') p.set('price',  activePrice);
+      if (searchTerm)            p.set('search', searchTerm);
+      if (currentPage > 1)       p.set('page',   String(currentPage));
+      const qs = p.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+    }
+
     function showPage() {
       const count = document.getElementById('resultsCount');
       count.innerHTML = filteredList.length
@@ -685,6 +695,7 @@
       const start = (currentPage - 1) * PAGE_SIZE;
       renderCars(filteredList.slice(start, start + PAGE_SIZE));
       renderPagination();
+      syncURL();
     }
 
     function goToPage(page) {
@@ -712,7 +723,7 @@
       });
     }
 
-    function applyFilters() {
+    function applyFilters(preservePage = false) {
       let r = BRAVEL_VEHICLES;
       if (searchTerm) {
         r = r.filter(v => `${v.brand} ${v.modelOnly} ${v.version || ''}`.toLowerCase().includes(searchTerm));
@@ -728,7 +739,7 @@
         r = r.filter(ranges[activePrice]);
       }
       filteredList = r;
-      currentPage = 1;
+      if (!preservePage) currentPage = 1;
       showPage();
     }
 
@@ -856,9 +867,27 @@
       document.getElementById('estoque-main').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
-    // ─── Init ────────────────────────────────────────────────────
-    filteredList = BRAVEL_VEHICLES;
-    showPage();
+    // ─── Init — restaura estado da URL ───────────────────────────
+    const urlParams = new URLSearchParams(location.search);
+    activeType  = urlParams.get('type')   || 'all';
+    activePrice = urlParams.get('price')  || 'all';
+    searchTerm  = (urlParams.get('search') || '').toLowerCase();
+    currentPage = parseInt(urlParams.get('page') || '1') || 1;
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      const { filter, value } = btn.dataset;
+      btn.classList.toggle('active',
+        (filter === 'type'  && value === activeType) ||
+        (filter === 'price' && value === activePrice)
+      );
+    });
+
+    if (searchTerm) {
+      searchInput.value = searchTerm;
+      searchClear.classList.remove('hidden');
+    }
+
+    applyFilters(true);
   })();
   </script>
 </body>
