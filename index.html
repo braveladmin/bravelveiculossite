@@ -639,24 +639,18 @@
         setTimeout(() => imgs[prevIdx].classList.remove('active'), 420);
         return;
       }
-      // Botão AMPLIAR
+      // Botão AMPLIAR → vai para a página do veículo
       const ampliarBtn = e.target.closest('.gallery-ampliar');
       if (ampliarBtn) {
-        const gallery = ampliarBtn.closest('.car-gallery');
-        const photos = JSON.parse(gallery.dataset.photos || '[]');
-        const imgs = [...gallery.querySelectorAll('.car-gallery-img')].filter(img => img.style.display !== 'none');
-        const curr = imgs.findIndex(img => img.classList.contains('active'));
-        openLightbox(photos, Math.max(0, curr));
+        const card = ampliarBtn.closest('.car-card');
+        if (card) window.location.href = `veiculo.html?id=${card.dataset.id}`;
         return;
       }
-      // Clique direto na foto ativa → lightbox
+      // Clique direto na foto → vai para a página do veículo
       const clickedImg = e.target.closest('.car-gallery-img');
-      if (clickedImg && clickedImg.classList.contains('active') && clickedImg.style.display !== 'none') {
-        const gallery = clickedImg.closest('.car-gallery');
-        const photos = JSON.parse(gallery.dataset.photos || '[]');
-        if (!photos.length) return;
-        const loadedImgs = [...gallery.querySelectorAll('.car-gallery-img')].filter(img => img.style.display !== 'none');
-        openLightbox(photos, Math.max(0, loadedImgs.indexOf(clickedImg)));
+      if (clickedImg) {
+        const card = clickedImg.closest('.car-card');
+        if (card) window.location.href = `veiculo.html?id=${card.dataset.id}`;
         return;
       }
       // Botão WhatsApp — deixa o <a> funcionar normalmente
