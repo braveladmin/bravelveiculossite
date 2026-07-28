@@ -20,7 +20,10 @@ import type { GeneratedMedia, MediaFolder, MediaType, Vehicle } from "@/lib/type
 
 // pixelRatio 4 sobre o preview gera resolução acima do mínimo 1080x1920 do
 // Instagram, então a arte sai nítida mesmo depois do Instagram comprimir/redimensionar.
-const EXPORT_OPTIONS = { pixelRatio: 4, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
+// cacheBust removido: as imagens são pré-convertidas a data URIs via proxy antes da
+// captura; cacheBust não tem efeito sobre data URIs e ativá-lo em outras URLs só
+// adiciona parâmetros que podem causar falha de fetch interno do html-to-image.
+const EXPORT_OPTIONS = { pixelRatio: 4, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
 
 const SURFACE = "#181818"
 const SURF2   = "#111111"
@@ -220,10 +223,9 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   const previewVehicle = collagePhotos?.length ? { ...vehicle, images: collagePhotos } : vehicle
 
   // ── Pré-fetch de imagens como base64 ao montar ───────────────────────────
-  // Busca todas as fotos que serão usadas no hidden preview e as converte para
-  // data URIs assim que o card aparece na tela. Quando o usuário clicar em
-  // "Salvar imagem", as imgs no DOM já são data URIs — sem CORS, sem race
-  // conditions, sem áreas pretas. Não bloqueia a UI (roda em background).
+  // Usa o proxy server-side (/admin/api/image-proxy) para buscar imagens do
+  // Supabase sem CORS. Como o proxy é same-origin, o fetch sempre funciona no
+  // mobile — sem canvas tainted, sem áreas pretas.
   const [preloadedImages, setPreloadedImages] = useState<string[] | null>(null)
 
   useEffect(() => {
@@ -235,7 +237,9 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
         sourceUrls.map(async (url): Promise<string> => {
           if (!url || url.startsWith("data:")) return url
           try {
-            const res = await fetch(url, { mode: "cors", signal: controller.signal })
+            // Proxy same-origin: evita bloqueio CORS em iOS/mobile
+            const proxied = `/admin/api/image-proxy?url=${encodeURIComponent(url)}`
+            const res = await fetch(proxied, { signal: controller.signal })
             if (!res.ok) return url
             const blob = await res.blob()
             return new Promise<string>((resolve) => {
@@ -279,7 +283,9 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       const src = img.getAttribute("src") ?? ""
       if (!src || src.startsWith("data:")) return
       try {
-        const res = await fetch(src, { mode: "cors" })
+        // URLs externas (Supabase) passam pelo proxy same-origin
+        const fetchUrl = src.startsWith("/") ? src : `/admin/api/image-proxy?url=${encodeURIComponent(src)}`
+        const res = await fetch(fetchUrl)
         if (!res.ok) return
         const blob = await res.blob()
         const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -431,9 +437,10 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
         </Button>
       </div>
 
-      {/* Hidden preview — sempre renderiza com data URIs pré-buscadas para captura sem CORS */}
+      {/* Hidden preview — clip-path esconde visualmente mas força o browser (inclusive iOS)
+          a renderizar as imgs; left: -9999px pode fazer iOS diferir o carregamento de imagens */}
       {media.mediaType === "story" && (
-        <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: "-9999px", width: "360px", pointerEvents: "none" }} aria-hidden>
+        <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: 0, width: "360px", pointerEvents: "none", clipPath: "inset(100%)", zIndex: -1 }} aria-hidden>
           {isCollage
             ? <StoryCollagePreview vehicle={preloadedPreviewVehicle} />
             : <StoryPreview vehicle={preloadedImages !== null ? { ...vehicle, images: preloadedImages } : vehicle} />
