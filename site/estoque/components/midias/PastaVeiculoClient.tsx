@@ -219,17 +219,31 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   const collagePhotos = isCollage ? (media.previewData?.collagePhotos as string[] | undefined) : undefined
   const previewVehicle = collagePhotos?.length ? { ...vehicle, images: collagePhotos } : vehicle
 
+  // Aguarda dois frames de animação — garante que o browser pintou os elementos
+  // atualizados antes de o html-to-image fazer a captura (crítico no mobile).
+  function waitFrames(n = 2): Promise<void> {
+    return new Promise(resolve => {
+      let count = 0
+      const tick = () => { if (++count >= n) resolve(); else requestAnimationFrame(tick) }
+      requestAnimationFrame(tick)
+    })
+  }
+
   // Pré-converte todas as <img> para base64 antes de capturar.
-  // Necessário pois o canvas bloqueia imagens cross-origin (fotos Supabase)
-  // e produziria áreas pretas sem esse passo. Retorna função de restauração.
+  // Sem isso, o canvas trata fotos Supabase (cross-origin) como tainted e
+  // produz áreas 100% pretas. No mobile o cache do browser está quase sempre
+  // vazio para imgs que estão num div off-screen, então nunca usamos
+  // "force-cache" — fazemos sempre um fetch real com CORS.
   async function inlineImagesAsBase64(node: HTMLElement): Promise<() => void> {
     const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
     const restores: Array<() => void> = []
+
     await Promise.all(imgs.map(async (img) => {
       const src = img.getAttribute("src") ?? ""
       if (!src || src.startsWith("data:")) return
       try {
-        const res  = await fetch(src, { mode: "cors", cache: "force-cache" })
+        const res = await fetch(src, { mode: "cors" })
+        if (!res.ok) return
         const blob = await res.blob()
         const dataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader()
@@ -237,22 +251,33 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
           reader.onerror = reject
           reader.readAsDataURL(blob)
         })
+        const prev = img.getAttribute("src")!
         img.setAttribute("src", dataUrl)
-        restores.push(() => img.setAttribute("src", src))
-        await new Promise<void>((resolve) => {
-          if (img.complete && img.naturalWidth > 0) { resolve(); return }
-          img.addEventListener("load",  resolve as () => void, { once: true })
-          img.addEventListener("error", resolve as () => void, { once: true })
-        })
-      } catch { /* mantém src original */ }
+        restores.push(() => img.setAttribute("src", prev))
+        // img.decode() espera o browser decodificar a imagem na memória —
+        // muito mais confiável que o evento "load" no iOS Safari.
+        try {
+          await img.decode()
+        } catch {
+          await new Promise<void>(resolve => {
+            if (img.complete && img.naturalWidth > 0) { resolve(); return }
+            img.addEventListener("load",  resolve as () => void, { once: true })
+            img.addEventListener("error", resolve as () => void, { once: true })
+          })
+        }
+      } catch { /* mantém src original se fetch falhar */ }
     }))
+
+    // Dois frames extras após inlining para garantir que o browser pintou tudo
+    await waitFrames(2)
     return () => restores.forEach(fn => fn())
   }
 
   async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineImagesAsBase64(node)
     try {
-      await toPng(node, EXPORT_OPTIONS) // aquece cache de fontes/recursos
+      await toPng(node, EXPORT_OPTIONS) // passagem de aquecimento (fontes, SVG masks)
+      await waitFrames(2)               // garante paint completo antes da captura final
       const blob = await toBlob(node, EXPORT_OPTIONS)
       if (!blob) throw new Error("Captura retornou vazia")
       return blob
