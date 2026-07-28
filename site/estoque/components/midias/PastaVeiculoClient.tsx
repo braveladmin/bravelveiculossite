@@ -219,8 +219,48 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   const collagePhotos = isCollage ? (media.previewData?.collagePhotos as string[] | undefined) : undefined
   const previewVehicle = collagePhotos?.length ? { ...vehicle, images: collagePhotos } : vehicle
 
-  // Aguarda dois frames de animação — garante que o browser pintou os elementos
-  // atualizados antes de o html-to-image fazer a captura (crítico no mobile).
+  // ── Pré-fetch de imagens como base64 ao montar ───────────────────────────
+  // Busca todas as fotos que serão usadas no hidden preview e as converte para
+  // data URIs assim que o card aparece na tela. Quando o usuário clicar em
+  // "Salvar imagem", as imgs no DOM já são data URIs — sem CORS, sem race
+  // conditions, sem áreas pretas. Não bloqueia a UI (roda em background).
+  const [preloadedImages, setPreloadedImages] = useState<string[] | null>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const sourceUrls = (isCollage && collagePhotos?.length ? collagePhotos : vehicle.images) ?? []
+
+    ;(async () => {
+      const results = await Promise.all(
+        sourceUrls.map(async (url): Promise<string> => {
+          if (!url || url.startsWith("data:")) return url
+          try {
+            const res = await fetch(url, { mode: "cors", signal: controller.signal })
+            if (!res.ok) return url
+            const blob = await res.blob()
+            return new Promise<string>((resolve) => {
+              const reader = new FileReader()
+              reader.onload  = () => resolve(reader.result as string)
+              reader.onerror = () => resolve(url)
+              reader.readAsDataURL(blob)
+            })
+          } catch { return url }
+        })
+      )
+      if (!controller.signal.aborted) setPreloadedImages(results)
+    })()
+
+    return () => controller.abort()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [media.id])
+
+  // Vehicle com imagens já em base64 — usado exclusivamente no hidden preview
+  const preloadedPreviewVehicle = preloadedImages !== null
+    ? { ...previewVehicle, images: preloadedImages }
+    : previewVehicle
+
+  // ── Helpers de captura ────────────────────────────────────────────────────
+
   function waitFrames(n = 2): Promise<void> {
     return new Promise(resolve => {
       let count = 0
@@ -229,15 +269,12 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     })
   }
 
-  // Pré-converte todas as <img> para base64 antes de capturar.
-  // Sem isso, o canvas trata fotos Supabase (cross-origin) como tainted e
-  // produz áreas 100% pretas. No mobile o cache do browser está quase sempre
-  // vazio para imgs que estão num div off-screen, então nunca usamos
-  // "force-cache" — fazemos sempre um fetch real com CORS.
-  async function inlineImagesAsBase64(node: HTMLElement): Promise<() => void> {
+  // Segurança extra: converte qualquer <img> que ainda não seja data URI.
+  // Com o pré-fetch acima, na prática isso só age sobre o logo da loja
+  // (/admin/bravel-logo.png, same-origin) e é quasi-instantâneo.
+  async function inlineRemainingImages(node: HTMLElement): Promise<() => void> {
     const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
     const restores: Array<() => void> = []
-
     await Promise.all(imgs.map(async (img) => {
       const src = img.getAttribute("src") ?? ""
       if (!src || src.startsWith("data:")) return
@@ -254,30 +291,18 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
         const prev = img.getAttribute("src")!
         img.setAttribute("src", dataUrl)
         restores.push(() => img.setAttribute("src", prev))
-        // img.decode() espera o browser decodificar a imagem na memória —
-        // muito mais confiável que o evento "load" no iOS Safari.
-        try {
-          await img.decode()
-        } catch {
-          await new Promise<void>(resolve => {
-            if (img.complete && img.naturalWidth > 0) { resolve(); return }
-            img.addEventListener("load",  resolve as () => void, { once: true })
-            img.addEventListener("error", resolve as () => void, { once: true })
-          })
-        }
-      } catch { /* mantém src original se fetch falhar */ }
+        try { await img.decode() } catch { /* ok */ }
+      } catch { /* mantém src original */ }
     }))
-
-    // Dois frames extras após inlining para garantir que o browser pintou tudo
     await waitFrames(2)
     return () => restores.forEach(fn => fn())
   }
 
   async function captureNode(node: HTMLElement): Promise<Blob> {
-    const cleanup = await inlineImagesAsBase64(node)
+    const cleanup = await inlineRemainingImages(node)
     try {
-      await toPng(node, EXPORT_OPTIONS) // passagem de aquecimento (fontes, SVG masks)
-      await waitFrames(2)               // garante paint completo antes da captura final
+      await toPng(node, EXPORT_OPTIONS) // aquecimento: carrega fontes e SVG masks
+      await waitFrames(2)
       const blob = await toBlob(node, EXPORT_OPTIONS)
       if (!blob) throw new Error("Captura retornou vazia")
       return blob
@@ -406,10 +431,13 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
         </Button>
       </div>
 
-      {/* Instância oculta do Story — só pra capturar a arte na hora de salvar a imagem */}
+      {/* Hidden preview — sempre renderiza com data URIs pré-buscadas para captura sem CORS */}
       {media.mediaType === "story" && (
         <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: "-9999px", width: "360px", pointerEvents: "none" }} aria-hidden>
-          {isCollage ? <StoryCollagePreview vehicle={previewVehicle} /> : <StoryPreview vehicle={vehicle} />}
+          {isCollage
+            ? <StoryCollagePreview vehicle={preloadedPreviewVehicle} />
+            : <StoryPreview vehicle={preloadedImages !== null ? { ...vehicle, images: preloadedImages } : vehicle} />
+          }
         </div>
       )}
 
