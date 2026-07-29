@@ -308,6 +308,21 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     })
 
     const cleanup = await inlineRemainingImages(node)
+
+    // Aguarda todas as imgs confirmarem load no DOM (browser carrega eagerly
+    // com opacity > 0; sem isso html2canvas pode capturar antes do decode)
+    const domImgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
+    await Promise.race([
+      Promise.all(domImgs.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve()
+        return new Promise<void>(resolve => {
+          img.addEventListener("load",  () => resolve(), { once: true })
+          img.addEventListener("error", () => resolve(), { once: true })
+        })
+      })),
+      new Promise<void>(resolve => setTimeout(resolve, 10_000)),
+    ])
+
     try {
       const rect = node.getBoundingClientRect()
       const canvas = await html2canvas(node, {
@@ -450,10 +465,12 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
         </Button>
       </div>
 
-      {/* Hidden preview — clip-path esconde visualmente mas força o browser (inclusive iOS)
-          a renderizar as imgs; left: -9999px pode fazer iOS diferir o carregamento de imagens */}
+      {/* Hidden preview — opacity:0.001 em vez de clip-path: iOS não carrega imagens
+          para elementos totalmente clipados, mas carrega para opacity>0. O valor 0.001
+          é imperceptível ao usuário. getBoundingClientRect() também retorna 0 dentro de
+          clip-path no iOS, quebrando o cálculo de altura flex-1 antes do html2canvas. */}
       {media.mediaType === "story" && (
-        <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: 0, width: "360px", pointerEvents: "none", clipPath: "inset(100%)", zIndex: -1 }} aria-hidden>
+        <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: 0, width: "360px", pointerEvents: "none", opacity: 0.001, zIndex: -1 }} aria-hidden>
           {isCollage
             ? <StoryCollagePreview vehicle={preloadedPreviewVehicle} />
             : <StoryPreview vehicle={preloadedImages !== null ? { ...vehicle, images: preloadedImages } : vehicle} />
