@@ -297,11 +297,24 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   }
 
   async function captureNode(node: HTMLElement): Promise<Blob> {
+    // html2canvas resolve height:100% de filhos absolutos usando o valor CSS do pai,
+    // não o bounding rect. Em flex-1, o CSS height é "auto" → resolve como 0 → img preta.
+    // Fix: stampar altura explícita em px em todos os flex-1 antes de capturar.
+    const flexEls = Array.from(node.querySelectorAll<HTMLElement>(".flex-1"))
+    const prevHeights = flexEls.map(el => el.style.height)
+    flexEls.forEach(el => {
+      const h = el.getBoundingClientRect().height
+      if (h > 0) el.style.height = `${h}px`
+    })
+
     const cleanup = await inlineRemainingImages(node)
     try {
+      const rect = node.getBoundingClientRect()
       const canvas = await html2canvas(node, {
         scale: 4,
-        useCORS: false,        // imagens já são data URIs após inlineRemainingImages
+        width: Math.round(rect.width) || 360,
+        height: Math.round(rect.height) || Math.round(360 * 16 / 9),
+        useCORS: false,
         allowTaint: false,
         backgroundColor: "#0a0a0a",
         logging: false,
@@ -313,6 +326,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       return blob
     } finally {
       cleanup()
+      flexEls.forEach((el, i) => { el.style.height = prevHeights[i] })
     }
   }
 
