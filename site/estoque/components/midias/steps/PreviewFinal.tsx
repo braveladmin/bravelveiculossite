@@ -68,51 +68,38 @@ export function PreviewFinal({
     ? vehicle.images
     : [vehicle.imageUrl || PLACEHOLDER_IMAGE]
 
-  // Converte todas as <img> do nó para data URIs via proxy server-side.
-  // O proxy é same-origin — sem CORS, sem canvas tainted, sem área preta no iOS.
+  // Converte todas as <img> do nó para Blob URLs via proxy server-side.
+  // Blob URLs são same-origin e binários — sem overhead de base64, sem falha de
+  // img.decode() por memória no iOS (causa das fotos pretas com data URIs grandes).
   async function inlineImagesAsBase64(node: HTMLElement): Promise<() => void> {
     const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
     const restores: Array<() => void> = []
+    const blobUrls: string[] = []
     await Promise.all(imgs.map(async (img) => {
       const src = img.getAttribute("src") ?? ""
-      if (!src || src.startsWith("data:")) return
+      if (!src || src.startsWith("data:") || src.startsWith("blob:")) return
       try {
-        // URLs relativas (logo same-origin) usadas diretamente; externas passam pelo proxy
         const fetchUrl = src.startsWith("/") ? src : `/admin/api/image-proxy?url=${encodeURIComponent(src)}`
-        const res  = await fetch(fetchUrl)
+        const res = await fetch(fetchUrl)
         if (!res.ok) return
         const blob = await res.blob()
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload  = () => resolve(reader.result as string)
-          reader.onerror = reject
-          reader.readAsDataURL(blob)
-        })
+        const blobUrl = URL.createObjectURL(blob)
+        blobUrls.push(blobUrl)
         const prev = img.getAttribute("src")!
-        img.setAttribute("src", dataUrl)
-        restores.push(() => img.setAttribute("src", prev))
-        try { await img.decode() } catch { /* ok */ }
+        img.src = blobUrl
+        restores.push(() => { img.src = prev })
+        if (!img.complete || img.naturalWidth === 0) {
+          await new Promise<void>(resolve => {
+            img.addEventListener("load", () => resolve(), { once: true })
+            img.addEventListener("error", () => resolve(), { once: true })
+          })
+        }
       } catch { /* mantém src original */ }
     }))
-    return () => restores.forEach(fn => fn())
-  }
-
-  // Decodifica todas as imgs e faz upload de textura na GPU antes de capturar.
-  // img.decode() coloca a imagem na CPU; drawImage() num canvas 2×2 faz o upload para
-  // GPU — essencial no iOS/Safari que não renderiza imgs em SVG foreignObject sem
-  // textura na GPU, mesmo com data URIs corretos.
-  async function waitForImageDecode(node: HTMLElement): Promise<void> {
-    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-    const offscreen = document.createElement("canvas")
-    offscreen.width = 2
-    offscreen.height = 2
-    const ctx = offscreen.getContext("2d")
-    await Promise.all(imgs.map(async img => {
-      try {
-        await img.decode()
-        if (ctx) ctx.drawImage(img, 0, 0, 2, 2)
-      } catch { /* ok */ }
-    }))
+    return () => {
+      restores.forEach(fn => fn())
+      blobUrls.forEach(u => URL.revokeObjectURL(u))
+    }
   }
 
   // No iOS o atributo "download" é ignorado pelo Safari — usa Web Share API
@@ -137,7 +124,6 @@ export function PreviewFinal({
   async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineImagesAsBase64(node)
     try {
-      await waitForImageDecode(node)
       const canvas = await html2canvas(node, {
         scale: 4,
         useCORS: false,        // imagens já são data URIs após inlineImagesAsBase64

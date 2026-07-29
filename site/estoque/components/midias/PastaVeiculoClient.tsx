@@ -227,30 +227,30 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   useEffect(() => {
     const controller = new AbortController()
     const sourceUrls = (isCollage && collagePhotos?.length ? collagePhotos : vehicle.images) ?? []
+    const blobUrls: string[] = []
 
     ;(async () => {
       const results = await Promise.all(
         sourceUrls.map(async (url): Promise<string> => {
-          if (!url || url.startsWith("data:")) return url
+          if (!url || url.startsWith("data:") || url.startsWith("blob:")) return url
           try {
-            // Proxy same-origin: evita bloqueio CORS em iOS/mobile
             const proxied = `/admin/api/image-proxy?url=${encodeURIComponent(url)}`
             const res = await fetch(proxied, { signal: controller.signal })
             if (!res.ok) return url
             const blob = await res.blob()
-            return new Promise<string>((resolve) => {
-              const reader = new FileReader()
-              reader.onload  = () => resolve(reader.result as string)
-              reader.onerror = () => resolve(url)
-              reader.readAsDataURL(blob)
-            })
+            const blobUrl = URL.createObjectURL(blob)
+            blobUrls.push(blobUrl)
+            return blobUrl
           } catch { return url }
         })
       )
       if (!controller.signal.aborted) setPreloadedImages(results)
     })()
 
-    return () => controller.abort()
+    return () => {
+      controller.abort()
+      blobUrls.forEach(u => URL.revokeObjectURL(u))
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [media.id])
 
@@ -261,67 +261,44 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
 
   // ── Helpers de captura ────────────────────────────────────────────────────
 
-  function waitFrames(n = 2): Promise<void> {
-    return new Promise(resolve => {
-      let count = 0
-      const tick = () => { if (++count >= n) resolve(); else requestAnimationFrame(tick) }
-      requestAnimationFrame(tick)
-    })
-  }
-
-  // Segurança extra: converte qualquer <img> que ainda não seja data URI.
-  // Com o pré-fetch acima, na prática isso só age sobre o logo da loja
-  // (/admin/bravel-logo.png, same-origin) e é quasi-instantâneo.
+  // Converte qualquer <img> que ainda não seja Blob URL via proxy server-side.
+  // Blob URLs são same-origin e binários — sem overhead de base64, sem falha de
+  // img.decode() por memória no iOS (causa das fotos pretas com data URIs grandes).
+  // Com o pré-fetch do useEffect, na prática só age sobre o logo (/admin/bravel-logo.png).
   async function inlineRemainingImages(node: HTMLElement): Promise<() => void> {
     const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
     const restores: Array<() => void> = []
+    const blobUrls: string[] = []
     await Promise.all(imgs.map(async (img) => {
       const src = img.getAttribute("src") ?? ""
-      if (!src || src.startsWith("data:")) return
+      if (!src || src.startsWith("data:") || src.startsWith("blob:")) return
       try {
-        // URLs externas (Supabase) passam pelo proxy same-origin
         const fetchUrl = src.startsWith("/") ? src : `/admin/api/image-proxy?url=${encodeURIComponent(src)}`
         const res = await fetch(fetchUrl)
         if (!res.ok) return
         const blob = await res.blob()
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onload  = () => resolve(reader.result as string)
-          reader.onerror = reject
-          reader.readAsDataURL(blob)
-        })
+        const blobUrl = URL.createObjectURL(blob)
+        blobUrls.push(blobUrl)
         const prev = img.getAttribute("src")!
-        img.setAttribute("src", dataUrl)
-        restores.push(() => img.setAttribute("src", prev))
-        try { await img.decode() } catch { /* ok */ }
+        img.src = blobUrl
+        restores.push(() => { img.src = prev })
+        if (!img.complete || img.naturalWidth === 0) {
+          await new Promise<void>(resolve => {
+            img.addEventListener("load", () => resolve(), { once: true })
+            img.addEventListener("error", () => resolve(), { once: true })
+          })
+        }
       } catch { /* mantém src original */ }
     }))
-    await waitFrames(2)
-    return () => restores.forEach(fn => fn())
-  }
-
-  // Decodifica todas as imgs do nó e força upload de textura na GPU antes de capturar.
-  // img.decode() coloca a imagem na CPU; drawImage() num canvas 2×2 faz o upload para
-  // GPU — essencial no iOS/Safari, que não renderiza imgs em SVG foreignObject sem textura
-  // já carregada na GPU. Sem isso o collage captura preto mesmo com data URIs corretos.
-  async function waitForImageDecode(node: HTMLElement): Promise<void> {
-    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-    const offscreen = document.createElement("canvas")
-    offscreen.width = 2
-    offscreen.height = 2
-    const ctx = offscreen.getContext("2d")
-    await Promise.all(imgs.map(async img => {
-      try {
-        await img.decode()
-        if (ctx) ctx.drawImage(img, 0, 0, 2, 2)
-      } catch { /* ok — falha silenciosa não trava a captura */ }
-    }))
+    return () => {
+      restores.forEach(fn => fn())
+      blobUrls.forEach(u => URL.revokeObjectURL(u))
+    }
   }
 
   async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineRemainingImages(node)
     try {
-      await waitForImageDecode(node)
       const canvas = await html2canvas(node, {
         scale: 4,
         useCORS: false,        // imagens já são data URIs após inlineRemainingImages
