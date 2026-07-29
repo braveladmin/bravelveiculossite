@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
-// Hostname do Supabase desse projeto — só imagens daqui são proxied
-const SUPABASE_HOST = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).hostname
+// IPs privados / locais — bloqueados para evitar SSRF
+const PRIVATE_HOST = /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/
 
 export async function GET(req: NextRequest) {
   const rawUrl = req.nextUrl.searchParams.get("url")
@@ -14,8 +14,11 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Invalid URL", { status: 400 })
   }
 
-  // Bloqueia qualquer URL que não seja do nosso Supabase (previne SSRF)
-  if (parsed.hostname !== SUPABASE_HOST) {
+  // Só HTTPS externo — bloqueia protocolos locais e IPs privados (SSRF básico)
+  if (parsed.protocol !== "https:") {
+    return new NextResponse("Forbidden", { status: 403 })
+  }
+  if (PRIVATE_HOST.test(parsed.hostname)) {
     return new NextResponse("Forbidden", { status: 403 })
   }
 
@@ -23,10 +26,16 @@ export async function GET(req: NextRequest) {
     const res = await fetch(rawUrl)
     if (!res.ok) return new NextResponse("Upstream error", { status: res.status })
 
+    const ct = res.headers.get("Content-Type") ?? ""
+    // Só serve imagens — evita vazar conteúdo arbitrário de terceiros
+    if (!ct.startsWith("image/") && !ct.startsWith("application/octet-stream")) {
+      return new NextResponse("Not an image", { status: 415 })
+    }
+
     const buffer = await res.arrayBuffer()
     return new NextResponse(buffer, {
       headers: {
-        "Content-Type": res.headers.get("Content-Type") ?? "image/jpeg",
+        "Content-Type": ct,
         "Cache-Control": "public, max-age=86400, immutable",
       },
     })

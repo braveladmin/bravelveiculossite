@@ -304,12 +304,22 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     return () => restores.forEach(fn => fn())
   }
 
-  // Aguarda o browser decodificar todas as imagens do nó antes de capturar.
-  // Essencial para collage (3 data URIs grandes): sem isso o iOS não termina de
-  // decodificar as imgs a tempo e o canvas captura preto.
+  // Decodifica todas as imgs do nó e força upload de textura na GPU antes de capturar.
+  // img.decode() coloca a imagem na CPU; drawImage() num canvas 2×2 faz o upload para
+  // GPU — essencial no iOS/Safari, que não renderiza imgs em SVG foreignObject sem textura
+  // já carregada na GPU. Sem isso o collage captura preto mesmo com data URIs corretos.
   async function waitForImageDecode(node: HTMLElement): Promise<void> {
     const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-    await Promise.all(imgs.map(img => img.decode().catch(() => undefined)))
+    const offscreen = document.createElement("canvas")
+    offscreen.width = 2
+    offscreen.height = 2
+    const ctx = offscreen.getContext("2d")
+    await Promise.all(imgs.map(async img => {
+      try {
+        await img.decode()
+        if (ctx) ctx.drawImage(img, 0, 0, 2, 2)
+      } catch { /* ok — falha silenciosa não trava a captura */ }
+    }))
   }
 
   async function captureNode(node: HTMLElement): Promise<Blob> {
