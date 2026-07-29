@@ -24,12 +24,21 @@ const SUCCESS = "#25d366"
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1503736334956-4c8f8e4733e7?w=800&q=80&auto=format&fit=crop"
 
-// pixelRatio 4 sobre o quadro 360x640 do preview gera 1440x2560 — acima do mínimo
-// 1080x1920 do Instagram, então a arte sai nítida mesmo depois do Instagram comprimir/redimensionar.
-const EXPORT_OPTIONS = { pixelRatio: 4, cacheBust: true, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
+// cacheBust removido: as imagens são pré-convertidas para data URIs via proxy antes
+// da captura — cacheBust forçaria re-fetch cross-origin interno do html-to-image e
+// quebraria imagens em iOS/Safari (canvas tainted = área preta).
+const EXPORT_OPTIONS = { pixelRatio: 4, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
 
 async function waitForFonts() {
   if (typeof document !== "undefined" && document.fonts) await document.fonts.ready
+}
+
+function waitFrames(n = 2): Promise<void> {
+  return new Promise(resolve => {
+    let count = 0
+    const tick = () => { if (++count >= n) resolve(); else requestAnimationFrame(tick) }
+    requestAnimationFrame(tick)
+  })
 }
 
 type Props = {
@@ -69,9 +78,8 @@ export function PreviewFinal({
     ? vehicle.images
     : [vehicle.imageUrl || PLACEHOLDER_IMAGE]
 
-  // Pré-converte todas as <img> do elemento para base64 antes de capturar.
-  // Necessário no iOS/Safari: o canvas bloqueia imagens cross-origin e
-  // produz áreas pretas sem esse passo. Retorna função de restauração.
+  // Converte todas as <img> do nó para data URIs via proxy server-side.
+  // O proxy é same-origin — sem CORS, sem canvas tainted, sem área preta no iOS.
   async function inlineImagesAsBase64(node: HTMLElement): Promise<() => void> {
     const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
     const restores: Array<() => void> = []
@@ -79,7 +87,10 @@ export function PreviewFinal({
       const src = img.getAttribute("src") ?? ""
       if (!src || src.startsWith("data:")) return
       try {
-        const res  = await fetch(src, { mode: "cors", cache: "force-cache" })
+        // URLs relativas (logo same-origin) usadas diretamente; externas passam pelo proxy
+        const fetchUrl = src.startsWith("/") ? src : `/admin/api/image-proxy?url=${encodeURIComponent(src)}`
+        const res  = await fetch(fetchUrl)
+        if (!res.ok) return
         const blob = await res.blob()
         const dataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader()
@@ -87,16 +98,31 @@ export function PreviewFinal({
           reader.onerror = reject
           reader.readAsDataURL(blob)
         })
+        const prev = img.getAttribute("src")!
         img.setAttribute("src", dataUrl)
-        restores.push(() => img.setAttribute("src", src))
-        await new Promise<void>((resolve) => {
-          if (img.complete && img.naturalWidth > 0) { resolve(); return }
-          img.addEventListener("load",  resolve as () => void, { once: true })
-          img.addEventListener("error", resolve as () => void, { once: true })
-        })
+        restores.push(() => img.setAttribute("src", prev))
+        try { await img.decode() } catch { /* ok */ }
       } catch { /* mantém src original */ }
     }))
     return () => restores.forEach(fn => fn())
+  }
+
+  // Decodifica todas as imgs e faz upload de textura na GPU antes de capturar.
+  // img.decode() coloca a imagem na CPU; drawImage() num canvas 2×2 faz o upload para
+  // GPU — essencial no iOS/Safari que não renderiza imgs em SVG foreignObject sem
+  // textura na GPU, mesmo com data URIs corretos.
+  async function waitForImageDecode(node: HTMLElement): Promise<void> {
+    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
+    const offscreen = document.createElement("canvas")
+    offscreen.width = 2
+    offscreen.height = 2
+    const ctx = offscreen.getContext("2d")
+    await Promise.all(imgs.map(async img => {
+      try {
+        await img.decode()
+        if (ctx) ctx.drawImage(img, 0, 0, 2, 2)
+      } catch { /* ok */ }
+    }))
   }
 
   // No iOS o atributo "download" é ignorado pelo Safari — usa Web Share API
@@ -117,13 +143,13 @@ export function PreviewFinal({
     }
   }
 
-  // Captura o nó como Blob diretamente (sem passar por data URL intermediário).
-  // O toPng de aquecimento cacheia fontes/recursos; o toBlob gera o arquivo final.
-  // Usar toBlob evita o problema de data URLs de 20MB+ corrompendo em alguns browsers.
+  // Captura o nó como Blob: inline → decode GPU → warmup → capture.
   async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineImagesAsBase64(node)
     try {
-      await toPng(node, EXPORT_OPTIONS)
+      await waitForImageDecode(node)
+      await toPng(node, EXPORT_OPTIONS) // aquecimento: carrega fontes e SVG masks
+      await waitFrames(2)
       const blob = await toBlob(node, EXPORT_OPTIONS)
       if (!blob) throw new Error("Captura retornou vazia")
       return blob
