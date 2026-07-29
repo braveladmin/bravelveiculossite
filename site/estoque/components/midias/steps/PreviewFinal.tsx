@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/Switch"
 import { ConfirmModal } from "@/components/ui/ConfirmModal"
 import { createClient } from "@/lib/supabase/client"
 import { postToInstagram } from "@/lib/actions/instagram"
+import { captureCollage as captureCollageManual } from "@/lib/midias/captureCollage"
 import type { MediaType, Vehicle } from "@/lib/types"
 
 const SURF2  = "#111111"
@@ -146,53 +147,6 @@ export function PreviewFinal({
     }
   }
 
-  // Colagem de 3 fotos: captura cada banda individualmente (1 imagem por vez,
-  // igual ao story de 1 foto que funciona no iOS) e costura num canvas final.
-  // Evita o carregamento simultâneo de 3 imagens que esgota memória no iOS.
-  async function captureCollage(previewEl: HTMLElement): Promise<Blob> {
-    const scale = 4
-    const previewRect = previewEl.getBoundingClientRect()
-    const totalW = Math.round(previewRect.width)  || 360
-    const totalH = Math.round(previewRect.height) || Math.round(360 * 16 / 9)
-
-    const finalCanvas = document.createElement("canvas")
-    finalCanvas.width  = totalW * scale
-    finalCanvas.height = totalH * scale
-    const ctx = finalCanvas.getContext("2d")!
-    ctx.fillStyle = "#0a0a0a"
-    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height)
-
-    const bands = Array.from(previewEl.querySelectorAll<HTMLElement>(".absolute.overflow-hidden"))
-
-    for (const band of bands) {
-      const cleanup = await inlineImagesAsBase64(band)
-      try {
-        const bandRect = band.getBoundingClientRect()
-        const bandCanvas = await html2canvas(band, {
-          scale,
-          width:  Math.round(bandRect.width),
-          height: Math.round(bandRect.height),
-          useCORS: false,
-          allowTaint: false,
-          backgroundColor: "#0a0a0a",
-          logging: false,
-          imageTimeout: 30000,
-        })
-        const offsetY = Math.round(bandRect.top - previewRect.top) * scale
-        ctx.drawImage(bandCanvas, 0, offsetY)
-      } finally {
-        cleanup()
-      }
-    }
-
-    return new Promise<Blob>((resolve, reject) =>
-      finalCanvas.toBlob(
-        b => b ? resolve(b) : reject(new Error("Captura retornou vazia")),
-        "image/png"
-      )
-    )
-  }
-
   async function handleDownload() {
     setDownloading(true)
     setDownloadErr(null)
@@ -212,7 +166,7 @@ export function PreviewFinal({
       } else {
         const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
         if (!node) return
-        const blob = storyCollage ? await captureCollage(node) : await captureNode(node)
+        const blob = storyCollage ? await captureCollageManual(vehicle) : await captureNode(node)
         await triggerDownload(blob, `${mediaType}-${slug}.png`)
       }
     } catch {
@@ -236,7 +190,7 @@ export function PreviewFinal({
     if (mediaType === "story") {
       const node = previewWrapRef.current?.querySelector(".media-preview") as HTMLElement | null
       if (!node) throw new Error("Preview do Story não encontrado")
-      return [await blobToDataUrl(storyCollage ? await captureCollage(node) : await captureNode(node))]
+      return [await blobToDataUrl(storyCollage ? await captureCollageManual(vehicle) : await captureNode(node))]
     }
     const nodes = Array.from(hiddenSlidesRef.current?.querySelectorAll(".media-preview") ?? [])
     const dataUrls: string[] = []
