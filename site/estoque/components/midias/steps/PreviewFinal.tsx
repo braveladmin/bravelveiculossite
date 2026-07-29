@@ -86,37 +86,64 @@ export function PreviewFinal({
     }
   }
 
-  // Captura o nó como Blob usando html2canvas (Canvas 2D, sem SVG foreignObject).
-  // useCORS: true — Supabase Storage público retorna Access-Control-Allow-Origin: *,
-  // então html2canvas carrega as fotos com crossOrigin="anonymous" sem canvas taint.
-  async function captureNode(node: HTMLElement): Promise<Blob> {
-    // Aguarda todas as imagens carregarem antes de capturar
+  // Converte todas as <img> do nó para Blob URLs via proxy server-side.
+  // O proxy é same-origin → sem CORS, sem canvas taint. Blob URLs carregam da memória
+  // instantaneamente após a criação, então html2canvas recebe srcs já prontos.
+  async function inlineImagesAsBase64(node: HTMLElement): Promise<() => void> {
     const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-    await Promise.race([
-      Promise.all(imgs.map(img => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve()
-        return new Promise<void>(resolve => {
-          img.addEventListener("load",  () => resolve(), { once: true })
-          img.addEventListener("error", () => resolve(), { once: true })
-        })
-      })),
-      new Promise<void>(resolve => setTimeout(resolve, 15_000)),
-    ])
+    const restores: Array<() => void> = []
+    const blobUrls: string[] = []
+    await Promise.all(imgs.map(async (img) => {
+      const src = img.getAttribute("src") ?? ""
+      if (!src || src.startsWith("data:") || src.startsWith("blob:")) return
+      try {
+        const fetchUrl = src.startsWith("/")
+          ? src
+          : `/admin/api/image-proxy?url=${encodeURIComponent(src)}`
+        const res = await fetch(fetchUrl)
+        if (!res.ok) return
+        const blob = await res.blob()
+        const blobUrl = URL.createObjectURL(blob)
+        blobUrls.push(blobUrl)
+        const prev = img.getAttribute("src")!
+        img.src = blobUrl
+        restores.push(() => { img.src = prev })
+        if (!img.complete || img.naturalWidth === 0) {
+          await new Promise<void>(resolve => {
+            img.addEventListener("load",  () => resolve(), { once: true })
+            img.addEventListener("error", () => resolve(), { once: true })
+          })
+        }
+      } catch { /* mantém src original */ }
+    }))
+    return () => {
+      restores.forEach(fn => fn())
+      blobUrls.forEach(u => URL.revokeObjectURL(u))
+    }
+  }
 
-    const rect = node.getBoundingClientRect()
-    const canvas = await html2canvas(node, {
-      scale: 4,
-      width:  Math.round(rect.width)  || 360,
-      height: Math.round(rect.height) || Math.round(360 * 16 / 9),
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: "#0a0a0a",
-      logging: false,
-      imageTimeout: 30000,
-    })
-    return new Promise<Blob>((resolve, reject) =>
-      canvas.toBlob(b => b ? resolve(b) : reject(new Error("Captura retornou vazia")), "image/png")
-    )
+  // Captura o nó como Blob usando html2canvas (Canvas 2D, sem SVG foreignObject).
+  // useCORS: false — todas as imgs são convertidas para Blob URLs (same-origin) antes.
+  async function captureNode(node: HTMLElement): Promise<Blob> {
+    const cleanup = await inlineImagesAsBase64(node)
+    try {
+      const rect = node.getBoundingClientRect()
+      const canvas = await html2canvas(node, {
+        scale: 4,
+        width:  Math.round(rect.width)  || 360,
+        height: Math.round(rect.height) || Math.round(360 * 16 / 9),
+        useCORS: false,
+        allowTaint: false,
+        backgroundColor: "#0a0a0a",
+        logging: false,
+        imageTimeout: 30000,
+      })
+      return new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Captura retornou vazia")), "image/png")
+      )
+    } finally {
+      cleanup()
+    }
   }
 
   async function handleDownload() {
