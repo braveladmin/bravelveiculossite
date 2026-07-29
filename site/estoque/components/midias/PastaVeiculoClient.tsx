@@ -281,6 +281,54 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     }
   }
 
+  // Para a colagem de 3 fotos no iOS, carregar 3 imagens ao mesmo tempo esgota a
+  // memória e o html2canvas desenha preto. Solução: capturar cada banda com 1 foto
+  // de cada vez (igual ao story de 1 foto que funciona) e costurar num canvas final.
+  async function captureCollage(previewEl: HTMLElement): Promise<Blob> {
+    const scale = 4
+    const previewRect = previewEl.getBoundingClientRect()
+    const totalW = Math.round(previewRect.width)  || 360
+    const totalH = Math.round(previewRect.height) || Math.round(360 * 16 / 9)
+
+    const finalCanvas = document.createElement("canvas")
+    finalCanvas.width  = totalW * scale
+    finalCanvas.height = totalH * scale
+    const ctx = finalCanvas.getContext("2d")!
+    ctx.fillStyle = "#0a0a0a"
+    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height)
+
+    // Cada Band tem class "absolute overflow-hidden" — os 3 únicos elementos assim
+    const bands = Array.from(previewEl.querySelectorAll<HTMLElement>(".absolute.overflow-hidden"))
+
+    for (const band of bands) {
+      const cleanup = await inlineRemainingImages(band)
+      try {
+        const bandRect = band.getBoundingClientRect()
+        const bandCanvas = await html2canvas(band, {
+          scale,
+          width:  Math.round(bandRect.width),
+          height: Math.round(bandRect.height),
+          useCORS: false,
+          allowTaint: false,
+          backgroundColor: "#0a0a0a",
+          logging: false,
+          imageTimeout: 30000,
+        })
+        const offsetY = Math.round(bandRect.top - previewRect.top) * scale
+        ctx.drawImage(bandCanvas, 0, offsetY)
+      } finally {
+        cleanup()
+      }
+    }
+
+    return new Promise<Blob>((resolve, reject) =>
+      finalCanvas.toBlob(
+        b => b ? resolve(b) : reject(new Error("Captura retornou vazia")),
+        "image/png"
+      )
+    )
+  }
+
   // Aguarda todos os <img> do preview do modal confirmarem load.
   // Chamado depois de abrir o modal — modal visível = browser carrega imagens eagerly.
   async function waitForModalImages(): Promise<void> {
@@ -318,7 +366,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       await waitForModalImages()
       const previewEl = captureModalRef.current?.querySelector(".media-preview") as HTMLElement | null
       if (!previewEl) throw new Error("Preview não encontrado")
-      const blob     = await captureNode(previewEl)
+      const blob     = isCollage ? await captureCollage(previewEl) : await captureNode(previewEl)
       setShowPreviewModal(false)
       const slug     = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       const filename = `${media.mediaType}-${slug}.png`
@@ -353,7 +401,7 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       await waitForModalImages()
       const previewEl = captureModalRef.current?.querySelector(".media-preview") as HTMLElement | null
       if (!previewEl) throw new Error("Preview não encontrado")
-      const blob = await captureNode(previewEl)
+      const blob = isCollage ? await captureCollage(previewEl) : await captureNode(previewEl)
       setShowPreviewModal(false)
 
       const supabase = createClient()
