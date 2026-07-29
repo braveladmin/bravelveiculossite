@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { toPng, toBlob } from "html-to-image"
+import html2canvas from "html2canvas"
 import JSZip from "jszip"
 import { Button } from "@heroui/react"
 import { CheckCircle2, Download, Loader2, Send, Sparkles } from "lucide-react"
@@ -24,21 +24,11 @@ const SUCCESS = "#25d366"
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1503736334956-4c8f8e4733e7?w=800&q=80&auto=format&fit=crop"
 
-// cacheBust removido: as imagens são pré-convertidas para data URIs via proxy antes
-// da captura — cacheBust forçaria re-fetch cross-origin interno do html-to-image e
-// quebraria imagens em iOS/Safari (canvas tainted = área preta).
-const EXPORT_OPTIONS = { pixelRatio: 4, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
+// html2canvas não usa SVG foreignObject — re-implementa o CSS diretamente no
+// Canvas 2D, o que resolve o bug do iOS Safari que tornava as fotos pretas.
 
 async function waitForFonts() {
   if (typeof document !== "undefined" && document.fonts) await document.fonts.ready
-}
-
-function waitFrames(n = 2): Promise<void> {
-  return new Promise(resolve => {
-    let count = 0
-    const tick = () => { if (++count >= n) resolve(); else requestAnimationFrame(tick) }
-    requestAnimationFrame(tick)
-  })
 }
 
 type Props = {
@@ -143,15 +133,22 @@ export function PreviewFinal({
     }
   }
 
-  // Captura o nó como Blob: inline → decode GPU → warmup → capture.
+  // Captura o nó como Blob usando html2canvas (Canvas 2D, sem SVG foreignObject).
   async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineImagesAsBase64(node)
     try {
       await waitForImageDecode(node)
-      await toPng(node, EXPORT_OPTIONS) // aquecimento: carrega fontes e SVG masks
-      await waitFrames(2)
-      const blob = await toBlob(node, EXPORT_OPTIONS)
-      if (!blob) throw new Error("Captura retornou vazia")
+      const canvas = await html2canvas(node, {
+        scale: 4,
+        useCORS: false,        // imagens já são data URIs após inlineImagesAsBase64
+        allowTaint: false,
+        backgroundColor: "#0a0a0a",
+        logging: false,
+        imageTimeout: 20000,
+      })
+      const blob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Captura retornou vazia")), "image/png")
+      )
       return blob
     } finally {
       cleanup()

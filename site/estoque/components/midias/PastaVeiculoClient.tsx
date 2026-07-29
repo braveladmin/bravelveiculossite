@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react"
 import { createPortal } from "react-dom"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { toPng, toBlob } from "html-to-image"
+import html2canvas from "html2canvas"
 import { AlertTriangle, ArrowLeft, CheckCircle2, Clipboard, Download, Eye, Folder, Loader2, Send, Trash2, X } from "lucide-react"
 import { Button, Chip } from "@heroui/react"
 import { VeiculoResumoCard } from "@/components/midias/VeiculoResumoCard"
@@ -18,12 +18,8 @@ import { createClient } from "@/lib/supabase/client"
 import { MEDIA_TYPE_CFG } from "@/lib/constants"
 import type { GeneratedMedia, MediaFolder, MediaType, Vehicle } from "@/lib/types"
 
-// pixelRatio 4 sobre o preview gera resolução acima do mínimo 1080x1920 do
-// Instagram, então a arte sai nítida mesmo depois do Instagram comprimir/redimensionar.
-// cacheBust removido: as imagens são pré-convertidas a data URIs via proxy antes da
-// captura; cacheBust não tem efeito sobre data URIs e ativá-lo em outras URLs só
-// adiciona parâmetros que podem causar falha de fetch interno do html-to-image.
-const EXPORT_OPTIONS = { pixelRatio: 4, backgroundColor: "#0a0a0a", style: { borderRadius: "0px" } } as const
+// html2canvas não usa SVG foreignObject — re-implementa o CSS diretamente no
+// Canvas 2D, o que resolve o bug do iOS Safari que tornava as fotos pretas.
 
 const SURFACE = "#181818"
 const SURF2   = "#111111"
@@ -325,11 +321,18 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineRemainingImages(node)
     try {
-      await waitForImageDecode(node) // garante decode completo de todas as imgs
-      await toPng(node, EXPORT_OPTIONS) // aquecimento: carrega fontes e SVG masks
-      await waitFrames(2)
-      const blob = await toBlob(node, EXPORT_OPTIONS)
-      if (!blob) throw new Error("Captura retornou vazia")
+      await waitForImageDecode(node)
+      const canvas = await html2canvas(node, {
+        scale: 4,
+        useCORS: false,        // imagens já são data URIs após inlineRemainingImages
+        allowTaint: false,
+        backgroundColor: "#0a0a0a",
+        logging: false,
+        imageTimeout: 20000,
+      })
+      const blob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Captura retornou vazia")), "image/png")
+      )
       return blob
     } finally {
       cleanup()
