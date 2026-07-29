@@ -212,137 +212,50 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   const [showPostModal,     setShowPostModal]     = useState(false)
   const [downloading,       setDownloading]       = useState(false)
   const [posting,           setPosting]           = useState(false)
-  const hiddenPreviewRef = useRef<HTMLDivElement>(null)
+  // captureModalRef aponta pro wrapper do preview dentro do modal de visualização.
+  // O download captura desse elemento visível (não de um hidden preview) — garante
+  // que as imagens estão carregadas, porque o usuário pode literalmente vê-las.
+  const captureModalRef = useRef<HTMLDivElement>(null)
 
   const isCollage = media.previewData?.layout === "instagram-story-collage-v1"
   const collagePhotos = isCollage ? (media.previewData?.collagePhotos as string[] | undefined) : undefined
   const previewVehicle = collagePhotos?.length ? { ...vehicle, images: collagePhotos } : vehicle
 
-  // ── Pré-fetch de imagens como base64 ao montar ───────────────────────────
-  // Usa o proxy server-side (/admin/api/image-proxy) para buscar imagens do
-  // Supabase sem CORS. Como o proxy é same-origin, o fetch sempre funciona no
-  // mobile — sem canvas tainted, sem áreas pretas.
-  const [preloadedImages, setPreloadedImages] = useState<string[] | null>(null)
-
-  useEffect(() => {
-    const controller = new AbortController()
-    const sourceUrls = (isCollage && collagePhotos?.length ? collagePhotos : vehicle.images) ?? []
-    const blobUrls: string[] = []
-
-    ;(async () => {
-      const results = await Promise.all(
-        sourceUrls.map(async (url): Promise<string> => {
-          if (!url || url.startsWith("data:") || url.startsWith("blob:")) return url
-          try {
-            const proxied = `/admin/api/image-proxy?url=${encodeURIComponent(url)}`
-            const res = await fetch(proxied, { signal: controller.signal })
-            if (!res.ok) return url
-            const blob = await res.blob()
-            const blobUrl = URL.createObjectURL(blob)
-            blobUrls.push(blobUrl)
-            return blobUrl
-          } catch { return url }
-        })
-      )
-      if (!controller.signal.aborted) setPreloadedImages(results)
-    })()
-
-    return () => {
-      controller.abort()
-      blobUrls.forEach(u => URL.revokeObjectURL(u))
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [media.id])
-
-  // Vehicle com imagens já em base64 — usado exclusivamente no hidden preview
-  const preloadedPreviewVehicle = preloadedImages !== null
-    ? { ...previewVehicle, images: preloadedImages }
-    : previewVehicle
-
-  // ── Helpers de captura ────────────────────────────────────────────────────
-
-  // Converte qualquer <img> que ainda não seja Blob URL via proxy server-side.
-  // Blob URLs são same-origin e binários — sem overhead de base64, sem falha de
-  // img.decode() por memória no iOS (causa das fotos pretas com data URIs grandes).
-  // Com o pré-fetch do useEffect, na prática só age sobre o logo (/admin/bravel-logo.png).
-  async function inlineRemainingImages(node: HTMLElement): Promise<() => void> {
-    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-    const restores: Array<() => void> = []
-    const blobUrls: string[] = []
-    await Promise.all(imgs.map(async (img) => {
-      const src = img.getAttribute("src") ?? ""
-      if (!src || src.startsWith("data:") || src.startsWith("blob:")) return
-      try {
-        const fetchUrl = src.startsWith("/") ? src : `/admin/api/image-proxy?url=${encodeURIComponent(src)}`
-        const res = await fetch(fetchUrl)
-        if (!res.ok) return
-        const blob = await res.blob()
-        const blobUrl = URL.createObjectURL(blob)
-        blobUrls.push(blobUrl)
-        const prev = img.getAttribute("src")!
-        img.src = blobUrl
-        restores.push(() => { img.src = prev })
-        if (!img.complete || img.naturalWidth === 0) {
-          await new Promise<void>(resolve => {
-            img.addEventListener("load", () => resolve(), { once: true })
-            img.addEventListener("error", () => resolve(), { once: true })
-          })
-        }
-      } catch { /* mantém src original */ }
-    }))
-    return () => {
-      restores.forEach(fn => fn())
-      blobUrls.forEach(u => URL.revokeObjectURL(u))
-    }
+  // useCORS: true — Supabase Storage público retorna Access-Control-Allow-Origin: *,
+  // então html2canvas pode carregar as fotos com crossOrigin="anonymous" sem taint.
+  async function captureNode(node: HTMLElement): Promise<Blob> {
+    const rect = node.getBoundingClientRect()
+    const canvas = await html2canvas(node, {
+      scale: 4,
+      width:  Math.round(rect.width)  || 360,
+      height: Math.round(rect.height) || Math.round(360 * 16 / 9),
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: "#0a0a0a",
+      logging: false,
+      imageTimeout: 30000,
+    })
+    return new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error("Captura retornou vazia")), "image/png")
+    )
   }
 
-  async function captureNode(node: HTMLElement): Promise<Blob> {
-    // html2canvas resolve height:100% de filhos absolutos usando o valor CSS do pai,
-    // não o bounding rect. Em flex-1, o CSS height é "auto" → resolve como 0 → img preta.
-    // Fix: stampar altura explícita em px em todos os flex-1 antes de capturar.
-    const flexEls = Array.from(node.querySelectorAll<HTMLElement>(".flex-1"))
-    const prevHeights = flexEls.map(el => el.style.height)
-    flexEls.forEach(el => {
-      const h = el.getBoundingClientRect().height
-      if (h > 0) el.style.height = `${h}px`
-    })
-
-    const cleanup = await inlineRemainingImages(node)
-
-    // Aguarda todas as imgs confirmarem load no DOM (browser carrega eagerly
-    // com opacity > 0; sem isso html2canvas pode capturar antes do decode)
-    const domImgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
+  // Aguarda todos os <img> do preview do modal confirmarem load.
+  // Chamado depois de abrir o modal — modal visível = browser carrega imagens eagerly.
+  async function waitForModalImages(): Promise<void> {
+    const node = captureModalRef.current
+    if (!node) return
+    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
     await Promise.race([
-      Promise.all(domImgs.map(img => {
+      Promise.all(imgs.map(img => {
         if (img.complete && img.naturalWidth > 0) return Promise.resolve()
         return new Promise<void>(resolve => {
           img.addEventListener("load",  () => resolve(), { once: true })
           img.addEventListener("error", () => resolve(), { once: true })
         })
       })),
-      new Promise<void>(resolve => setTimeout(resolve, 10_000)),
+      new Promise<void>(resolve => setTimeout(resolve, 15_000)),
     ])
-
-    try {
-      const rect = node.getBoundingClientRect()
-      const canvas = await html2canvas(node, {
-        scale: 4,
-        width: Math.round(rect.width) || 360,
-        height: Math.round(rect.height) || Math.round(360 * 16 / 9),
-        useCORS: false,
-        allowTaint: false,
-        backgroundColor: "#0a0a0a",
-        logging: false,
-        imageTimeout: 20000,
-      })
-      const blob = await new Promise<Blob>((resolve, reject) =>
-        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Captura retornou vazia")), "image/png")
-      )
-      return blob
-    } finally {
-      cleanup()
-      flexEls.forEach((el, i) => { el.style.height = prevHeights[i] })
-    }
   }
 
   async function handleCopy() {
@@ -355,12 +268,17 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
   }
 
   async function handleDownloadImage() {
-    const node = hiddenPreviewRef.current?.querySelector(".media-preview") as HTMLElement | null
-    if (!node) return
     setDownloading(true)
     try {
       if (document.fonts) await document.fonts.ready
-      const blob     = await captureNode(node)
+      // Abre o modal — imagens carregam naturalmente por serem visíveis
+      setShowPreviewModal(true)
+      await new Promise(resolve => setTimeout(resolve, 200))
+      await waitForModalImages()
+      const previewEl = captureModalRef.current?.querySelector(".media-preview") as HTMLElement | null
+      if (!previewEl) throw new Error("Preview não encontrado")
+      const blob     = await captureNode(previewEl)
+      setShowPreviewModal(false)
       const slug     = `${vehicle.brand}-${vehicle.name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-")
       const filename = `${media.mediaType}-${slug}.png`
       const file     = new File([blob], filename, { type: "image/png" })
@@ -378,17 +296,24 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     } catch (err) {
       console.error("[download] falha ao capturar preview:", err)
       onToast("Não consegui gerar a imagem. Tente de novo.", "error")
+      setShowPreviewModal(false)
     }
     setDownloading(false)
   }
 
   async function handlePostInstagram() {
-    const node = hiddenPreviewRef.current?.querySelector(".media-preview") as HTMLElement | null
-    if (!node) return
     setPosting(true)
+    // Fecha o modal de confirmação e abre o de preview para captura
+    setShowPostModal(false)
+    setShowPreviewModal(true)
     try {
       if (document.fonts) await document.fonts.ready
-      const blob = await captureNode(node)
+      await new Promise(resolve => setTimeout(resolve, 200))
+      await waitForModalImages()
+      const previewEl = captureModalRef.current?.querySelector(".media-preview") as HTMLElement | null
+      if (!previewEl) throw new Error("Preview não encontrado")
+      const blob = await captureNode(previewEl)
+      setShowPreviewModal(false)
 
       const supabase = createClient()
       const path = `instagram-posts/${Date.now()}_${Math.random().toString(36).slice(2)}.png`
@@ -402,11 +327,11 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
       if (result.error) throw new Error(result.error)
 
       onToast("Postado no Instagram Stories!")
-      setShowPostModal(false)
     } catch (err) {
       console.error("[instagram] falha ao capturar/publicar:", err)
       onToast(err instanceof Error ? `Falha ao publicar: ${err.message}` : "Falha ao publicar no Instagram", "error")
     }
+    setShowPreviewModal(false)
     setPosting(false)
   }
 
@@ -465,27 +390,30 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
         </Button>
       </div>
 
-      {/* Hidden preview — opacity:0.001 em vez de clip-path: iOS não carrega imagens
-          para elementos totalmente clipados, mas carrega para opacity>0. O valor 0.001
-          é imperceptível ao usuário. getBoundingClientRect() também retorna 0 dentro de
-          clip-path no iOS, quebrando o cálculo de altura flex-1 antes do html2canvas. */}
-      {media.mediaType === "story" && (
-        <div ref={hiddenPreviewRef} style={{ position: "fixed", top: 0, left: 0, width: "360px", pointerEvents: "none", opacity: 0.001, zIndex: -1 }} aria-hidden>
-          {isCollage
-            ? <StoryCollagePreview vehicle={preloadedPreviewVehicle} />
-            : <StoryPreview vehicle={preloadedImages !== null ? { ...vehicle, images: preloadedImages } : vehicle} />
-          }
-        </div>
-      )}
-
-      {/* Modal de visualização — mídia + legenda */}
-      <Modal open={showPreviewModal} onClose={() => setShowPreviewModal(false)} title={media.title}>
+      {/* Modal de visualização — também usado como fonte para captura de download/post.
+          onClose bloqueado enquanto downloading/posting pra evitar fechar durante captura. */}
+      <Modal
+        open={showPreviewModal}
+        onClose={() => { if (!downloading && !posting) setShowPreviewModal(false) }}
+        title={media.title}
+      >
         <div className="space-y-5">
-          <div className="flex justify-center">
-            {media.mediaType === "story" && isCollage && <StoryCollagePreview vehicle={previewVehicle} />}
-            {media.mediaType === "story" && !isCollage && <StoryPreview vehicle={vehicle} />}
-            {media.mediaType === "post" && <PostPreview vehicle={vehicle} />}
-            {media.mediaType === "carousel" && <CarouselPreview vehicle={vehicle} />}
+          <div className="flex justify-center relative">
+            {/* captureModalRef envolve só o preview — a overlay de carregamento fica fora */}
+            <div ref={captureModalRef}>
+              {media.mediaType === "story" && isCollage && <StoryCollagePreview vehicle={previewVehicle} />}
+              {media.mediaType === "story" && !isCollage && <StoryPreview vehicle={vehicle} />}
+              {media.mediaType === "post" && <PostPreview vehicle={vehicle} />}
+              {media.mediaType === "carousel" && <CarouselPreview vehicle={vehicle} />}
+            </div>
+            {(downloading || posting) && (
+              <div
+                className="absolute inset-0 z-50 flex items-center justify-center rounded-2xl"
+                style={{ backgroundColor: "rgba(10,10,10,0.8)" }}
+              >
+                <Loader2 className="w-8 h-8 animate-spin text-white" />
+              </div>
+            )}
           </div>
           <div>
             <p className="text-[10px] font-bold tracking-[0.12em] uppercase mb-1.5" style={{ color: MUTED }}>Legenda salva</p>

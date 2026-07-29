@@ -68,40 +68,6 @@ export function PreviewFinal({
     ? vehicle.images
     : [vehicle.imageUrl || PLACEHOLDER_IMAGE]
 
-  // Converte todas as <img> do nó para Blob URLs via proxy server-side.
-  // Blob URLs são same-origin e binários — sem overhead de base64, sem falha de
-  // img.decode() por memória no iOS (causa das fotos pretas com data URIs grandes).
-  async function inlineImagesAsBase64(node: HTMLElement): Promise<() => void> {
-    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
-    const restores: Array<() => void> = []
-    const blobUrls: string[] = []
-    await Promise.all(imgs.map(async (img) => {
-      const src = img.getAttribute("src") ?? ""
-      if (!src || src.startsWith("data:") || src.startsWith("blob:")) return
-      try {
-        const fetchUrl = src.startsWith("/") ? src : `/admin/api/image-proxy?url=${encodeURIComponent(src)}`
-        const res = await fetch(fetchUrl)
-        if (!res.ok) return
-        const blob = await res.blob()
-        const blobUrl = URL.createObjectURL(blob)
-        blobUrls.push(blobUrl)
-        const prev = img.getAttribute("src")!
-        img.src = blobUrl
-        restores.push(() => { img.src = prev })
-        if (!img.complete || img.naturalWidth === 0) {
-          await new Promise<void>(resolve => {
-            img.addEventListener("load", () => resolve(), { once: true })
-            img.addEventListener("error", () => resolve(), { once: true })
-          })
-        }
-      } catch { /* mantém src original */ }
-    }))
-    return () => {
-      restores.forEach(fn => fn())
-      blobUrls.forEach(u => URL.revokeObjectURL(u))
-    }
-  }
-
   // No iOS o atributo "download" é ignorado pelo Safari — usa Web Share API
   // pra abrir o menu nativo de compartilhamento/salvar. Em outros navegadores
   // usa o fluxo normal com createObjectURL.
@@ -121,38 +87,36 @@ export function PreviewFinal({
   }
 
   // Captura o nó como Blob usando html2canvas (Canvas 2D, sem SVG foreignObject).
+  // useCORS: true — Supabase Storage público retorna Access-Control-Allow-Origin: *,
+  // então html2canvas carrega as fotos com crossOrigin="anonymous" sem canvas taint.
   async function captureNode(node: HTMLElement): Promise<Blob> {
-    // html2canvas resolve height:100% de filhos absolutos usando o valor CSS do pai,
-    // não o bounding rect. Em flex-1, o CSS height é "auto" → resolve como 0 → img preta.
-    // Fix: stampar altura explícita em px em todos os flex-1 antes de capturar.
-    const flexEls = Array.from(node.querySelectorAll<HTMLElement>(".flex-1"))
-    const prevHeights = flexEls.map(el => el.style.height)
-    flexEls.forEach(el => {
-      const h = el.getBoundingClientRect().height
-      if (h > 0) el.style.height = `${h}px`
-    })
+    // Aguarda todas as imagens carregarem antes de capturar
+    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
+    await Promise.race([
+      Promise.all(imgs.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve()
+        return new Promise<void>(resolve => {
+          img.addEventListener("load",  () => resolve(), { once: true })
+          img.addEventListener("error", () => resolve(), { once: true })
+        })
+      })),
+      new Promise<void>(resolve => setTimeout(resolve, 15_000)),
+    ])
 
-    const cleanup = await inlineImagesAsBase64(node)
-    try {
-      const rect = node.getBoundingClientRect()
-      const canvas = await html2canvas(node, {
-        scale: 4,
-        width: Math.round(rect.width) || 360,
-        height: Math.round(rect.height) || Math.round(360 * 16 / 9),
-        useCORS: false,
-        allowTaint: false,
-        backgroundColor: "#0a0a0a",
-        logging: false,
-        imageTimeout: 20000,
-      })
-      const blob = await new Promise<Blob>((resolve, reject) =>
-        canvas.toBlob(b => b ? resolve(b) : reject(new Error("Captura retornou vazia")), "image/png")
-      )
-      return blob
-    } finally {
-      cleanup()
-      flexEls.forEach((el, i) => { el.style.height = prevHeights[i] })
-    }
+    const rect = node.getBoundingClientRect()
+    const canvas = await html2canvas(node, {
+      scale: 4,
+      width:  Math.round(rect.width)  || 360,
+      height: Math.round(rect.height) || Math.round(360 * 16 / 9),
+      useCORS: true,
+      allowTaint: false,
+      backgroundColor: "#0a0a0a",
+      logging: false,
+      imageTimeout: 30000,
+    })
+    return new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error("Captura retornou vazia")), "image/png")
+    )
   }
 
   async function handleDownload() {
