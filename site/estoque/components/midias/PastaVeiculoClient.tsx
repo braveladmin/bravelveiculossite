@@ -304,9 +304,18 @@ function MediaDetailCard({ media, vehicle, archiving, onArchive, onToast }: {
     return () => restores.forEach(fn => fn())
   }
 
+  // Aguarda o browser decodificar todas as imagens do nó antes de capturar.
+  // Essencial para collage (3 data URIs grandes): sem isso o iOS não termina de
+  // decodificar as imgs a tempo e o canvas captura preto.
+  async function waitForImageDecode(node: HTMLElement): Promise<void> {
+    const imgs = Array.from(node.querySelectorAll<HTMLImageElement>("img"))
+    await Promise.all(imgs.map(img => img.decode().catch(() => undefined)))
+  }
+
   async function captureNode(node: HTMLElement): Promise<Blob> {
     const cleanup = await inlineRemainingImages(node)
     try {
+      await waitForImageDecode(node) // garante decode completo de todas as imgs
       await toPng(node, EXPORT_OPTIONS) // aquecimento: carrega fontes e SVG masks
       await waitFrames(2)
       const blob = await toBlob(node, EXPORT_OPTIONS)
